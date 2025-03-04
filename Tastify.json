@@ -1,0 +1,32 @@
+{
+  "version": "2.3.0",
+  "summary": {
+    "title": "Tastify",
+    "owner": "Kelompok 64",
+    "description": "Tastify adalah platform berbagi resep makanan dan minuman yang memungkinkan User untuk menemukan, mencari, menyimpan, dan membagikan resep favorit mereka. Dengan fitur interaktif, user dapat memberikan komentar, rating, dan bookmark. Aplikasi ini dibuat supaya mudah digunakan, cepat, dan aman, sehingga siapa pun bisa menemukan inspirasi memasak dengan mudah.",
+    "id": 0
+  },
+  "detail": {
+    "contributors": [
+      {
+        "name": "Ridya Azizah Khayyira Mumtaz"
+      },
+      {
+        "name": "Indah Cahya Puspitahati"
+      },
+      {
+        "name": "Sarah Saphira Setiawan"
+      },
+      {
+        "name": "Nisa Najla Hanina Hasanah"
+      },
+      {
+        "name": "Salsabila Arumdapta"
+      }
+    ],
+    "diagrams": [],
+    "diagramTop": 0,
+    "reviewer": "Kelompok 64",
+    "threatTop": 0
+  }
+}
