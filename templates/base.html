@@ -1,14 +1,35 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    {% block meta %} {% endblock meta %}
-  </head>
-  <script src="https://cdn.tailwindcss.com">
-</script>
-  <body>
-    {% block content %} {% endblock content %}
-  </body>
+
+<head>
+    {% include "head.html" %}
+    {% block meta %}
+    {% endblock meta %}
+</head>
+
+<body>
+    {% include "navbar.html" %}
+    
+    <!-- Messages section -->
+    {% if messages %}
+        <div class="fixed bottom-4 right-4 z-50">
+            {% for message in messages %}
+                <div class="mb-2 p-4 rounded shadow-lg {% if message.tags == 'success' %}bg-green-500{% elif message.tags == 'error' %}bg-red-500{% else %}bg-blue-500{% endif %} text-white">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% block content %}
+    {% endblock content %}
+    
+    {% include "footer.html" %}
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    {% block script %}
+    {% endblock script %}
+</body>
+
 </html>
