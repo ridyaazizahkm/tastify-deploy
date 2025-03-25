@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block meta %}
+<title>Register</title>
+{% endblock meta %}
+
+{% block content %}
+<div class="flex items-center justify-center min-h-screen bg-[#654a2d]" style="background-image: url('https://i.pinimg.com/736x/f3/a7/eb/f3a7eb3690ba15a19185c624e3438697.jpg')">
+  <div class="w-full max-w-4xl p-8 space-y-6 bg-[#e8dcd4] rounded-lg shadow-md">
+    <h1 class="text-4xl font-extrabold text-center text-[#3d200a] font-rasa">Register</h1>
+    
+    <form method="POST" class="space-y-6">
+      {% csrf_token %}
+      
+      <div class="grid gap-6 mb-6 md:grid-cols-2">
+        <!-- Username Field -->
+        <div>
+          <label for="{{ form.username.id_for_label }}" class="block mb-2 text-sm font-medium text-[#3d200a]">
+            {{ form.username.label }}
+          </label>
+          {{ form.username }}
+          {% if form.username.errors %}
+            <p class="text-sm text-red-500">{{ form.username.errors }}</p>
+          {% endif %}
+          {% if form.username.help_text and not form.username.errors %}
+            <p class="text-xs text-[#927155]">{{ form.username.help_text }}</p>
+          {% endif %}
+        </div>
+
+        <!-- Email Field -->
+        <div>
+          <label for="{{ form.email.id_for_label }}" class="block mb-2 text-sm font-medium text-[#3d200a]">
+            {{ form.email.label }}
+          </label>
+          {{ form.email }}
+          {% if form.email.errors %}
+            <p class="text-sm text-red-500">{{ form.email.errors }}</p>
+          {% endif %}
+          {% if form.email.help_text and not form.email.errors %}
+            <p class="text-xs text-[#927155]">{{ form.email.help_text }}</p>
+          {% endif %}
+        </div>
+      </div>
+      
+      <!-- Password Fields -->
+      <div class="grid gap-6 mb-6 md:grid-cols-2">
+        <div>
+          <label for="{{ form.password1.id_for_label }}" class="block mb-2 text-sm font-medium text-[#3d200a]">
+            {{ form.password1.label }}
+          </label>
+          {{ form.password1 }}
+          {% if form.password1.errors %}
+            <p class="text-sm text-red-500">{{ form.password1.errors }}</p>
+          {% endif %}
+          {% if form.password1.help_text and not form.password1.errors %}
+            <p class="text-xs text-[#927155]">{{ form.password1.help_text }}</p>
+          {% endif %}
+        </div>
+
+        <div>
+          <label for="{{ form.password2.id_for_label }}" class="block mb-2 text-sm font-medium text-[#3d200a]">
+            {{ form.password2.label }}
+          </label>
+          {{ form.password2 }}
+          {% if form.password2.errors %}
+            <p class="text-sm text-red-500">{{ form.password2.errors }}</p>
+          {% endif %}
+        </div>
+      </div>
+      
+      <!-- Submit Button -->
+      <div>
+        <input type="submit" name="submit" value="Daftar" class="w-full px-4 py-2 text-white bg-[#654a2d] rounded-lg cursor-pointer hover:bg-[#927155]" />
+      </div>
+
+      <!-- Log In Link -->
+      <p class="mt-6 text-sm text-center text-[#654a2d] font-plus-jakarta-sans">
+        Already have an account? 
+        <a href="{% url 'authentication:login' %}" class="text-[#3d200a] hover:underline">Log In</a>
+      </p>
+    </form>
+
+    {% if messages %}
+    <ul class="mt-4">
+      {% for message in messages %}
+      <li class="text-sm text-red-500">{{ message }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+</div>
+{% endblock content %}
