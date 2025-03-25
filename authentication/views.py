@@ -44,7 +44,7 @@ def login_user(request):
         if form.is_valid():
             user = form.get_user()
             auth_login(request, user)
-            response = HttpResponseRedirect(reverse("main:main.html"))
+            response = HttpResponseRedirect(reverse("main:show_main"))
             response.set_cookie('last_login', str(datetime.datetime.now()))
             return response
         else:
