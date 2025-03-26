@@ -167,7 +167,7 @@ def list_resep(request):
 
     return render(request, 'resep/list_of_resep.html', context)
 
-@login_required(login_url='/authentication/login/')
+@login_required(login_url='/auth/login/')
 @csrf_protect
 def create_resep(request):
     if request.method == 'POST':
