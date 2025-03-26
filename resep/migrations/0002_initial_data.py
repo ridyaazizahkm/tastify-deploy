@@ -9,7 +9,7 @@ def create_initial_data(apps, schema_editor):
     Kategori.objects.create(nama='Healthy Food')
     Kategori.objects.create(nama='Fast Food')
     Kategori.objects.create(nama='Beverage')
-    Kategori.objects.create(nama='Fast Food')
+    Kategori.objects.create(nama='Traditional Food')
 
     Bahan.objects.create(nama='Roti')
     Bahan.objects.create(nama='Buah & Sayur')
@@ -21,7 +21,7 @@ def create_initial_data(apps, schema_editor):
     CookingMethod.objects.create(nama='Boiled')
     CookingMethod.objects.create(nama='Steamed')
     CookingMethod.objects.create(nama='Baked')
-    CookingMethod.objects.create(nama='Bleder')
+    CookingMethod.objects.create(nama='Blender')
 
 def reverse_initial_data(apps, schema_editor):
     Kategori = apps.get_model('resep', 'Kategori')
