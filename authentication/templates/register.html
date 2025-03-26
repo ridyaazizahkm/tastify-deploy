@@ -1,91 +1,105 @@
-{% extends 'base.html' %}
+{% extends 'auth_base.html' %}
+
 {% block meta %}
 <title>Register</title>
 {% endblock meta %}
 
 {% block content %}
-<div class="flex items-center justify-center min-h-screen bg-[#654a2d]" style="background-image: url('https://i.pinimg.com/736x/f3/a7/eb/f3a7eb3690ba15a19185c624e3438697.jpg')">
-  <div class="w-full max-w-4xl p-8 space-y-6 bg-[#e8dcd4] rounded-lg shadow-md">
-    <h1 class="text-4xl font-extrabold text-center text-[#3d200a] font-rasa">Register</h1>
-    
-    <form method="POST" class="space-y-6">
-      {% csrf_token %}
-      
-      <div class="grid gap-6 mb-6 md:grid-cols-2">
-        <!-- Username Field -->
-        <div>
-          <label for="{{ form.username.id_for_label }}" class="block mb-2 text-sm font-medium text-[#3d200a]">
-            {{ form.username.label }}
-          </label>
-          {{ form.username }}
-          {% if form.username.errors %}
-            <p class="text-sm text-red-500">{{ form.username.errors }}</p>
-          {% endif %}
-          {% if form.username.help_text and not form.username.errors %}
-            <p class="text-xs text-[#927155]">{{ form.username.help_text }}</p>
-          {% endif %}
+<div class="min-h-screen flex items-center justify-center bg-[#e0cfc2] p-4">
+    <div class="w-full max-w-5xl bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
+        <!-- Left side - Decorative Image -->
+        <div class="hidden md:block md:w-1/2 bg-[#62191c] relative">
+            <div class="absolute inset-0 flex items-center justify-center">
+                <img src="/static/images/logo.png" alt="logo" class="w-1/2 h-1/2 object-contain">
+            </div>
         </div>
-
-        <!-- Email Field -->
-        <div>
-          <label for="{{ form.email.id_for_label }}" class="block mb-2 text-sm font-medium text-[#3d200a]">
-            {{ form.email.label }}
-          </label>
-          {{ form.email }}
-          {% if form.email.errors %}
-            <p class="text-sm text-red-500">{{ form.email.errors }}</p>
-          {% endif %}
-          {% if form.email.help_text and not form.email.errors %}
-            <p class="text-xs text-[#927155]">{{ form.email.help_text }}</p>
-          {% endif %}
+        
+        <!-- Mobile Logo -->
+        <div class="flex md:hidden justify-center items-center bg-[#62191c] p-6">
+            <img src="/static/images/logo.png" alt="logo" class="h-16 object-contain">
         </div>
-      </div>
-      
-      <!-- Password Fields -->
-      <div class="grid gap-6 mb-6 md:grid-cols-2">
-        <div>
-          <label for="{{ form.password1.id_for_label }}" class="block mb-2 text-sm font-medium text-[#3d200a]">
-            {{ form.password1.label }}
-          </label>
-          {{ form.password1 }}
-          {% if form.password1.errors %}
-            <p class="text-sm text-red-500">{{ form.password1.errors }}</p>
-          {% endif %}
-          {% if form.password1.help_text and not form.password1.errors %}
-            <p class="text-xs text-[#927155]">{{ form.password1.help_text }}</p>
-          {% endif %}
+        
+        <!-- Right side - Form -->
+        <div class="w-full md:w-1/2 bg-[#f3ece3] p-5 sm:p-8">
+            <div class="mb-4 sm:mb-6">
+                <h2 class="text-2xl sm:text-3xl font-bold text-gray-800">Create Your Account</h2>
+                <p class="text-[#62191c] mt-1 sm:mt-2">
+                    Already have an account?
+                    <a href="{% url 'authentication:login' %}" class="hover:underline">
+                        Sign in
+                    </a>
+                </p>
+            </div>
+            
+            <form method="POST" class="space-y-4 sm:space-y-6">
+                {% csrf_token %}
+                
+                <div>
+                    <label for="username" class="block text-xs sm:text-sm font-medium text-gray-700 uppercase mb-1 sm:mb-2">Username</label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username" 
+                        required 
+                        placeholder="Enter your username" 
+                        class="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#62191c] transition duration-300"
+                    >
+                </div>
+
+                <div>
+                    <label for="email" class="block text-xs sm:text-sm font-medium text-gray-700 uppercase mb-1 sm:mb-2">Email</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        required 
+                        placeholder="Enter your email" 
+                        class="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#62191c] transition duration-300"
+                    >
+                </div>
+
+                <div>
+                    <label for="password1" class="block text-xs sm:text-sm font-medium text-gray-700 uppercase mb-1 sm:mb-2">Password</label>
+                    <input 
+                        type="password" 
+                        id="password1" 
+                        name="password1" 
+                        required 
+                        placeholder="Enter your password" 
+                        class="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#62191c] transition duration-300"
+                    >
+                </div>
+
+                <div>
+                    <label for="password2" class="block text-xs sm:text-sm font-medium text-gray-700 uppercase mb-1 sm:mb-2">Confirm Password</label>
+                    <input 
+                        type="password" 
+                        id="password2" 
+                        name="password2" 
+                        required 
+                        placeholder="Confirm your password" 
+                        class="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#62191c] transition duration-300"
+                    >
+                </div>
+                
+                <div>
+                    <button 
+                        type="submit" 
+                        class="w-full flex justify-center py-2 px-3 sm:py-3 sm:px-4 rounded-lg shadow-sm text-sm font-medium text-white bg-[#873632] hover:bg-[#62191c] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition duration-300"
+                    >
+                        Sign Up
+                    </button>
+                </div>
+            </form>
+
+            {% if messages %}
+            <div class="mt-4">
+                {% for message in messages %}
+                <p class="text-xs sm:text-sm text-red-500">{{ message }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
         </div>
-
-        <div>
-          <label for="{{ form.password2.id_for_label }}" class="block mb-2 text-sm font-medium text-[#3d200a]">
-            {{ form.password2.label }}
-          </label>
-          {{ form.password2 }}
-          {% if form.password2.errors %}
-            <p class="text-sm text-red-500">{{ form.password2.errors }}</p>
-          {% endif %}
-        </div>
-      </div>
-      
-      <!-- Submit Button -->
-      <div>
-        <input type="submit" name="submit" value="Daftar" class="w-full px-4 py-2 text-white bg-[#654a2d] rounded-lg cursor-pointer hover:bg-[#927155]" />
-      </div>
-
-      <!-- Log In Link -->
-      <p class="mt-6 text-sm text-center text-[#654a2d] font-plus-jakarta-sans">
-        Already have an account? 
-        <a href="{% url 'authentication:login' %}" class="text-[#3d200a] hover:underline">Log In</a>
-      </p>
-    </form>
-
-    {% if messages %}
-    <ul class="mt-4">
-      {% for message in messages %}
-      <li class="text-sm text-red-500">{{ message }}</li>
-      {% endfor %}
-    </ul>
-    {% endif %}
-  </div>
+    </div>
 </div>
 {% endblock content %}
