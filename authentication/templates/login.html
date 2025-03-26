@@ -33,18 +33,20 @@
         <input type="hidden" name="remember" value="true">
 
         <div>
-          <label for="username" class="block text-gray-700 font-medium mb-1 sm:mb-2 uppercase text-xs sm:text-sm">
-            Username
-          </label>
-          <input 
-            type="text" 
-            id="username" 
-            name="username" 
-            required
-            placeholder="Enter your username"
-            class="w-full p-2 sm:p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#62191c]"
-          >
-        </div>
+            <label for="username" class="block text-gray-700 font-medium mb-1 sm:mb-2 uppercase text-xs sm:text-sm">
+              Username
+            </label>
+            <input 
+              type="text" 
+              id="username" 
+              name="username" 
+              required
+              placeholder="Enter your username"
+              pattern="[a-zA-Z0-9]+" 
+              title="Only letters and numbers allowed"
+              class="w-full p-2 sm:p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#62191c]"
+            >
+          </div>          
 
         <div>
           <label for="password" class="block text-gray-700 font-medium mb-1 sm:mb-2 uppercase text-xs sm:text-sm">

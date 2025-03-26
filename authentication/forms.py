@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from .models import UserProfile
+from django.core.validators import RegexValidator
 
 class UserRegistrationForm(UserCreationForm):
     email = forms.EmailField(
@@ -82,3 +83,63 @@ class ProfileUpdateForm(forms.ModelForm):
                 'rows': 4,
             }),
         }
+
+class UserRegistrationForm(UserCreationForm):
+    email = forms.EmailField(required=True)
+    username = forms.CharField(
+        validators=[
+            RegexValidator(
+                regex=r'^[\w.@+-]+$',  # Kombinasi validasi existing dan baru
+                message='Username hanya boleh berisi huruf, angka, dan @/./+/-/_'
+            )
+        ],
+        widget=forms.TextInput(attrs={
+            'class': 'w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#62191c] transition duration-300',
+            'placeholder': 'Enter your username'
+        })
+    )
+    
+    email = forms.EmailField(
+        validators=[
+            RegexValidator(
+                regex=r'^[^<>&\'"]+@[^<>&\'"]+\.[^<>&\'"]+$',
+                message='Email mengandung karakter tidak valid'
+            )
+        ],
+        widget=forms.EmailInput(attrs={
+            'class': 'w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#62191c] transition duration-300',
+            'placeholder': 'Enter your email'
+        })
+    )
+    
+    password1 = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#62191c] transition duration-300',
+            'placeholder': 'Enter your password'
+        })
+    )
+    
+    password2 = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#62191c] transition duration-300',
+            'placeholder': 'Confirm your password'
+        })
+    )
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password1', 'password2']
+    
+    def clean_username(self):
+        username = self.cleaned_data['username']
+        # Tambahan pembersihan dan validasi
+        if any(char in username for char in '<>&\'"'):
+            raise forms.ValidationError('Username mengandung karakter berbahaya')
+        return username.strip()
+    
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        # Tambahan pembersihan dan validasi
+        if any(char in email for char in '<>&\'"'):
+            raise forms.ValidationError('Email mengandung karakter berbahaya')
+        return email.strip()
