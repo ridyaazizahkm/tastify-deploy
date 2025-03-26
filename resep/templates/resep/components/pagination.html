@@ -1,0 +1,55 @@
+{% if resep_items.has_other_pages %}
+<div class="mt-8 flex flex-col sm:flex-row justify-center items-center gap-4">
+    <div class="flex items-center">
+        <label for="items_per_page" class="text-sm font-medium text-gray-700 mr-2">Show:</label>
+        <select name="items_per_page" id="items_per_page" class="items-per-page-select px-3 py-2 border border-gray-300 rounded-lg focus:ring-[#62191c] focus:border-[#62191c]">
+            <option value="9" {% if items_per_page == 9 %}selected{% endif %}>9</option>
+            <option value="18" {% if items_per_page == 18 %}selected{% endif %}>18</option>
+            <option value="24" {% if items_per_page == 24 %}selected{% endif %}>24</option>
+            <option value="36" {% if items_per_page == 36 %}selected{% endif %}>36</option>
+        </select>
+        <span class="ml-2 text-sm text-gray-600">each page</span>
+    </div>
+
+    <nav class="relative z-0 inline-flex shadow-sm -space-x-px rounded-md" aria-label="Pagination">
+        {% if resep_items.has_previous %}
+            <a href="#" data-page="{{ resep_items.previous_page_number }}" class="pagination-link relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                <span class="sr-only">Previous</span>
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+            </a>
+        {% endif %}
+
+        {% for i in resep_items.paginator.page_range %}
+            {% if resep_items.number == i %}
+                <span class="relative inline-flex items-center px-4 py-2 border border-[#62191c] bg-[#62191c] text-sm font-medium text-white">{{ i }}</span>
+            {% elif i > resep_items.number|add:"-3" and i < resep_items.number|add:"3" %}
+                <a href="#" data-page="{{ i }}" class="pagination-link relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">{{ i }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if resep_items.has_next %}
+            <a href="#" data-page="{{ resep_items.next_page_number }}" class="pagination-link relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                <span class="sr-only">Next</span>
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                </svg>
+            </a>
+        {% endif %}
+    </nav>
+</div>
+{% else %}
+<div class="mt-8 flex justify-center">
+    <div class="flex items-center">
+        <label for="items_per_page" class="text-sm font-medium text-gray-700 mr-2">Show:</label>
+        <select name="items_per_page" id="items_per_page" class="items-per-page-select px-3 py-2 border border-gray-300 rounded-lg focus:ring-[#62191c] focus:border-[#62191c]">
+            <option value="9" {% if items_per_page == 9 %}selected{% endif %}>9</option>
+            <option value="18" {% if items_per_page == 18 %}selected{% endif %}>18</option>
+            <option value="24" {% if items_per_page == 24 %}selected{% endif %}>24</option>
+            <option value="36" {% if items_per_page == 36 %}selected{% endif %}>36</option>
+        </select>
+        <span class="ml-2 text-sm text-gray-600">each page</span>
+    </div>
+</div>
+{% endif %}

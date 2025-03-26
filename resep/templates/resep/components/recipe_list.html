@@ -1,0 +1,18 @@
+{% for resep in resep_items %}
+    {% include "resep/components/recipe_card.html" with resep=resep %}
+{% empty %}
+<div class="w-full p-3">
+    <div class="bg-gray-50 border border-gray-200 p-6 rounded-lg shadow-sm text-center">
+        <div class="flex flex-col items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <h3 class="font-semibold text-xl text-gray-800 mb-2">No recipes found</h3>
+            <p class="text-gray-600 mb-6">Create your recipe now!</p>
+            <a href="{% url 'resep:create_resep' %}" class="px-5 py-2.5 bg-[#62191c] hover:bg-[#50151a] text-white rounded-md transition-colors duration-200 font-medium">
+                Create Recipe Now
+            </a>
+        </div>
+    </div>
+</div>
+{% endfor %}
