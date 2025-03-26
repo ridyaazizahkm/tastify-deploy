@@ -24,6 +24,7 @@
             <div class="p-6">
                 <form method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
+                    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 
                     <div class="mb-6">
                         <label for="{{ form.judul.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Recipe Title <span class="text-red-500">*</span></label>
