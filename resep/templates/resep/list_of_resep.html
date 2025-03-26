@@ -154,6 +154,13 @@
                 .replace(/'/g, '&#039;');
         }
 
+        function decodeHTMLEntities(str) {
+            if (!str) return '';
+            const textarea = document.createElement('textarea');
+            textarea.innerHTML = str;
+            return textarea.value;
+        }
+
         function updateFilterCounts(data) {
             if (data.categories) {
                 const selectedCategory = categorySelect.value;
@@ -161,9 +168,10 @@
                 data.categories.forEach(cat => {
                     if (cat.kategori) {
                         const option = document.createElement('option');
-                        option.value = escapeHTML(cat.kategori);
-                        option.textContent = `${escapeHTML(cat.kategori)} (${cat.count})`;
-                        option.selected = (cat.kategori === selectedCategory);
+                        const decodedKategori = decodeHTMLEntities(cat.kategori);
+                        option.value = decodedKategori;
+                        option.textContent = `${decodedKategori} (${cat.count})`;
+                        option.selected = (decodedKategori === decodeHTMLEntities(selectedCategory));
                         categorySelect.appendChild(option);
                     }
                 });
@@ -175,9 +183,10 @@
                 data.cooking_methods.forEach(method => {
                     if (method.metode_masak) {
                         const option = document.createElement('option');
-                        option.value = escapeHTML(method.metode_masak);
-                        option.textContent = `${escapeHTML(method.metode_masak)} (${method.count})`;
-                        option.selected = (method.metode_masak === selectedMethod);
+                        const decodedMethod = decodeHTMLEntities(method.metode_masak);
+                        option.value = decodedMethod;
+                        option.textContent = `${decodedMethod} (${method.count})`;
+                        option.selected = (decodedMethod === decodeHTMLEntities(selectedMethod));
                         cookingMethodSelect.appendChild(option);
                     }
                 });
@@ -189,13 +198,25 @@
                 data.main_ingredients.forEach(ingredient => {
                     if (ingredient.bahan_utama) {
                         const option = document.createElement('option');
-                        option.value = escapeHTML(ingredient.bahan_utama);
-                        option.textContent = `${escapeHTML(ingredient.bahan_utama)} (${ingredient.count})`;
-                        option.selected = (ingredient.bahan_utama === selectedIngredient);
+                        const decodedIngredient = decodeHTMLEntities(ingredient.bahan_utama);
+                        option.value = decodedIngredient;
+                        option.textContent = `${decodedIngredient} (${ingredient.count})`;
+                        option.selected = (decodedIngredient === decodeHTMLEntities(selectedIngredient));
                         mainIngredientSelect.appendChild(option);
                     }
                 });
             }
+        }
+
+        function createEncodedFormData(formElement) {
+            const originalFormData = new FormData(formElement);
+            const encodedFormData = new FormData();
+
+            for (const [key, value] of originalFormData.entries()) {
+                encodedFormData.append(key, value);
+            }
+
+            return encodedFormData;
         }
 
         function loadRecipes(url, formData) {
@@ -242,17 +263,17 @@
 
         function handleFormSubmit(e) {
             e.preventDefault();
-            const formData = new FormData(form);
+            const formData = createEncodedFormData(form);
             loadRecipes(form.action, formData);
         }
 
         const debouncedSearch = debounce(function() {
-            const formData = new FormData(form);
+            const formData = createEncodedFormData(form);
             loadRecipes(form.action, formData);
         }, 500);
 
         function handleFilterChange() {
-            const formData = new FormData(form);
+            const formData = createEncodedFormData(form);
             formData.set('page', '1');
             loadRecipes(form.action, formData);
         }
@@ -262,7 +283,7 @@
             paginationLinks.forEach(link => {
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
-                    const formData = new FormData(form);
+                    const formData = createEncodedFormData(form);
 
                     const pageNumber = this.getAttribute('data-page');
                     if (pageNumber) {
@@ -291,9 +312,40 @@
         });
 
         searchInput.addEventListener('input', debouncedSearch);
-        categorySelect.addEventListener('change', handleFilterChange);
-        cookingMethodSelect.addEventListener('change', handleFilterChange);
-        mainIngredientSelect.addEventListener('change', handleFilterChange);
+
+        categorySelect.addEventListener('change', function() {
+            const formData = createEncodedFormData(form);
+            formData.set('page', '1');
+
+            if (this.value === '') {
+                formData.delete('category');
+            }
+
+            loadRecipes(form.action, formData);
+        });
+
+        cookingMethodSelect.addEventListener('change', function() {
+            if (this.value === '') {
+                const formData = createEncodedFormData(form);
+                formData.delete('cooking_method');
+                formData.set('page', '1');
+                loadRecipes(form.action, formData);
+            } else {
+                handleFilterChange();
+            }
+        });
+
+        mainIngredientSelect.addEventListener('change', function() {
+            if (this.value === '') {
+                const formData = createEncodedFormData(form);
+                formData.delete('main_ingredient');
+                formData.set('page', '1');
+                loadRecipes(form.action, formData);
+            } else {
+                handleFilterChange();
+            }
+        });
+
         sortSelect.addEventListener('change', handleFilterChange);
 
         if (itemsPerPageSelect) {

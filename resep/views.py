@@ -9,17 +9,23 @@ from django.template.loader import render_to_string
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.utils.html import escape
 import bleach
+import html
 
 def sanitize_post_data(post_data):
     """
     Sanitize POST data to prevent XSS attacks
     """
     sanitized_data = post_data.copy()
-    text_fields = ['q', 'category', 'cooking_method', 'main_ingredient']
+    text_fields = ['q']
+    filter_fields = ['category', 'cooking_method', 'main_ingredient']
 
     for field in text_fields:
         if field in sanitized_data:
             sanitized_data[field] = escape(sanitized_data[field])
+
+    for field in filter_fields:
+        if field in sanitized_data and sanitized_data[field]:
+            sanitized_data[field] = html.unescape(sanitized_data[field])
 
     return sanitized_data
 
@@ -36,9 +42,9 @@ def list_resep(request):
         items_per_page = sanitized_data.get('items_per_page', 9)
     else:
         query = request.GET.get('q', '')
-        category = request.GET.get('category', '')
-        cooking_method = request.GET.get('cooking_method', '')
-        main_ingredient = request.GET.get('main_ingredient', '')
+        category = html.unescape(request.GET.get('category', ''))
+        cooking_method = html.unescape(request.GET.get('cooking_method', ''))
+        main_ingredient = html.unescape(request.GET.get('main_ingredient', ''))
         sort_by = request.GET.get('sort_by', '')
         page_number = request.GET.get('page', 1)
         items_per_page = request.GET.get('items_per_page', 9)
