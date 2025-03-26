@@ -6,9 +6,9 @@ from authentication.models import UserProfile
 from django.core.paginator import Paginator
 from django.db.models import Count
 from django.template.loader import render_to_string
-from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.csrf import ensure_csrf_cookie, csrf_protect
 from django.utils.html import escape
-import bleach
+from django.contrib.auth.decorators import login_required
 import html
 
 def sanitize_post_data(post_data):
@@ -167,6 +167,8 @@ def list_resep(request):
 
     return render(request, 'resep/list_of_resep.html', context)
 
+@login_required(login_url='/authentication/login/')
+@csrf_protect
 def create_resep(request):
     if request.method == 'POST':
         form = ResepForm(request.POST)
@@ -176,11 +178,16 @@ def create_resep(request):
             resep.user = user_profile
             resep.save()
             return redirect('resep:list_resep')
+        else:
+            print(f"Form errors: {form.errors}")
     else:
         form = ResepForm()
 
     context = {'form': form}
-    return render(request, 'resep/create_resep.html', context)
+    response = render(request, 'resep/create_resep.html', context)
+
+    response.set_cookie('csrftoken', request.META.get('CSRF_COOKIE', ''), samesite='Lax')
+    return response
 
 def detail_resep(request, id):
     resep = get_object_or_404(Resep, pk=id)
