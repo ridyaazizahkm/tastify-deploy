@@ -1,4 +1,5 @@
 import datetime
+import re
 from django.http import HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
@@ -13,6 +14,7 @@ from django.contrib.auth import authenticate, login as auth_login
 from django.http import HttpResponse
 from django.core import serializers
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 
 @csrf_exempt
 def register(request):
@@ -44,10 +46,31 @@ def get_client_ip(request):
         ip = request.META.get('REMOTE_ADDR')
     return ip
 
+class CustomAuthenticationForm(AuthenticationForm):
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        # Sanitize username to prevent SQL injection
+        if username:
+            username = re.sub(r'[<>&\'"()]', '', username)
+            if not username:
+                raise ValidationError('Invalid username')
+        return username
+
 @csrf_exempt
 def login_user(request):
     # Jika request menggunakan metode POST
     if request.method == 'POST':
+        # Use the custom form with additional sanitization
+        form = CustomAuthenticationForm(request, data=request.POST)
+
+        # Additional server-side validation
+        username = request.POST.get('username', '')
+        password = request.POST.get('password', '')
+        
+        # Remove potentially dangerous characters
+        username = re.sub(r'[<>&\'"()]', '', username)
+        password = re.sub(r'[<>&\'"()]', '', password)
+        
         # Get client IP
         client_ip = get_client_ip(request)
         
