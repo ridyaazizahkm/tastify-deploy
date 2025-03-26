@@ -7,22 +7,38 @@ from django.core.paginator import Paginator
 from django.db.models import Count
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import ensure_csrf_cookie
+from django.utils.html import escape
+import bleach
+
+def sanitize_post_data(post_data):
+    """
+    Sanitize POST data to prevent XSS attacks
+    """
+    sanitized_data = post_data.copy()
+    text_fields = ['q', 'category', 'cooking_method', 'main_ingredient']
+
+    for field in text_fields:
+        if field in sanitized_data:
+            sanitized_data[field] = escape(sanitized_data[field])
+
+    return sanitized_data
 
 @ensure_csrf_cookie
 def list_resep(request):
     if request.method == 'POST':
-        query = request.POST.get('q', '')
-        category = request.POST.get('category', '')
-        cooking_method = request.POST.get('cooking_method', '')
-        main_ingredient = request.POST.get('main_ingredient', '')
-        sort_by = request.POST.get('sort_by', '')
-        page_number = request.POST.get('page', 1)
-        items_per_page = request.POST.get('items_per_page', 9)
+        sanitized_data = sanitize_post_data(request.POST)
+        query = sanitized_data.get('q', '')
+        category = sanitized_data.get('category', '')
+        cooking_method = sanitized_data.get('cooking_method', '')
+        main_ingredient = sanitized_data.get('main_ingredient', '')
+        sort_by = sanitized_data.get('sort_by', '')
+        page_number = sanitized_data.get('page', 1)
+        items_per_page = sanitized_data.get('items_per_page', 9)
     else:
         query = request.GET.get('q', '')
         category = request.GET.get('category', '')
         cooking_method = request.GET.get('cooking_method', '')
-        main_ingredient = request.POST.get('main_ingredient', '')
+        main_ingredient = request.GET.get('main_ingredient', '')
         sort_by = request.GET.get('sort_by', '')
         page_number = request.GET.get('page', 1)
         items_per_page = request.GET.get('items_per_page', 9)
@@ -65,7 +81,6 @@ def list_resep(request):
     if main_ingredient:
         resep_list = resep_list.filter(bahan_utama__nama=main_ingredient)
 
-    # Update the sorting logic
     if sort_by == 'cooking_time_asc':
         resep_list = resep_list.order_by('durasi')
     elif sort_by == 'cooking_time_desc':

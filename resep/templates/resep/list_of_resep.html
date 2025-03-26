@@ -144,15 +144,25 @@
             };
         }
 
+        function escapeHTML(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
         function updateFilterCounts(data) {
             if (data.categories) {
                 const selectedCategory = categorySelect.value;
-                categorySelect.innerHTML = '<option value="">Semua Kategori</option>';
+                categorySelect.innerHTML = '<option value="">All Categories</option>';
                 data.categories.forEach(cat => {
                     if (cat.kategori) {
                         const option = document.createElement('option');
-                        option.value = cat.kategori;
-                        option.textContent = `${cat.kategori} (${cat.count})`;
+                        option.value = escapeHTML(cat.kategori);
+                        option.textContent = `${escapeHTML(cat.kategori)} (${cat.count})`;
                         option.selected = (cat.kategori === selectedCategory);
                         categorySelect.appendChild(option);
                     }
@@ -161,12 +171,12 @@
 
             if (data.cooking_methods) {
                 const selectedMethod = cookingMethodSelect.value;
-                cookingMethodSelect.innerHTML = '<option value="">Semua Metode</option>';
+                cookingMethodSelect.innerHTML = '<option value="">All Cooking Methods</option>';
                 data.cooking_methods.forEach(method => {
                     if (method.metode_masak) {
                         const option = document.createElement('option');
-                        option.value = method.metode_masak;
-                        option.textContent = `${method.metode_masak} (${method.count})`;
+                        option.value = escapeHTML(method.metode_masak);
+                        option.textContent = `${escapeHTML(method.metode_masak)} (${method.count})`;
                         option.selected = (method.metode_masak === selectedMethod);
                         cookingMethodSelect.appendChild(option);
                     }
@@ -175,12 +185,12 @@
 
             if (data.main_ingredients) {
                 const selectedIngredient = mainIngredientSelect.value;
-                mainIngredientSelect.innerHTML = '<option value="">Semua Bahan</option>';
+                mainIngredientSelect.innerHTML = '<option value="">All Main Ingredients</option>';
                 data.main_ingredients.forEach(ingredient => {
                     if (ingredient.bahan_utama) {
                         const option = document.createElement('option');
-                        option.value = ingredient.bahan_utama;
-                        option.textContent = `${ingredient.bahan_utama} (${ingredient.count})`;
+                        option.value = escapeHTML(ingredient.bahan_utama);
+                        option.textContent = `${escapeHTML(ingredient.bahan_utama)} (${ingredient.count})`;
                         option.selected = (ingredient.bahan_utama === selectedIngredient);
                         mainIngredientSelect.appendChild(option);
                     }
@@ -276,7 +286,7 @@
 
             const formData = new FormData();
             formData.append('csrfmiddlewaretoken', csrfToken);
-            formData.append('page', '1'); 
+            formData.append('page', '1');
             loadRecipes(form.action, formData);
         });
 
