@@ -12,9 +12,11 @@
                 </div>
                 {% endif %}
 
-                <button class="absolute top-2 right-2 bg-white bg-opacity-75 hover:bg-opacity-100 p-1.5 rounded-full shadow-sm transition-all duration-200"
-                        onclick="event.stopPropagation(); event.preventDefault(); toggleFavorite({{ resep.id }})">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <button class="absolute top-2 right-2 bg-white bg-opacity-75 hover:bg-opacity-100 p-1.5 rounded-full shadow-sm transition-all duration-200 bookmark-toggle-btn" 
+                        data-resep-id="{{ resep.id }}"
+                        onclick="event.stopPropagation(); event.preventDefault(); toggleBookmark({{ resep.id }}, event)">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 bookmark-icon {% if is_bookmarked %}text-red-500{% endif %}" 
+                        fill="{% if is_bookmarked %}currentColor{% else %}none{% endif %}" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                     </svg>
                 </button>
@@ -64,7 +66,9 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-0.5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
                         </svg>
-                        <span class="text-xs">{{ resep.likes_count|default:"0" }} Likes</span>
+                        <span class="text-xs likes-count">
+                            {{ resep.likes_count|default:"0" }} Likes
+                        </span>
                     </div>
                 </div>
             </div>
@@ -73,7 +77,105 @@
 </div>
 
 <script>
-    function toggleFavorite(resepId) {
-        console.log('Toggle favorite for recipe:', resepId);
+    document.addEventListener('DOMContentLoaded', function() {
+        const bookmarkButtons = document.querySelectorAll('.bookmark-toggle-btn');
+        
+        bookmarkButtons.forEach(button => {
+            const resepId = button.dataset.resepId;
+            const bookmarkIcon = button.querySelector('svg');
+            
+            // Periksa status bookmark saat halaman dimuat
+            fetch(`/bookmark/check/${resepId}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.is_bookmarked) {
+                    bookmarkIcon.style.fill = 'currentColor';
+                    bookmarkIcon.classList.add('text-red-500');
+                } else {
+                    bookmarkIcon.style.fill = 'none';
+                    bookmarkIcon.classList.remove('text-red-500');
+                }
+            })
+            .catch(error => {
+                console.error('Error checking bookmark status:', error);
+            });
+        });
+    });
+
+    function toggleBookmark(resepId, event) {
+        // Hindari event bawaan
+        event.preventDefault();
+        event.stopPropagation();
+
+        // Temukan elemen SVG terlebih dahulu
+        const bookmarkButton = event.target.closest('button');
+        const bookmarkIcon = bookmarkButton ? bookmarkButton.querySelector('svg') : null;
+        const recipeCard = bookmarkButton ? bookmarkButton.closest('.recipe-card, a') : null;
+        const likesCountElement = recipeCard ? recipeCard.querySelector('.likes-count') : null;
+
+        fetch(`/bookmark/toggle/${resepId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (bookmarkIcon) {
+                if (data.is_bookmarked) {
+                    // Pastikan fill berubah dan warna merah
+                    bookmarkIcon.style.fill = 'currentColor';
+                    bookmarkIcon.classList.add('text-red-500');
+
+                    // Tambahkan likes count
+                    if (likesCountElement) {
+                        const currentLikesCount = parseInt(likesCountElement.textContent) || 0;
+                        likesCountElement.textContent = currentLikesCount + 1;
+                    }
+                } else {
+                    // Kembalikan ke kondisi semula
+                    bookmarkIcon.style.fill = 'none';
+                    bookmarkIcon.classList.remove('text-red-500');
+
+                    // Kurangi likes count
+                    if (likesCountElement) {
+                        const currentLikesCount = parseInt(likesCountElement.textContent) || 0;
+                        likesCountElement.textContent = Math.max(0, currentLikesCount - 1);
+                    }
+                }
+            }
+
+            // Jika sedang di halaman bookmark, hapus item jika di-unbookmark
+            if (!data.is_bookmarked && window.location.pathname.includes('/bookmark/')) {
+                const recipeCard = bookmarkIcon.closest('.recipe-card');
+                if (recipeCard) {
+                    recipeCard.remove();
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error toggling bookmark:', error);
+        });
+    }
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
     }
 </script>

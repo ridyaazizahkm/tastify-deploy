@@ -1,7 +1,6 @@
 from django.db import models
 from authentication.models import UserProfile
 
-
 class Kategori(models.Model):
     nama = models.CharField(max_length=100)
 

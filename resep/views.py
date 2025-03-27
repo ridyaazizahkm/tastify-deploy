@@ -10,6 +10,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.utils.html import escape
 import bleach
 import html
+from bookmark.models import Bookmark
 
 def sanitize_post_data(post_data):
     """
@@ -184,5 +185,12 @@ def create_resep(request):
 
 def detail_resep(request, id):
     resep = get_object_or_404(Resep, pk=id)
-    context = {'resep': resep}
+    
+    is_bookmarked = False
+    if request.user.is_authenticated:
+        user_profile = UserProfile.objects.get(user=request.user)
+        is_bookmarked = Bookmark.objects.filter(user=user_profile, resep=resep).exists()
+
+    context = {'resep': resep,
+               'is_bookmarked': is_bookmarked}
     return render(request, 'resep/detail_resep.html', context)
