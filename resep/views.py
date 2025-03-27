@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
+
+from komentar.forms import KomentarForm
 from .models import Resep
 from .forms import ResepForm
 from authentication.models import UserProfile
@@ -191,5 +193,7 @@ def create_resep(request):
 
 def detail_resep(request, id):
     resep = get_object_or_404(Resep, pk=id)
-    context = {'resep': resep, "average_rating": resep.average_rating(), "total_ratings": resep.total_ratings(),}
+    komentar_form = KomentarForm()
+    context = {'resep': resep, "average_rating": resep.average_rating(), "total_ratings": resep.total_ratings(), 'form': komentar_form,}
+
     return render(request, 'resep/detail_resep.html', context)

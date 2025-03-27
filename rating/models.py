@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from resep.models import Resep
 from django.db.models import Avg, Count
-
+from django.db.models import Avg
 class Rating(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     resep = models.ForeignKey(Resep, on_delete=models.CASCADE, related_name='ratings')
