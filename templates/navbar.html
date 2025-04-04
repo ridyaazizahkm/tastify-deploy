@@ -199,9 +199,16 @@
                         class="nav-link {% if request.path == '/merchant/' %}active{% endif %} block py-2 px-3 rounded">Bookmark</a>
                 </li>
                 <li>
-                    <a href="/recipe/create/"
-                        class="nav-link {% if request.path == '/recipe/create/' %}active{% endif %} block py-2 px-3 rounded">Upload Your Recipes</a>
-                </li>
+                    {% if user.is_superuser %}
+                        <a href="{% url 'main:admin_dashboard' %}" class="nav-link {% if request.path == '/admin_dashboard/' %}active{% endif %} block py-2 px-3 rounded">
+                            Dashboard Admin
+                        </a>
+                    {% else %}
+                        <a href="/recipe/create/" class="nav-link {% if request.path == '/recipe/create/' %}active{% endif %} block py-2 px-3 rounded">
+                            Upload Your Recipes
+                        </a>
+                    {% endif %}
+                </li>              
                 <div class="flex items-center space-x-4 md:order-1 search-container">
                     <div class="relative">
                         <input type="text" placeholder="Search recipes..."
@@ -227,17 +234,25 @@
                         class="nav-link {% if request.path == show_main_url %}active{% endif %}">Home</a>
                 </li>
                 <li>
-                    <a href="/product/"
-                        class="nav-link {% if request.path == '/product/' %}active{% endif %}">Recipe</a>
+                    <a href="/recipe/"
+                        class="nav-link {% if request.path == '/recipe/' %}active{% endif %}">Recipe</a>
                 </li>
                 <li>
                     <a href="/merchant/"
                         class="nav-link {% if request.path == '/merchant/' %}active{% endif %}">Bookmark</a>
                 </li>
                 <li>
-                    <a href="/article"
-                        class="nav-link {% if request.path == '/article/' %}active{% endif %}">Upload Your Recipes</a>
+                    {% if user.is_superuser %}
+                        <a href="{% url 'main:admin_dashboard' %}" class="nav-link {% if request.path == '/admin_dashboard/' %}active{% endif %} block py-2 px-3 rounded">
+                            Dashboard Admin
+                        </a>
+                    {% else %}
+                        <a href="/recipe/create/" class="nav-link {% if request.path == '/recipe/create/' %}active{% endif %} block py-2 px-3 rounded">
+                            Upload Your Recipes
+                        </a>
+                    {% endif %}
                 </li>
+                
             </ul>
 
             <!-- Mobile search bar -->
