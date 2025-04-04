@@ -1,0 +1,129 @@
+<!-- Rating Section -->
+<div class="flex items-center mt-4 mb-4 border-t pt-4 border-gray-100">
+    <div class="flex items-center">
+        <span class="text-lg font-semibold">{{ average_rating }}</span>
+        <span class="text-yellow-500 mx-1">★</span>
+        <span class="text-sm text-gray-500 ml-1">({{ total_ratings }})</span>
+    </div>
+    <button id="addRatingBtn" class="ml-4 bg-[#62191c] text-white px-4 py-2 rounded">Add Rating</button>
+</div>
+
+<!-- Rating Popup -->
+<div id="ratingPopup" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 hidden z-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-80">
+        <h3 class="text-lg font-semibold mb-4">Rate this Recipe</h3>
+        <div id="starContainer" class="flex justify-center mb-6 space-x-2">
+        </div>
+        <div class="flex justify-end space-x-2">
+            <button id="cancelRatingBtn" class="px-4 py-2 border border-gray-300 rounded text-gray-600 hover:bg-gray-100">Cancel</button>
+            <button id="submitRatingBtn" data-rating-url="{% url 'rating:add_rating' resep.id %}" class="px-4 py-2 bg-[#62191c] text-white rounded hover:bg-[#62191c]/90">Submit</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.addEventListener('load', function() {
+        // Rating functionality
+        let selectedRating = 0;
+        const ratingPopup = document.getElementById('ratingPopup');
+        const addRatingBtn = document.getElementById('addRatingBtn');
+        const cancelRatingBtn = document.getElementById('cancelRatingBtn');
+        const submitRatingBtn = document.getElementById('submitRatingBtn');
+        const starContainer = document.getElementById('starContainer');
+        
+        if (addRatingBtn) {
+            addRatingBtn.addEventListener('click', function() {
+                ratingPopup.classList.remove('hidden');
+                generateStars();
+            });
+        }
+        
+        if (cancelRatingBtn) {
+            cancelRatingBtn.addEventListener('click', function() {
+                ratingPopup.classList.add('hidden');
+                selectedRating = 0;
+            });
+        }
+        
+        if (submitRatingBtn) {
+            submitRatingBtn.addEventListener('click', function() {
+                if (selectedRating > 0) {
+                    const ratingUrl = this.getAttribute('data-rating-url');
+                    if (!ratingUrl) {
+                        console.error("Rating URL not found");
+                        alert("Error: Rating URL not found");
+                        return;
+                    }
+                    
+                    console.log("Submitting rating to:", ratingUrl);
+                    
+                    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+                    
+                    fetch(ratingUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-CSRFToken': csrfToken.value
+                        },
+                        body: `score=${selectedRating}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("Rating response:", data);
+                        if (data.error) {
+                            alert(data.error);
+                            return;
+                        }
+                        
+                        const ratingDisplay = document.querySelector('.flex.items-center .text-lg.font-semibold');
+                        const totalRatingsDisplay = document.querySelector('.flex.items-center .text-sm.text-gray-500');
+                        
+                        if (ratingDisplay && totalRatingsDisplay) {
+                            ratingDisplay.textContent = data.average_rating.toFixed(1);
+                            totalRatingsDisplay.textContent = `(${data.total_ratings})`;
+                        }
+                        
+                        ratingPopup.classList.add('hidden');
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Failed to add rating');
+                    });
+                } else {
+                    alert('Please select a rating first');
+                }
+            });
+        }
+        
+        function generateStars() {
+            console.log("Generating stars");
+            starContainer.innerHTML = '';
+            for (let i = 1; i <= 5; i++) {
+                const star = document.createElement('span');
+                star.innerHTML = '★';
+                star.classList.add('text-4xl', 'cursor-pointer', 'text-gray-300');
+                star.dataset.rating = i;
+                star.addEventListener('click', function() {
+                    selectRating(i);
+                });
+                starContainer.appendChild(star);
+            }
+        }
+        
+        function selectRating(rating) {
+            console.log("Star selected:", rating);
+            selectedRating = rating;
+            const stars = starContainer.querySelectorAll('span');
+            stars.forEach(star => {
+                const starRating = parseInt(star.dataset.rating);
+                if (starRating <= rating) {
+                    star.classList.remove('text-gray-300');
+                    star.classList.add('text-yellow-500');
+                } else {
+                    star.classList.remove('text-yellow-500');
+                    star.classList.add('text-gray-300');
+                }
+            });
+        }
+    });
+</script>
