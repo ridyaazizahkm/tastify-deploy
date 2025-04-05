@@ -6,5 +6,5 @@ app_name = 'resep'
 urlpatterns = [
     path('', list_resep, name='list_resep'),
     path('create/', create_resep, name='create_resep'),
-    path('<int:id>/', detail_resep, name='detail_resep'),
+    path('detail/<int:id>/', detail_resep, name='detail_resep'),
 ]

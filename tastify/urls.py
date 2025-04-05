@@ -24,4 +24,6 @@ urlpatterns = [
     path('auth/', include('authentication.urls')),
     path('', include('main.urls')),
     path('recipe/', include('resep.urls')),
+    path('ratings/', include('rating.urls')),
+    path('komentar/', include('komentar.urls')),
 ]
