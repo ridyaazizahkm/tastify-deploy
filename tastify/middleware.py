@@ -12,40 +12,17 @@ class ContentSecurityPolicyMiddleware(MiddlewareMixin):
     def process_response(self, request, response):
         # Konfigurasi CSP yang aman tetapi masih mengizinkan fitur yang diperlukan
         csp_policies = [
-            # Default policy untuk semua konten
             "default-src 'self'", 
-            
-            # Untuk inline scripts dan styles yang diperlukan dalam template
-            "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com", 
-            
-            # Style dari sumber yang aman
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com", 
-            
-            # Font dari sumber yang aman
+            "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.tailwindcss.com https://unpkg.com", 
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com", 
             "font-src 'self' https://fonts.gstatic.com", 
-            
-            # Gambar dari sumber yang aman
             "img-src 'self' data: https:", 
-            
-            # Untuk fonts dan styles
             "connect-src 'self'",
-            
-            # Frame hanya dari sumber yang sama
             "frame-src 'self'",
-            
-            # Untuk melarang semua plugin seperti Flash, Java, dll.
             "object-src 'none'",
-            
-            # Untuk melarang inline JavaScript event handlers
             "base-uri 'self'",
-            
-            # Untuk melarang <form> mendaftarkan handler di luar domain yang sama
             "form-action 'self'",
-            
-            # Melarang embedding <frame>, <iframe>, <object>, <embed>, <applet>
             "frame-ancestors 'self'",
-            
-            # Memaksa HTTPS untuk semua aset
             "upgrade-insecure-requests",
         ]
         
