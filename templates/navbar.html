@@ -151,19 +151,6 @@
         .desktop-menu {
             display: none;
         }
-
-        .search-container {
-            display: none;
-        }
-
-        .mobile-search-container {
-            margin-top: 1rem;
-            width: 100%;
-        }
-
-        .mobile-search-container input {
-            width: 100%;
-        }
     }
 </style>
 
@@ -209,19 +196,6 @@
                         </a>
                     {% endif %}
                 </li>              
-                <div class="flex items-center space-x-4 md:order-1 search-container">
-                    <div class="relative">
-                        <input type="text" placeholder="Search recipes..."
-                            class="p-2 pl-10 pr-4 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#e0cfc2] focus:border-[#e0cfc2]">
-                        <button type="button" class="absolute left-3 top-1/2 transform -translate-y-1/2">
-                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="2"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M21 21l-4.35-4.35M9 17a8 8 0 1 1 8-8 8 8 0 0 1-8 8z" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
             </ul>
         </div>
 
@@ -243,32 +217,16 @@
                 </li>
                 <li>
                     {% if user.is_superuser %}
-                        <a href="{% url 'main:admin_dashboard' %}" class="nav-link {% if request.path == '/admin_dashboard/' %}active{% endif %} block py-2 px-3 rounded">
+                        <a href="{% url 'main:admin_dashboard' %}" class="nav-link {% if request.path == '/admin_dashboard/' %}active{% endif %}">
                             Dashboard Admin
                         </a>
                     {% else %}
-                        <a href="/recipe/create/" class="nav-link {% if request.path == '/recipe/create/' %}active{% endif %} block py-2 px-3 rounded">
+                        <a href="/recipe/create/" class="nav-link {% if request.path == '/recipe/create/' %}active{% endif %}">
                             Upload Your Recipes
                         </a>
                     {% endif %}
                 </li>
-                
             </ul>
-
-            <!-- Mobile search bar -->
-            <div class="mobile-search-container mt-4">
-                <div class="relative">
-                    <input type="text" placeholder="Search recipes..."
-                        class="w-full p-2 pl-10 pr-4 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#e0cfc2] focus:border-[#e0cfc2]">
-                    <button type="button" class="absolute left-3 top-1/2 transform -translate-y-1/2">
-                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="2"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M21 21l-4.35-4.35M9 17a8 8 0 1 1 8-8 8 8 0 0 1-8 8z" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
         </div>
 
         <!-- User Menu -->
