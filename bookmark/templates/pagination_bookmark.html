@@ -1,15 +1,23 @@
 {% if bookmark_items.has_other_pages %}
 <div class="mt-8 flex flex-col sm:flex-row justify-center items-center gap-4">
-    <div class="flex items-center">
-        <label for="items_per_page" class="text-sm font-medium text-gray-700 mr-2">Show:</label>
-        <select name="items_per_page" id="items_per_page" class="items-per-page-select px-3 py-2 border border-gray-300 rounded-lg focus:ring-[#62191c] focus:border-[#62191c]">
-            <option value="9" {% if items_per_page == 9 %}selected{% endif %}>9</option>
-            <option value="18" {% if items_per_page == 18 %}selected{% endif %}>18</option>
-            <option value="24" {% if items_per_page == 24 %}selected{% endif %}>24</option>
-            <option value="36" {% if items_per_page == 36 %}selected{% endif %}>36</option>
-        </select>
-        <span class="ml-2 text-sm text-gray-600">each page</span>
-    </div>
+    <form method="GET" action="">
+        <div class="flex items-center">
+            <label for="items_per_page" class="text-sm font-medium text-gray-700 mr-2">Show:</label>
+            <select name="items_per_page" id="items_per_page" onchange="this.form.submit()" class="items-per-page-select px-3 py-2 border border-gray-300 rounded-lg focus:ring-[#62191c] focus:border-[#62191c]">
+                <option value="9" {% if items_per_page == 9 %}selected{% endif %}>9</option>
+                <option value="18" {% if items_per_page == 18 %}selected{% endif %}>18</option>
+                <option value="24" {% if items_per_page == 24 %}selected{% endif %}>24</option>
+                <option value="36" {% if items_per_page == 36 %}selected{% endif %}>36</option>
+            </select>
+            <span class="ml-2 text-sm text-gray-600">each page</span>
+        </div>
+        <!-- Pertahankan parameter URL lain -->
+        {% if current_sort %}
+        <input type="hidden" name="sort" value="{{ current_sort }}">
+        {% endif %}
+        <!-- Reset ke halaman 1 ketika mengubah items per page -->
+        <input type="hidden" name="page" value="1">
+    </form>
     <nav class="relative z-0 inline-flex shadow-sm -space-x-px rounded-md" aria-label="Pagination">
     {% if bookmark_items.has_previous %}
         <a href="?page={{ bookmark_items.previous_page_number }}{% if current_sort %}&sort={{ current_sort }}{% endif %}{% if items_per_page %}&items_per_page={{ items_per_page }}{% endif %}" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
@@ -40,15 +48,23 @@
 </div>
 {% else %}
 <div class="mt-8 flex justify-center">
-    <div class="flex items-center">
-        <label for="items_per_page" class="text-sm font-medium text-gray-700 mr-2">Show:</label>
-        <select name="items_per_page" id="items_per_page" class="items-per-page-select px-3 py-2 border border-gray-300 rounded-lg focus:ring-[#62191c] focus:border-[#62191c]">
-            <option value="9" {% if items_per_page == 9 %}selected{% endif %}>9</option>
-            <option value="18" {% if items_per_page == 18 %}selected{% endif %}>18</option>
-            <option value="24" {% if items_per_page == 24 %}selected{% endif %}>24</option>
-            <option value="36" {% if items_per_page == 36 %}selected{% endif %}>36</option>
-        </select>
-        <span class="ml-2 text-sm text-gray-600">each page</span>
-    </div>
+    <form method="GET" action="">
+        <div class="flex items-center">
+            <label for="items_per_page" class="text-sm font-medium text-gray-700 mr-2">Show:</label>
+            <select name="items_per_page" id="items_per_page" onchange="this.form.submit()" class="items-per-page-select px-3 py-2 border border-gray-300 rounded-lg focus:ring-[#62191c] focus:border-[#62191c]">
+                <option value="9" {% if items_per_page == 9 %}selected{% endif %}>9</option>
+                <option value="18" {% if items_per_page == 18 %}selected{% endif %}>18</option>
+                <option value="24" {% if items_per_page == 24 %}selected{% endif %}>24</option>
+                <option value="36" {% if items_per_page == 36 %}selected{% endif %}>36</option>
+            </select>
+            <span class="ml-2 text-sm text-gray-600">each page</span>
+        </div>
+        <!-- Pertahankan parameter URL lain -->
+        {% if current_sort %}
+        <input type="hidden" name="sort" value="{{ current_sort }}">
+        {% endif %}
+        <!-- Reset ke halaman 1 ketika mengubah items per page -->
+        <input type="hidden" name="page" value="1">
+    </form>
 </div>
 {% endif %}
