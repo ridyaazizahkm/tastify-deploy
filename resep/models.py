@@ -1,5 +1,6 @@
 from django.db import models
 from authentication.models import UserProfile
+from django.dispatch import receiver
 
 class Kategori(models.Model):
     nama = models.CharField(max_length=100)
@@ -35,6 +36,12 @@ class Resep(models.Model):
     url_foto = models.URLField()
     durasi = models.IntegerField()
     porsi = models.IntegerField()
+    likes_count = models.IntegerField(default=0)
+
+    def update_likes_count(self):
+        from bookmark.models import Bookmark
+        self.likes_count = Bookmark.objects.filter(resep=self).count()
+        self.save(update_fields=['likes_count'])
 
     def __str__(self):
         return self.judul

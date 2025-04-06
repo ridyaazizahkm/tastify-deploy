@@ -129,25 +129,16 @@
         .then(data => {
             if (bookmarkIcon) {
                 if (data.is_bookmarked) {
-                    // Pastikan fill berubah dan warna merah
                     bookmarkIcon.style.fill = 'currentColor';
                     bookmarkIcon.classList.add('text-red-500');
-
-                    // Tambahkan likes count
-                    if (likesCountElement) {
-                        const currentLikesCount = parseInt(likesCountElement.textContent) || 0;
-                        likesCountElement.textContent = currentLikesCount + 1;
-                    }
                 } else {
-                    // Kembalikan ke kondisi semula
                     bookmarkIcon.style.fill = 'none';
                     bookmarkIcon.classList.remove('text-red-500');
+                }
 
-                    // Kurangi likes count
-                    if (likesCountElement) {
-                        const currentLikesCount = parseInt(likesCountElement.textContent) || 0;
-                        likesCountElement.textContent = Math.max(0, currentLikesCount - 1);
-                    }
+                // Gunakan likes count dari server
+                if (likesCountElement) {
+                    likesCountElement.textContent = `${data.likes_count} Likes`;
                 }
             }
 
