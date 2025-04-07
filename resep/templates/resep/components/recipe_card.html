@@ -112,7 +112,6 @@
         event.preventDefault();
         event.stopPropagation();
 
-        // Temukan elemen SVG terlebih dahulu
         const bookmarkButton = event.target.closest('button');
         const bookmarkIcon = bookmarkButton ? bookmarkButton.querySelector('svg') : null;
         const recipeCard = bookmarkButton ? bookmarkButton.closest('.recipe-card, a') : null;
@@ -122,11 +121,31 @@
             method: 'POST',
             headers: {
                 'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
                 'Content-Type': 'application/json'
             }
         })
         .then(response => response.json())
         .then(data => {
+            if (data.error && data.show_popup) {
+                showErrorPopup(
+                    'You have reached the maximum bookmark limit in 1 minute.',
+                    true,
+                    data.retry_after,
+                    data.resep_id
+                );
+                return;
+            } 
+            
+            if (data.error) {
+                if (typeof showNotification === 'function') {
+                    showNotification('An error occurred. Please try again.', true);
+                } else {
+                    console.error('An error occurred. Please try again.');
+                }
+                return;
+            }
+
             if (bookmarkIcon) {
                 if (data.is_bookmarked) {
                     bookmarkIcon.style.fill = 'currentColor';
@@ -136,22 +155,30 @@
                     bookmarkIcon.classList.remove('text-red-500');
                 }
 
-                // Gunakan likes count dari server
                 if (likesCountElement) {
                     likesCountElement.textContent = `${data.likes_count} Likes`;
                 }
             }
 
-            // Jika sedang di halaman bookmark, hapus item jika di-unbookmark
             if (!data.is_bookmarked && window.location.pathname.includes('/bookmark/')) {
                 const recipeCard = bookmarkIcon.closest('.recipe-card');
                 if (recipeCard) {
                     recipeCard.remove();
                 }
             }
+
+            if (typeof showNotification === 'function') {
+                const message = data.is_bookmarked ? 
+                    'Recipe successfully added to bookmarks.' : 
+                    'Recipe removed from bookmarks.';
+                showNotification(message, false);
+            }
         })
         .catch(error => {
             console.error('Error toggling bookmark:', error);
+            if (typeof showNotification === 'function') {
+                showNotification('An error occurred. Please try again later.', true);
+            }
         });
     }
     

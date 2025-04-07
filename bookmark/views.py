@@ -7,52 +7,80 @@ from .models import Bookmark
 from resep.models import Resep
 from authentication.models import UserProfile
 from django.db.models import Q, F  
+from django.utils import timezone
 from django.core.cache import cache
 import time
 from functools import wraps
 
-def rate_limit_bookmark(max_requests=5, window_seconds=60):
+def rate_limit_bookmark(max_requests=10, window_seconds=60):
     def decorator(view_func):
         @wraps(view_func)
         def _wrapped_view(request, *args, **kwargs):
-            # Buat key unik berdasarkan user ID dan function name
+            # Ensure user is authenticated
+            if not request.user.is_authenticated:
+                return JsonResponse({'error': True, 'message': 'Authentication required'}, status=401)
+                
+            # Create a unique key based on user ID only (not recipe-specific)
             user_id = request.user.id
-            cache_key = f"bookmark_rate_limit_{user_id}_{view_func.__name__}"
+            cache_key = f"bookmark_rate_limit_{user_id}_global"
             
-            # Ambil data rate limit dari cache
+            # Get rate limit data from cache
             rate_data = cache.get(cache_key)
             current_time = time.time()
             
             if rate_data is None:
-                # Belum ada data rate limit, buat baru
+                # No rate limit data exists, create new
                 rate_data = {
                     'count': 1,
                     'window_start': current_time
                 }
-                cache.set(cache_key, rate_data, window_seconds)
+                # Set cache expiry time with window_seconds + 5 second buffer
+                cache.set(cache_key, rate_data, window_seconds + 5)
                 return view_func(request, *args, **kwargs)
             
-            # Cek apakah window_seconds sudah berlalu
-            if current_time - rate_data['window_start'] > window_seconds:
+            # Debug info to see remaining time
+            time_passed = current_time - rate_data['window_start']
+            time_remaining = window_seconds - time_passed
+            print(f"User {user_id}: {rate_data['count']} requests, {time_passed:.2f}s passed, {time_remaining:.2f}s remaining")
+            
+            # Check if window_seconds has passed
+            if time_passed >= window_seconds:
                 # Reset window
+                print(f"Resetting rate limit for user {user_id}")
                 rate_data = {
                     'count': 1,
                     'window_start': current_time
                 }
-                cache.set(cache_key, rate_data, window_seconds)
+                cache.set(cache_key, rate_data, window_seconds + 5)
                 return view_func(request, *args, **kwargs)
             
-            # Cek jumlah request
+            # Check request count
             if rate_data['count'] >= max_requests:
-                # Terlalu banyak request
+                # Too many requests - send user-friendly message
+                retry_after = int(window_seconds - time_passed)
+                
+                # Get bookmark data to send with error message
+                resep_id = kwargs.get('resep_id')
+                resep = get_object_or_404(Resep, id=resep_id)
+                user_profile = UserProfile.objects.get(user=request.user)
+                is_bookmarked = Bookmark.objects.filter(user=user_profile, resep=resep).exists()
+                
+                print(f"Rate limit exceeded for user {user_id}. Retry after {retry_after}s")
+                
                 return JsonResponse({
-                    'error': 'Too many bookmark requests. Please try again later.',
-                    'retry_after': int(window_seconds - (current_time - rate_data['window_start']))
+                    'error': True,
+                    'show_popup': True,
+                    'message': f'Anda telah mencapai batas maksimal {max_requests} bookmark dalam 1 menit.',
+                    'is_bookmarked': is_bookmarked,
+                    'bookmarks_count': Bookmark.objects.filter(resep=resep).count(),
+                    'likes_count': resep.likes_count,
+                    'retry_after': retry_after,
+                    'resep_id': resep_id
                 }, status=429)
             
-            # Tambah counter
+            # Increment counter
             rate_data['count'] += 1
-            cache.set(cache_key, rate_data, window_seconds)
+            cache.set(cache_key, rate_data, window_seconds + 5)
             
             return view_func(request, *args, **kwargs)
         return _wrapped_view
@@ -131,7 +159,7 @@ def bookmark_detail(request, bookmark_id):
 # Other functions remain the same
 @login_required
 @require_POST
-@rate_limit_bookmark(max_requests=5, window_seconds=60)
+@rate_limit_bookmark(max_requests=10, window_seconds=60)
 def toggle_bookmark(request, resep_id):
     try:
         user_profile = UserProfile.objects.get(user=request.user)
@@ -169,3 +197,26 @@ def check_bookmark_status(request, resep_id):
         'is_bookmarked': is_bookmarked,
         'bookmark_count': bookmark_count
     })
+
+@login_required
+def reset_bookmark_rate_limit(request):
+    """Endpoint to manually reset bookmark rate limit"""
+    if not request.user.is_authenticated:
+        return JsonResponse({'status': 'error', 'message': 'Authentication required'}, status=401)
+    
+    # Delete the global rate limit key for this user
+    user_id = request.user.id
+    cache_key = f"bookmark_rate_limit_{user_id}_global"
+
+    deleted = cache.delete(cache_key)
+    
+    if deleted:
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Rate limit has been reset successfully'
+        })
+    else:
+        return JsonResponse({
+            'status': 'warning',
+            'message': 'No active rate limit found to reset'
+        })
