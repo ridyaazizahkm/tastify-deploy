@@ -39,9 +39,23 @@
                     {% for profile in user_profiles %}
                     <tr class="bg-white border-b hover:bg-gray-50">
                       <td class="px-6 py-4">{{ profile.user.username }}</td>
-                      <td class="px-6 py-4">{{ profile.user.email }}</td>
+                      <td class="px-6 py-4">
+                        {% with email=profile.user.email %}
+                          {% if email %}
+                            {% with username=email|cut:"@"|first domain=email|cut:"@"|last %}
+                              {% if username|length > 3 %}
+                                {{ username|slice:":2" }}***@{{ domain }}
+                              {% else %}
+                                {{ username|slice:":1" }}**@{{ domain }}
+                              {% endif %}
+                            {% endwith %}
+                          {% else %}
+                            -
+                          {% endif %}
+                        {% endwith %}
+                      </td>
                       <td class="px-6 py-4">{{ profile.bio|default:"-" }}</td>
-                      <td class="px-6 py-4">{% if profile.user.is_superuser %}admin{% else %}User{% endif %}</td>
+                      <td class="px-6 py-4">{% if profile.user.is_superuser %}Admin{% else %}User{% endif %}</td>
                     </tr>
                     {% endfor %}
                   </tbody>
@@ -50,7 +64,6 @@
             </div>
             
             <!-- Reported Comments Tab -->
-             <!-- ini contoh -->
             <div class="hidden" id="reported-comments" role="tabpanel" aria-labelledby="reported-comments-tab">
               <div class="overflow-x-auto">
                 <table class="w-full text-sm text-left text-gray-700">
