@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container mx-auto mt-20 px-4">
+  <div class="flex justify-center">
+    <div class="w-full md:w-full">
+      <div class="rounded-lg overflow-hidden shadow-md border border-gray-200">
+        <div class="bg-[#62191c] text-white p-4">
+          <h4 class="text-xl font-medium mb-0">Admin Panel</h4>
+        </div>
+        <div class="p-6">
+          <!-- Tab Navigation -->
+          <div class="border-b border-gray-200">
+            <ul class="flex flex-wrap -mb-px" id="adminTabs" role="tablist">
+              <li class="mr-2" role="presentation">
+                <button class="inline-block py-2 px-4 text-[#8b445c] border-b-2 border-[#8b445c] rounded-t-lg" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button" role="tab" aria-controls="users" aria-selected="true">Users</button>
+              </li>
+              <li class="mr-2" role="presentation">
+                <button class="inline-block py-2 px-4 text-gray-500 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" id="reported-comments-tab" data-bs-toggle="tab" data-bs-target="#reported-comments" type="button" role="tab" aria-controls="reported-comments" aria-selected="false">Reported Comments</button>
+              </li>
+            </ul>
+          </div>
+          
+          <!-- Tab Content -->
+          <div class="mt-6" id="adminTabsContent">
+            <!-- Users Tab -->
+            <div class="block" id="users" role="tabpanel" aria-labelledby="users-tab">
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-gray-700">
+                  <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                    <tr>
+                      <th class="px-6 py-3">Username</th>
+                      <th class="px-6 py-3">Email</th>
+                      <th class="px-6 py-3">Bio</th>
+                      <th class="px-6 py-3">Role</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for profile in user_profiles %}
+                    <tr class="bg-white border-b hover:bg-gray-50">
+                      <td class="px-6 py-4">{{ profile.user.username }}</td>
+                      <td class="px-6 py-4">{{ profile.user.email }}</td>
+                      <td class="px-6 py-4">{{ profile.bio|default:"-" }}</td>
+                      <td class="px-6 py-4">{% if profile.user.is_superuser %}admin{% else %}User{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
+            <!-- Reported Comments Tab -->
+             <!-- ini contoh -->
+            <div class="hidden" id="reported-comments" role="tabpanel" aria-labelledby="reported-comments-tab">
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-gray-700">
+                  <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                    <tr>
+                      <th class="px-6 py-3">Reporter</th>
+                      <th class="px-6 py-3">Comment Author</th>
+                      <th class="px-6 py-3">Comment Content</th>
+                      <th class="px-6 py-3">Report Reason</th>
+                      <th class="px-6 py-3">Report Date</th>
+                      <th class="px-6 py-3">Status</th>
+                      <th class="px-6 py-3">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for report in reported_comments %}
+                    <tr class="bg-white border-b hover:bg-gray-50">
+                      <td class="px-6 py-4">{{ report.reporter.username }}</td>
+                      <td class="px-6 py-4">{{ report.comment.user.username }}</td>
+                      <td class="px-6 py-4">
+                        <div class="max-w-xs overflow-hidden text-ellipsis">
+                          {{ report.comment.content }}
+                        </div>
+                      </td>
+                      <td class="px-6 py-4">{{ report.reason }}</td>
+                      <td class="px-6 py-4">{{ report.created_at|date:"M d, Y" }}</td>
+                      <td class="px-6 py-4">
+                        <span class="px-2 py-1 rounded text-xs font-medium 
+                          {% if report.status == 'pending' %}
+                            bg-yellow-100 text-yellow-800
+                          {% elif report.status == 'approved' %}
+                            bg-red-100 text-red-800
+                          {% else %}
+                            bg-green-100 text-green-800
+                          {% endif %}">
+                          {{ report.status|title }}
+                        </span>
+                      </td>
+                      <td class="px-6 py-4">
+                        {% if report.status == 'pending' %}
+                        <div class="flex space-x-2">
+                          <form method="post" action="{% url 'admin:approve_report' report.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="px-3 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700">
+                              Approve
+                            </button>
+                          </form>
+                          <form method="post" action="{% url 'admin:decline_report' report.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700">
+                              Decline
+                            </button>
+                          </form>
+                        </div>
+                        {% else %}
+                        <span class="text-gray-500 text-xs">Processed</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                    {% empty %}
+                    <tr class="bg-white border-b">
+                      <td colspan="7" class="px-6 py-4 text-center text-gray-500">No reported comments found</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div> 
+          
+          <!-- Button -->
+          <div class="flex justify-end mt-6">
+            <a href="{% url 'main:show_main' %}" class="px-4 py-2 bg-[#62191c] text-white rounded hover:bg-[#634443]">Back to Home</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const tabButtons = document.querySelectorAll('[data-bs-toggle="tab"]');
+    const tabContents = document.querySelectorAll('[role="tabpanel"]');
+    
+    tabButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        tabButtons.forEach(btn => {
+          btn.classList.remove('border-[#8b445c]', 'text-[#8b445c]');
+          btn.classList.add('border-transparent', 'text-gray-500');
+          btn.setAttribute('aria-selected', 'false');
+        });
+        
+        tabContents.forEach(content => {
+          content.classList.add('hidden');
+          content.classList.remove('block');
+        });
+        
+        button.classList.add('border-[#8b445c]', 'text-[#8b445c]');
+        button.classList.remove('border-transparent', 'text-gray-500');
+        button.setAttribute('aria-selected', 'true');
+        
+        const targetId = button.getAttribute('data-bs-target').replace('#', '');
+        const targetContent = document.getElementById(targetId);
+        targetContent.classList.add('block');
+        targetContent.classList.remove('hidden');
+      });
+    });
+  });
+</script>
+{% endblock %}

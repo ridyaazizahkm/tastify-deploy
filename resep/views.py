@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
+
+from komentar.forms import KomentarForm
 from .models import Resep
 from .forms import ResepForm
 from authentication.models import UserProfile
@@ -10,6 +12,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie, csrf_protect
 from django.utils.html import escape
 from django.contrib.auth.decorators import login_required
 import html
+from bookmark.models import Bookmark
 
 def sanitize_post_data(post_data):
     """
@@ -191,5 +194,19 @@ def create_resep(request):
 
 def detail_resep(request, id):
     resep = get_object_or_404(Resep, pk=id)
-    context = {'resep': resep}
+    
+    is_bookmarked = False
+    if request.user.is_authenticated:
+        user_profile = UserProfile.objects.get(user=request.user)
+        is_bookmarked = Bookmark.objects.filter(user=user_profile, resep=resep).exists()
+
+    komentar_form = KomentarForm()
+    context = {
+        'resep': resep, 
+        "average_rating": resep.average_rating(), 
+        "total_ratings": resep.total_ratings(), 
+        'form': komentar_form, 
+        'is_bookmarked': is_bookmarked,
+    }
+
     return render(request, 'resep/detail_resep.html', context)
