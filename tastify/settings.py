@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'authentication',
     'resep',
     'bookmark',
+    'rating',
+    'komentar',
 ]
 
 MIDDLEWARE = [
@@ -51,6 +53,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'tastify.middleware.ContentSecurityPolicyMiddleware',
 ]
 
 ROOT_URLCONF = 'tastify.urls'

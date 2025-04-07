@@ -1,6 +1,7 @@
 from django.db import models
 from authentication.models import UserProfile
 from django.dispatch import receiver
+from django.db.models import Avg
 
 class Kategori(models.Model):
     nama = models.CharField(max_length=100)
@@ -45,3 +46,10 @@ class Resep(models.Model):
 
     def __str__(self):
         return self.judul
+    
+    def average_rating(self):
+        avg_nilai = self.ratings.aggregate(Avg('score'))
+        return avg_nilai.get('score__avg', 0) or 0.0
+
+    def total_ratings(self):
+        return self.ratings.count()

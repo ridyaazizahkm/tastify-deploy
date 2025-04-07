@@ -1,14 +1,16 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
+
+from komentar.forms import KomentarForm
 from .models import Resep
 from .forms import ResepForm
 from authentication.models import UserProfile
 from django.core.paginator import Paginator
 from django.db.models import Count
 from django.template.loader import render_to_string
-from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.csrf import ensure_csrf_cookie, csrf_protect
 from django.utils.html import escape
-import bleach
+from django.contrib.auth.decorators import login_required
 import html
 from bookmark.models import Bookmark
 
@@ -168,6 +170,8 @@ def list_resep(request):
 
     return render(request, 'resep/list_of_resep.html', context)
 
+@login_required(login_url='/auth/login/')
+@csrf_protect
 def create_resep(request):
     if request.method == 'POST':
         form = ResepForm(request.POST)
@@ -177,11 +181,16 @@ def create_resep(request):
             resep.user = user_profile
             resep.save()
             return redirect('resep:list_resep')
+        else:
+            print(f"Form errors: {form.errors}")
     else:
         form = ResepForm()
 
     context = {'form': form}
-    return render(request, 'resep/create_resep.html', context)
+    response = render(request, 'resep/create_resep.html', context)
+
+    response.set_cookie('csrftoken', request.META.get('CSRF_COOKIE', ''), samesite='Lax')
+    return response
 
 def detail_resep(request, id):
     resep = get_object_or_404(Resep, pk=id)
@@ -191,6 +200,13 @@ def detail_resep(request, id):
         user_profile = UserProfile.objects.get(user=request.user)
         is_bookmarked = Bookmark.objects.filter(user=user_profile, resep=resep).exists()
 
-    context = {'resep': resep,
-               'is_bookmarked': is_bookmarked}
+    komentar_form = KomentarForm()
+    context = {
+        'resep': resep, 
+        "average_rating": resep.average_rating(), 
+        "total_ratings": resep.total_ratings(), 
+        'form': komentar_form, 
+        'is_bookmarked': is_bookmarked,
+    }
+
     return render(request, 'resep/detail_resep.html', context)
