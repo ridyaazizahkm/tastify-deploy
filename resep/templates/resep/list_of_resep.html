@@ -116,6 +116,27 @@
     </div>
 </div>
 
+<!-- pop up message rate limiting -->
+<div id="error-popup" class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 hidden">
+    <div class="bg-white rounded-lg shadow-lg p-8 max-w-md w-full mx-4 text-center">
+      <div class="flex justify-center mb-4">
+        <div class="rounded-full w-16 h-16 flex items-center justify-center border-4 border-red-500">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+      </div>
+      <h2 class="text-xl font-bold text-red-500 mb-2">ERROR!</h2>
+      <p class="text-gray-700 font-medium mb-2">Oh no, you've exceeded your rate limit!</p>
+      <p class="text-gray-500 mb-6">Please try again to complete the request.</p>
+     <button id="try-again-btn" class="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-6 rounded-md transition-colors w-full">
+        Try Again
+      </button>
+      <div class="countdown-text text-sm text-gray-500 mb-4 mt-4 hidden">
+        <span><span id="countdown-timer">60</span> seconds before trying again.</span>
+    </div>
+</div>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('recipe-filter-form');
@@ -357,5 +378,113 @@
         attachPaginationListeners();
         attachItemsPerPageListener();
     });
+
+    // BOOKMARK
+    function handleBookmarkResponse(response) {
+        if (response.error && response.show_popup) {
+            // Extract data from the rate limit response
+            const message = response.message;
+            const hasCountdown = true; // Since the rate limit has a countdown
+            const seconds = response.retry_after;
+            const resepId = response.resep_id;
+            
+            // Show the error popup with countdown
+            showErrorPopup(message, hasCountdown, seconds, resepId);
+        }
+    }
+
+    function showErrorPopup(message, hasCountdown = false, seconds = 60, resepId = null) {
+        const popup = document.getElementById('error-popup');
+        const popupContentDiv = popup.querySelector('.bg-white');
+        const messageElem = popup.querySelector('p.text-gray-700.font-medium.mb-2');
+        const countdownContainer = popup.querySelector('.countdown-text');
+        const countdownElem = document.getElementById('countdown-timer');
+        const tryAgainBtn = document.getElementById('try-again-btn');
+
+        if (popupContentDiv) {
+            popupContentDiv.style.position = 'relative';
+            
+            const existingCloseBtn = popupContentDiv.querySelector('.close-button');
+            if (existingCloseBtn) {
+                existingCloseBtn.remove();
+            }
+            
+            const closeButton = document.createElement('button');
+            closeButton.className = 'close-button absolute top-3 right-3 bg-gray-200 hover:bg-gray-300 rounded-full p-1';
+            closeButton.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            `;
+            closeButton.onclick = function() {
+                popup.classList.add('hidden');
+            };
+            
+            popupContentDiv.appendChild(closeButton);
+        }
+
+        if (message && messageElem) {
+            messageElem.textContent = message;
+        }
+        
+        if (hasCountdown && seconds > 0) {
+            countdownContainer.classList.remove('hidden');
+            countdownElem.textContent = seconds;
+            
+            tryAgainBtn.disabled = true;
+            tryAgainBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            
+            let remainingTime = seconds;
+            const countdownInterval = setInterval(() => {
+                remainingTime--;
+                countdownElem.textContent = remainingTime;
+                
+                if (remainingTime <= 0) {
+                    clearInterval(countdownInterval);
+                    tryAgainBtn.disabled = false;
+                    tryAgainBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    countdownContainer.classList.add('hidden');
+                }
+            }, 1000);
+        } else {
+            countdownContainer.classList.add('hidden');
+            tryAgainBtn.disabled = false;
+            tryAgainBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+       
+        popup.classList.remove('hidden');
+        
+        tryAgainBtn.onclick = function() {
+            popup.classList.add('hidden');
+            
+            if (resepId && !tryAgainBtn.disabled) {
+                resetRateLimit(resepId);
+            }
+        };
+    }
+
+    function resetRateLimit(resepId) {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        
+        fetch('/bookmark/reset-rate-limit/', {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Optional: show success message
+                if (typeof showNotification === 'function') {
+                    showNotification('Rate limit has been reset. You can bookmark again now.', false);
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error resetting rate limit:', error);
+        });
+    }
 </script>
 {% endblock %}

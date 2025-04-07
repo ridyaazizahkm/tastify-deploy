@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'main',
     'authentication',
     'resep',
+    'bookmark',
     'rating',
     'komentar',
 ]
