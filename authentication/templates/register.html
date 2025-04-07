@@ -35,51 +35,43 @@
                 {% csrf_token %}
                 
                 <div>
-                    <label for="username" class="block text-xs sm:text-sm font-medium text-gray-700 uppercase mb-1 sm:mb-2">Username</label>
-                    <input 
-                        type="text" 
-                        id="username" 
-                        name="username" 
-                        required 
-                        placeholder="Enter your username" 
-                        class="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#62191c] transition duration-300"
-                    >
+                    <label for="{{ form.username.id_for_label }}" class="block text-xs sm:text-sm font-medium text-gray-700 uppercase mb-1 sm:mb-2">Username</label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        <div class="text-red-500 text-xs mt-1">
+                            {{ form.username.errors }}
+                        </div>
+                    {% endif %}
                 </div>
 
                 <div>
-                    <label for="email" class="block text-xs sm:text-sm font-medium text-gray-700 uppercase mb-1 sm:mb-2">Email</label>
-                    <input 
-                        type="email" 
-                        id="email" 
-                        name="email" 
-                        required 
-                        placeholder="Enter your email" 
-                        class="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#62191c] transition duration-300"
-                    >
+                    <label for="{{ form.email.id_for_label }}" class="block text-xs sm:text-sm font-medium text-gray-700 uppercase mb-1 sm:mb-2">Email</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <div class="text-red-500 text-xs mt-1">
+                            {{ form.email.errors }}
+                        </div>
+                    {% endif %}
                 </div>
 
                 <div>
-                    <label for="password1" class="block text-xs sm:text-sm font-medium text-gray-700 uppercase mb-1 sm:mb-2">Password</label>
-                    <input 
-                        type="password" 
-                        id="password1" 
-                        name="password1" 
-                        required 
-                        placeholder="Enter your password" 
-                        class="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#62191c] transition duration-300"
-                    >
+                    <label for="{{ form.password1.id_for_label }}" class="block text-xs sm:text-sm font-medium text-gray-700 uppercase mb-1 sm:mb-2">Password</label>
+                    {{ form.password1 }}
+                    {% if form.password1.errors %}
+                        <div class="text-red-500 text-xs mt-1">
+                            {{ form.password1.errors }}
+                        </div>
+                    {% endif %}
                 </div>
 
                 <div>
-                    <label for="password2" class="block text-xs sm:text-sm font-medium text-gray-700 uppercase mb-1 sm:mb-2">Confirm Password</label>
-                    <input 
-                        type="password" 
-                        id="password2" 
-                        name="password2" 
-                        required 
-                        placeholder="Confirm your password" 
-                        class="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#62191c] transition duration-300"
-                    >
+                    <label for="{{ form.password2.id_for_label }}" class="block text-xs sm:text-sm font-medium text-gray-700 uppercase mb-1 sm:mb-2">Confirm Password</label>
+                    {{ form.password2 }}
+                    {% if form.password2.errors %}
+                        <div class="text-red-500 text-xs mt-1">
+                            {{ form.password2.errors }}
+                        </div>
+                    {% endif %}
                 </div>
                 
                 <div>

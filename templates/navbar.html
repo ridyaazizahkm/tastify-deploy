@@ -271,7 +271,9 @@
                 id="user-dropdown">
                 <div class="px-4 py-3">
                     {% if user.is_authenticated %}
-                    <span class="block text-sm text-gray-900">{{ user.username }}</span>
+                    <a href="{% url 'user_profile:profile' %}" class="block text-sm text-gray-900 hover:underline">
+                        {{ user.username }}
+                    </a>
                     {% else %}
                     <span class="block text-sm text-gray-900">Guest</span>
                     {% endif %}
@@ -291,7 +293,6 @@
                 </ul>
             </div>
         </div>
-    </div>
 </nav>
 
 <script>
