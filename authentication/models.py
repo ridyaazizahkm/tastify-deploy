@@ -28,7 +28,7 @@ class UserProfile(models.Model):
     
 class Encryption:
     def __init__(self):
-        self.key = settings.ENCRYPTION_KEY.encode()
+        self.key = settings.ENCRYPTION_KEY
         self.cipher = Fernet(self.key)
     
     def encrypt(self, text):
