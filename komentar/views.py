@@ -5,7 +5,7 @@ from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
 from django.utils.html import escape
 from django.core.cache import cache
-from .models import Komentar
+from .models import Komentar, Report
 from .forms import KomentarForm
 from resep.models import Resep
 import json
@@ -33,6 +33,11 @@ OFFENSIVE_WORDS = [
 @login_required
 def add_komentar(request, resep_id):
     resep = get_object_or_404(Resep, id=resep_id)
+    
+    # Admin can't comment
+    if request.user.is_staff or request.user.is_superuser:
+        messages.error(request, 'Admin accounts cannot add comments.')
+        return redirect('resep:detail_resep', id=resep_id)
     
     if request.method == 'POST':
         if check_rate_limit(request.user.id, 'comment', 
@@ -76,11 +81,53 @@ def add_komentar(request, resep_id):
 def delete_komentar(request, komentar_id):
     komentar = get_object_or_404(Komentar, id=komentar_id)
     
-    if request.user == komentar.user or request.user.is_staff:
+    # Only allow regular users to delete their own comments
+    # Admin can't delete comments from detail page
+    if request.user.is_staff or request.user.is_superuser:
+        messages.error(request, 'Admin can only delete comments from the admin dashboard.')
+        return redirect('resep:detail_resep', id=komentar.resep.id)
+    
+    if request.user == komentar.user:
         resep_id = komentar.resep.id
         komentar.delete()
         messages.success(request, 'Komentar berhasil dihapus!')
         return redirect('resep:detail_resep', id=resep_id)
+    else:
+        messages.error(request, 'You can only delete your own comments.')
+        return redirect('resep:detail_resep', id=komentar.resep.id)
+
+@login_required
+def report_comment(request, comment_id):
+    comment = get_object_or_404(Komentar, id=comment_id)
+    
+    # Admin can't report comments
+    if request.user.is_staff or request.user.is_superuser:
+        messages.error(request, 'Admin accounts cannot report comments.')
+        return redirect('resep:detail_resep', id=comment.resep.id)
+    
+    if Report.objects.filter(reporter=request.user, comment=comment).exists():
+        messages.warning(request, 'You have already reported this comment.')
+        return redirect('resep:detail_resep', id=comment.resep.id)
+    
+    if request.method == 'POST':
+        reason = request.POST.get('reason')
+
+        valid_reasons = [reason_code for reason_code, _ in Report.REPORT_REASONS]
+        if reason not in valid_reasons:
+            messages.error(request, 'Invalid report reason.')
+            return redirect('resep:detail_resep', id=comment.resep.id)
+
+        Report.objects.create(
+            reporter=request.user,
+            comment=comment,
+            reason=reason,
+            status='pending'
+        )
+        
+        messages.success(request, 'Comment reported successfully. Our admin will review it.')
+        return redirect('resep:detail_resep', id=comment.resep.id)
+    
+    return redirect('resep:detail_resep', id=comment.resep.id)
 
 def check_rate_limit(user_id, action_type, max_attempts, period):
     cache_key = f"rate_limit_{action_type}_{user_id}"

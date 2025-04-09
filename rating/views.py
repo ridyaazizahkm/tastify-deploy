@@ -12,6 +12,12 @@ from resep.models import Resep
 def add_rating(request, resep_id):
     resep = get_object_or_404(Resep, id=resep_id)
     
+    # Admin can't add ratings
+    if request.user.is_staff or request.user.is_superuser:
+        return JsonResponse({
+            'error': 'Admin accounts cannot add ratings.'
+        })
+    
     if request.method == 'POST':
         # Cek rate limiting
         if check_rate_limit(request.user.id, 'rating', 
