@@ -23,9 +23,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', include('authentication.urls')),
     path('', include('main.urls')),
-    path('profile/', include('user_profile.urls')),
+    path('recipe/', include('resep.urls')),
+    path('bookmark/', include('bookmark.urls')),
+    path('ratings/', include('rating.urls')),
+    path('komentar/', include('komentar.urls')),
+    path('user/', include(('user_profile.urls', 'user_profile'), namespace='user_profile')),
 ]
-
-# Add this to serve media files during development
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

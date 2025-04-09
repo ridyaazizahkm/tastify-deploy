@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mx-auto px-4 py-8 mt-4">
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-3xl font-bold mb-4 sm:mb-0">My Bookmarks</h1>
+        <div class="flex items-center space-x-4">
+            <form id="sort-form" method="get" action="">
+                <div class="relative inline-block">
+                    <!-- Icon -->
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" class="w-6 h-6 text-gray-600">
+                            <line x1="12" y1="8" x2="12" y2="56" stroke-linecap="round"/>
+                            <polyline points="6,50 12,56 18,50" stroke-linecap="round" stroke-linejoin="round"/>
+                            <line x1="20" y1="12" x2="56" y2="12" />
+                            <line x1="20" y1="20" x2="48" y2="20" />
+                            <line x1="20" y1="28" x2="40" y2="28" />
+                            <line x1="20" y1="36" x2="32" y2="36" />
+                            <line x1="20" y1="44" x2="24" y2="44" />
+                        </svg>
+                    </div>
+
+                    <!-- Select -->
+                    <select id="bookmark-sort" name="sort" onchange="this.form.submit()" 
+                      class="pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-[#62191c] focus:border-[#62191c] appearance-none">
+                      <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>
+                        Recently Added
+                      </option>
+                      <option value="oldest" {% if current_sort == 'oldest' %}selected{% endif %}>
+                        Latest Added
+                      </option>
+                    </select>
+                </div>
+                  
+                {% if request.GET.items_per_page %}
+                <input type="hidden" name="items_per_page" value="{{ request.GET.items_per_page }}">
+                {% endif %}
+            </form>           
+            <a href="{% url 'resep:list_resep' %}" class="px-4 py-2 bg-[#62191c] hover:bg-[#50151a] text-white rounded-md transition-colors duration-200 text-sm flex items-center">
+                Explore Recipes
+            </a>
+        </div>
+    </div>
+    <p class="text-gray-600 text-sm">
+        All ({{ bookmark_items.paginator.count }} recipes)
+    </p>
+    <div class="mb-3"></div>
+
+    {% if bookmark_items %}
+    <div class="space-y-4">
+        {% for bookmark in bookmark_items %}
+            {% include "recipe_card_bookmark.html" with resep=bookmark.resep bookmark=bookmark is_bookmarked=True %}
+        {% endfor %}
+    </div>
+
+    {% include "pagination_bookmark.html" with bookmark_items=bookmark_items items_per_page=items_per_page %}
+    {% else %}
+    <div class="w-full p-3">
+        <div class="bg-gray-50 border border-gray-200 p-6 rounded-lg shadow-sm text-center">
+            <div class="flex flex-col items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2m-4-1v8m0 0l3-3m-3 3L9 8m-5 5h2.586a1 1 0 01.707.293l2.414 2.414a1 1 0 00.707.293h3.172a1 1 0 00.707-.293l2.414-2.414a1 1 0 01.707-.293H20" />
+                </svg>
+                <h3 class="font-semibold text-xl text-gray-800 mb-2">No Bookmarks Yet</h3>
+                <p class="text-gray-600 mb-6">Discover and save your favorite recipes!</p>
+                <a href="{% url 'resep:list_resep' %}" class="px-5 py-2.5 bg-[#62191c] hover:bg-[#50151a] text-white rounded-md transition-colors duration-200 font-medium">
+                    Browse Recipes
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if bookmark_items %}
+    <div class="mt-8 text-gray-600 text-sm">
+        <p>
+            <span class="font-medium">{{ bookmark_items.paginator.count }}</span> 
+            bookmarked recipe{% if bookmark_items.paginator.count != 1 %}s{% endif %} 
+            saved across 
+            <span class="font-medium">{{ bookmark_items.paginator.num_pages }}</span> 
+            page{% if bookmark_items.paginator.num_pages != 1 %}s{% endif %}
+        </p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function debounce(func, wait) {
+        let timeout;
+        return function() {
+            const context = this;
+            const args = arguments;
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                func.apply(context, args);
+            }, wait);
+        };
+    }
+
+    // Catat permintaan bookmark terakhir
+    let lastBookmarkRequest = 0;
+    const MIN_REQUEST_INTERVAL = 500; // 500ms minimum interval
+
+    // Ganti event listener untuk tombol bookmark
+    document.addEventListener('DOMContentLoaded', function() {
+        // Existing code for items_per_page
+        const itemsPerPageSelect = document.getElementById('items_per_page');
+        if (itemsPerPageSelect) {
+            itemsPerPageSelect.addEventListener('change', function() {
+                const currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set('items_per_page', this.value);
+                currentUrl.searchParams.set('page', 1);
+                window.location.href = currentUrl.toString();
+            });
+        }
+
+        // Tambahkan event listener untuk tombol bookmark
+        const bookmarkButtons = document.querySelectorAll('.bookmark-button');
+        bookmarkButtons.forEach(button => {
+            // Hapus event listener yang mungkin sudah ada
+            const newButton = button.cloneNode(true);
+            button.parentNode.replaceChild(newButton, button);
+            
+            // Tambahkan event listener dengan debounce
+            newButton.addEventListener('click', debouncedBookmarkToggle);
+        });
+    });
+
+    // Fungsi toggle bookmark dengan debounce
+    const debouncedBookmarkToggle = debounce(function(event) {
+        const now = Date.now();
+        if (now - lastBookmarkRequest < MIN_REQUEST_INTERVAL) {
+            console.log('Rate limited, please wait');
+            return;
+        }
+        
+        lastBookmarkRequest = now;
+        const button = event.currentTarget;
+        const resepId = button.dataset.resepId;
+        
+        // Tampilkan indikator loading sederhana
+        const icon = button.querySelector('svg');
+        const originalColor = icon.style.color;
+        icon.style.color = '#cccccc';
+        
+        // Kirim permintaan dengan fetch
+        fetch(`/bookmark/toggle/${resepId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json'
+            },
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (response.status === 429) {
+                // Rate limited
+                alert('Terlalu banyak permintaan bookmark. Coba lagi nanti.');
+                return null;
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data) {
+                // Update UI
+                const fillIcon = button.querySelector('.fill-icon');
+                const outlineIcon = button.querySelector('.outline-icon');
+                const countElement = button.parentNode.querySelector('.bookmark-count');
+                
+                if (data.is_bookmarked) {
+                    fillIcon.classList.remove('hidden');
+                    outlineIcon.classList.add('hidden');
+                } else {
+                    fillIcon.classList.add('hidden');
+                    outlineIcon.classList.remove('hidden');
+                }
+                
+                if (countElement) {
+                    countElement.textContent = data.bookmarks_count;
+                }
+            }
+            // Kembalikan warna icon
+            icon.style.color = originalColor;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // Kembalikan warna icon
+            icon.style.color = originalColor;
+        });
+    }, 300); // Debounce 300ms
+
+    // Fungsi untuk mendapatkan CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}

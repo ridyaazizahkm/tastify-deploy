@@ -1,38 +1,237 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
+{% load static %}
 
 {% block meta %}
-<title>Home</title>
+<title>Homepage</title>
 {% endblock meta %}
 
 {% block content %}
 
-<style>
-    .hover\:zoom-image {
-        transition: transform 0.3s ease;
-    }
-
-    .hover\:zoom-image:hover {
-        transform: scale(1.05);
-    }
-</style>
-
-<section class="bg-white">
+<!-- Recipe Explorer Section -->
+<section class="py-12 bg-[#f5f5f5]">
+    <div class="container mx-auto px-4">
+        <h2 class="text-4xl font-bold text-center mb-2 text-gray-800">Explore Recipe</h2>
+        <p class="text-center text-gray-600 mb-10">Find recipes according to your taste and needs</p>
+       <!-- Category Explorer -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            <!-- Categories -->
+            <a href="{% url 'resep:list_resep' %}?category=Beverage" class="block group">
+                <div class="relative h-60 rounded-lg overflow-hidden shadow-md">
+                    <img src="https://i.pinimg.com/736x/8e/0e/ff/8e0effa24aacbc1eba4646b84a1529f1.jpg" alt="Beverage" class="w-full h-full object-cover transition duration-300 brightness-75 group-hover:brightness-50 group-hover:scale-105">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="bg-white/90 text-gray-800 font-medium px-6 py-2 rounded-full text-lg">Beverage</span>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="{% url 'resep:list_resep' %}?category=Dessert" class="block group">
+                <div class="relative h-60 rounded-lg overflow-hidden shadow-md">
+                    <img src="https://images.unsplash.com/photo-1551024601-bec78aea704b" alt="Dessert" class="w-full h-full object-cover transition duration-300 brightness-75 group-hover:brightness-50 group-hover:scale-105">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="bg-white/90 text-gray-800 font-medium px-6 py-2 rounded-full text-lg">Dessert</span>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="{% url 'resep:list_resep' %}?category=Fast Food" class="block group">
+                <div class="relative h-60 rounded-lg overflow-hidden shadow-md">
+                    <img src="https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5" alt="Fast Food" class="w-full h-full object-cover transition duration-300 brightness-75 group-hover:brightness-50 group-hover:scale-105">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="bg-white/90 text-gray-800 font-medium px-6 py-2 rounded-full text-lg">Fast Food</span>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="{% url 'resep:list_resep' %}?category=Healthy Food" class="block group">
+                <div class="relative h-60 rounded-lg overflow-hidden shadow-md">
+                    <img src="https://i.pinimg.com/736x/72/d9/af/72d9af964d384fc2a16fd087c1062a7c.jpg" alt="Healthy Food" class="w-full h-full object-cover transition duration-300 brightness-75 group-hover:brightness-50 group-hover:scale-105">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="bg-white/90 text-gray-800 font-medium px-6 py-2 rounded-full text-lg">Healthy Food</span>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="{% url 'resep:list_resep' %}?category=Traditional Food" class="block group">
+                <div class="relative h-60 rounded-lg overflow-hidden shadow-md">
+                    <img src="https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd" alt="Traditional Food" class="w-full h-full object-cover transition duration-300 brightness-75 group-hover:brightness-50 group-hover:scale-105">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="bg-white/90 text-gray-800 font-medium px-6 py-2 rounded-full text-lg">Traditional Food</span>
+                    </div>
+                </div>
+            </a>
+        </div>
         
+        <!-- Second Row -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mt-6">
+            <!-- Main Ingredients -->
+            <a href="{% url 'resep:list_resep' %}?main_ingredient=Buah%20%26%20Sayur" class="block group">
+                <div class="relative h-60 rounded-lg overflow-hidden shadow-md">
+                    <img src="https://images.unsplash.com/photo-1610832958506-aa56368176cf" alt="Buah&Sayur" class="w-full h-full object-cover transition duration-300 brightness-75 group-hover:brightness-50 group-hover:scale-105">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="bg-white/90 text-gray-800 font-medium px-6 py-2 rounded-full text-lg">Buah & Sayur</span>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="{% url 'resep:list_resep' %}?main_ingredient=Coklat" class="block group">
+                <div class="relative h-60 rounded-lg overflow-hidden shadow-md">
+                    <img src="https://images.unsplash.com/photo-1606312619070-d48b4c652a52" alt="Coklat" class="w-full h-full object-cover transition duration-300 brightness-75 group-hover:brightness-50 group-hover:scale-105">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="bg-white/90 text-gray-800 font-medium px-6 py-2 rounded-full text-lg">Coklat</span>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="{% url 'resep:list_resep' %}?main_ingredient=Daging" class="block group">
+                <div class="relative h-60 rounded-lg overflow-hidden shadow-md">
+                    <img src="https://images.unsplash.com/photo-1560781290-7dc94c0f8f4f" alt="Daging" class="w-full h-full object-cover transition duration-300 brightness-75 group-hover:brightness-50 group-hover:scale-105">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="bg-white/90 text-gray-800 font-medium px-6 py-2 rounded-full text-lg">Daging</span>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="{% url 'resep:list_resep' %}?main_ingredient=Roti" class="block group">
+                <div class="relative h-60 rounded-lg overflow-hidden shadow-md">
+                    <img src="https://images.unsplash.com/photo-1608198093002-ad4e005484ec" alt="Roti" class="w-full h-full object-cover transition duration-300 brightness-75 group-hover:brightness-50 group-hover:scale-105">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="bg-white/90 text-gray-800 font-medium px-6 py-2 rounded-full text-lg">Roti</span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{% url 'resep:list_resep' %}?main_ingredient=Seafood" class="block group">
+                <div class="relative h-60 rounded-lg overflow-hidden shadow-md">
+                    <img src="https://i.pinimg.com/736x/55/69/92/55699222d5461ae11a4524628a778a32.jpg" alt="Seafood" class="w-full h-full object-cover transition duration-300 brightness-75 group-hover:brightness-50 group-hover:scale-105">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="bg-white/90 text-gray-800 font-medium px-6 py-2 rounded-full text-lg">Seafood</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Third Row -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mt-6">
+            <!-- Cooking Method -->
+            <a href="{% url 'resep:list_resep' %}?cooking_method=Baked" class="block group">
+                <div class="relative h-60 rounded-lg overflow-hidden shadow-md">
+                    <img src="https://i.pinimg.com/736x/3b/b2/e6/3bb2e6f48e44a075179bbc04fca9de66.jpg" alt="Baked" class="w-full h-full object-cover transition duration-300 brightness-75 group-hover:brightness-50 group-hover:scale-105">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="bg-white/90 text-gray-800 font-medium px-6 py-2 rounded-full text-lg">Baked</span>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="{% url 'resep:list_resep' %}?cooking_method=Blender" class="block group">
+                <div class="relative h-60 rounded-lg overflow-hidden shadow-md">
+                    <img src="http://www.eatyourselfskinny.com/wp-content/uploads/2017/08/smoothie-bowl-4.jpg" alt="Blender" class="w-full h-full object-cover transition duration-300 brightness-75 group-hover:brightness-50 group-hover:scale-105">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="bg-white/90 text-gray-800 font-medium px-6 py-2 rounded-full text-lg">Blender</span>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="{% url 'resep:list_resep' %}?cooking_method=Boiled" class="block group">
+                <div class="relative h-60 rounded-lg overflow-hidden shadow-md">
+                    <img src="https://i.pinimg.com/736x/a7/5f/14/a75f14b2364b7c56aa318c7437513050.jpg" alt="Boiled" class="w-full h-full object-cover transition duration-300 brightness-75 group-hover:brightness-50 group-hover:scale-105">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="bg-white/90 text-gray-800 font-medium px-6 py-2 rounded-full text-lg">Boiled</span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{% url 'resep:list_resep' %}?cooking_method=Fried" class="block group">
+                <div class="relative h-60 rounded-lg overflow-hidden shadow-md">
+                    <img src="https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58" alt="Fried" class="w-full h-full object-cover transition duration-300 brightness-75 group-hover:brightness-50 group-hover:scale-105">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="bg-white/90 text-gray-800 font-medium px-6 py-2 rounded-full text-lg">Fried</span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{% url 'resep:list_resep' %}?cooking_method=Steamed" class="block group">
+                <div class="relative h-60 rounded-lg overflow-hidden shadow-md">
+                    <img src="https://i.pinimg.com/736x/46/f9/94/46f994cf30a299cc6857431537f5ea0b.jpg" alt="Steamed" class="w-full h-full object-cover transition duration-300 brightness-75 group-hover:brightness-50 group-hover:scale-105">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="bg-white/90 text-gray-800 font-medium px-6 py-2 rounded-full text-lg">Steamed</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <!-- View All Button -->
+        <div class="text-center mt-10">
+            <a href="{% url 'resep:list_resep' %}" class="inline-block bg-[#62191c] hover:bg-[#873632] text-white py-3 px-8 rounded-lg font-medium transition duration-300">
+                View All Recipes
+            </a>
+        </div>
+    </div>
 </section>
 
-<section class="bg-[#716969]">
-    
+<!-- Top Rating Recipes -->
+<section class="py-12 bg-white">
+    <div class="container mx-auto px-4">
+        <h2 class="text-4xl font-bold text-center mb-10 text-gray-800">Top Rating Recipes</h2>
+        
+        <!-- Recipe Cards -->
+        <div class="flex flex-wrap -mx-3">
+            {% for resep in top_rated_recipes %}
+                {% include 'resep/components/recipe_card.html' %}
+            {% empty %}
+                <div class="col-span-full py-10 text-center">
+                    <p class="text-gray-600">Belum ada resep yang tersedia.</p>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <!-- View All Button -->
+        <div class="text-center mt-10">
+            <a href="{% url 'resep:list_resep' %}" class="inline-block bg-[#62191c] hover:bg-[#873632] text-white py-3 px-8 rounded-lg font-medium transition duration-300">
+                View All Recipes
+            </a>
+        </div>
+    </div>
 </section>
 
-<div class="text-center py-8">
-    
-</div>
-
-<div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 px-4 md:px-8">
-</div>
-
-<section class="bg-white">
-    
+<!-- Create Recipe CTA -->
+<section class="py-16 bg-gradient-to-r from-[#62191c] to-[#873632] text-white">
+    <div class="container mx-auto px-4 text-center">
+        <h2 class="text-3xl font-bold mb-4">Have a Recipe to Share?</h2>
+        <p class="text-lg mb-8 max-w-2xl mx-auto">Share your favorite recipes with our community so they can experience the deliciousness too!</p>
+        <a href="{% url 'resep:create_resep' %}" class="inline-block bg-white text-[#62191c] hover:bg-gray-100 py-3 px-8 rounded-lg font-medium transition duration-300">
+            Submit Your Recipe
+        </a>
+    </div>
 </section>
 
+<!-- Latest Recipes -->
+<section class="py-12 bg-white">
+    <div class="container mx-auto px-4">
+        <h2 class="text-4xl font-bold text-center mb-10 text-gray-800">Our Latest Recipes</h2>
+        
+        <!-- Recipe Cards -->
+        <div class="flex flex-wrap -mx-3">
+            {% for resep in latest_recipes %}
+                {% include 'resep/components/recipe_card.html' %}
+            {% empty %}
+                <div class="col-span-full py-10 text-center">
+                    <p class="text-gray-600">Belum ada resep yang tersedia.</p>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <!-- View All Button -->
+        <div class="text-center mt-10">
+            <a href="{% url 'resep:list_resep' %}" class="inline-block bg-[#62191c] hover:bg-[#873632] text-white py-3 px-8 rounded-lg font-medium transition duration-300">
+                View All Recipes
+            </a>
+        </div>
+    </div>
+</section>
 {% endblock content %}
+
+{% block js %}
+<script>
+
+</script>
+{% endblock js %}
