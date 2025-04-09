@@ -14,7 +14,7 @@ def profile(request):
     if request.user.is_staff:
         messages.error(request, "You do not have permission to edit your profile.")
         return redirect('cards_makanan:restaurant_list')
-    if request.method == 'POST':
+    if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
         user_form = UserUpdateForm(request.POST, instance=request.user)
         profile_form = ProfileUpdateForm(request.POST, instance=request.user.userprofile)
         if user_form.is_valid() and profile_form.is_valid():

@@ -9,9 +9,12 @@
             <div class="max-w-md mx-auto">
                 <div class="divide-y divide-gray-200">
                     <div class="py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
-                        <form method="POST" enctype="multipart/form-data">
+                        <!-- ALERT -->
+                        <div id="update-message" class="hidden text-center px-4 py-3 rounded-lg font-semibold transition-all duration-500"></div>
+
+                        <form id="update-profile-form" method="POST" enctype="multipart/form-data">
                             {% csrf_token %}
-                            
+
                             <div class="flex flex-col items-center">
                                 <!-- Profile Picture -->
                                 <div class="mb-4 relative">
@@ -33,7 +36,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <!-- Username -->
                                 <div class="mb-4 w-full">
                                     <label class="block text-gray-700 text-sm font-bold mb-2" for="username">
@@ -41,7 +44,7 @@
                                     </label>
                                     {{ user_form.username }}
                                 </div>
-                                
+
                                 <!-- Email -->
                                 <div class="mb-4 w-full">
                                     <label class="block text-gray-700 text-sm font-bold mb-2" for="email">
@@ -49,7 +52,7 @@
                                     </label>
                                     {{ user_form.email }}
                                 </div>
-                                
+
                                 <!-- Bio -->
                                 <div class="mb-4 w-full">
                                     <label class="block text-gray-700 text-sm font-bold mb-2" for="bio">
@@ -57,7 +60,7 @@
                                     </label>
                                     {{ profile_form.bio }}
                                 </div>
-                                
+
                                 <!-- Profile Picture Upload -->
                                 <div class="mb-4 w-full">
                                     <label class="block text-gray-700 text-sm font-bold mb-2" for="profile_picture">
@@ -65,7 +68,7 @@
                                     </label>
                                     {{ profile_form.profile_picture }}
                                 </div>
-                                
+
                                 <!-- Submit Button -->
                                 <div class="mb-4 w-full">
                                     <button 
@@ -83,4 +86,51 @@
         </div>
     </div>
 </div>
+
+<!-- SCRIPT AJAX -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('update-profile-form');
+    const message = document.getElementById('update-message');
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+
+        // Tampilkan pesan loading
+        showMessage('Updating...', 'bg-yellow-100 text-yellow-800 border-yellow-400');
+
+        fetch(window.location.href, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showMessage('Profile updated successfully!', 'bg-green-100 text-green-800 border-green-400');
+
+                // Auto-hide dalam 3 detik
+                setTimeout(() => {
+                    message.classList.add('hidden');
+                }, 3000);
+            } else {
+                showMessage('Update failed. Please try again.', 'bg-red-100 text-red-800 border-red-400');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showMessage('Something went wrong.', 'bg-red-100 text-red-800 border-red-400');
+        });
+    });
+
+    function showMessage(text, classNames) {
+        message.textContent = text;
+        message.className = `block text-center px-4 py-3 rounded-lg border font-semibold mb-4 ${classNames} transition-all duration-500`;
+    }
+});
+</script>
 {% endblock %}
