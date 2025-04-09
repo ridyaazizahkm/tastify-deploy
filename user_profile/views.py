@@ -7,6 +7,7 @@ from .forms import ProfileUpdateForm
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 from authentication.models import UserProfile 
+from resep.models import Resep
 
 @login_required
 @csrf_exempt
@@ -14,6 +15,10 @@ def profile(request):
     if request.user.is_staff:
         messages.error(request, "You do not have permission to edit your profile.")
         return redirect('cards_makanan:restaurant_list')
+
+    user_profile = request.user.userprofile
+    resep_list = Resep.objects.filter(user=user_profile)
+
     if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
         user_form = UserUpdateForm(request.POST, instance=request.user)
         profile_form = ProfileUpdateForm(request.POST, instance=request.user.userprofile)
@@ -35,5 +40,6 @@ def profile(request):
     context = {
         'user_form': user_form,
         'profile_form': profile_form,
+        'resep_list': resep_list,
     }
     return render(request, 'profile.html', context)

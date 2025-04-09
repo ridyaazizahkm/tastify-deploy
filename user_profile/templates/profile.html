@@ -9,6 +9,7 @@
             <div class="max-w-md mx-auto">
                 <div class="divide-y divide-gray-200">
                     <div class="py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
+
                         <!-- ALERT -->
                         <div id="update-message" class="hidden text-center px-4 py-3 rounded-lg font-semibold transition-all duration-500"></div>
 
@@ -87,6 +88,31 @@
     </div>
 </div>
 
+<!-- BAGIAN RESEP USER -->
+<div class="mt-16 sm:max-w-6xl sm:mx-auto px-6">
+    <h2 class="text-2xl font-bold text-[#62191c] mb-6 text-center">Your Recipe</h2>
+
+    {% if resep_list %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for resep in resep_list %}
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                    <img src="{{ resep.url_foto }}" alt="{{ resep.judul }}" class="w-full h-48 object-cover">
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold text-[#62191c] mb-1">{{ resep.judul }}</h3>
+                        <p class="text-sm text-gray-600">{{ resep.deskripsi|truncatewords:20 }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="flex flex-col items-center justify-center py-10 text-center text-gray-600">
+            <img src="https://cdn-icons-png.flaticon.com/512/2748/2748558.png" alt="Belum ada resep" class="w-40 h-40 opacity-70 mb-6">
+            <p class="text-lg font-medium italic">No recipe yet... 🍳</p>
+            <p class="text-sm mt-2">Let's create your own recipe!</p>
+        </div>
+    {% endif %}
+</div>
+
 <!-- SCRIPT AJAX -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -98,7 +124,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const formData = new FormData(form);
 
-        // Tampilkan pesan loading
+        // Show loading message
         showMessage('Updating...', 'bg-yellow-100 text-yellow-800 border-yellow-400');
 
         fetch(window.location.href, {
@@ -112,13 +138,11 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(data => {
             if (data.success) {
                 showMessage('Profile updated successfully!', 'bg-green-100 text-green-800 border-green-400');
-
-                // Auto-hide dalam 3 detik
                 setTimeout(() => {
                     message.classList.add('hidden');
                 }, 3000);
             } else {
-                showMessage('Update failed. Please try again.', 'bg-red-100 text-red-800 border-red-400');
+                showMessage('Update failed. Please check your input.', 'bg-red-100 text-red-800 border-red-400');
             }
         })
         .catch(error => {
