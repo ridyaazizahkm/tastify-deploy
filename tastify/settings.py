@@ -135,3 +135,10 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CSRF_TRUSTED_ORIGINS = ["http://localhost","http://127.0.0.1"]
+
+# settings.py
+from decouple import config
+from cryptography.fernet import Fernet
+
+ENCRYPTION_KEY = config('ENCRYPTION_KEY').encode()
+fernet = Fernet(ENCRYPTION_KEY)
