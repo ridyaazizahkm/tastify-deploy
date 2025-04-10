@@ -11,6 +11,7 @@ from django.template.loader import render_to_string
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_protect
 from django.utils.html import escape
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 import html
 from bookmark.models import Bookmark
 
@@ -128,15 +129,15 @@ def list_resep(request):
         resep_items = paginator.page(page_number)
     except:
         resep_items = paginator.page(1)
-    
+
     # bookmark status for each recipe
     if request.user.is_authenticated:
         user_profile = UserProfile.objects.get(user=request.user)
         bookmarked_reseps = set(Bookmark.objects.filter(
-            user=user_profile, 
+            user=user_profile,
             resep__in=resep_items.object_list
         ).values_list('resep_id', flat=True))
-        
+
         # Add is_bookmarked attribute to each recipe
         for resep in resep_items.object_list:
             resep.is_bookmarked = resep.id in bookmarked_reseps
@@ -233,6 +234,25 @@ def edit_resep(request, id):
 
     response.set_cookie('csrftoken', request.META.get('CSRF_COOKIE', ''), samesite='Lax')
     return response
+
+@login_required(login_url='/auth/login/')
+@csrf_protect
+def delete_resep(request, id):
+    resep = get_object_or_404(Resep, pk=id)
+    user_profile = UserProfile.objects.get(user=request.user)
+
+    # Check if the current user is the author of the recipe
+    if resep.user != user_profile:
+        return HttpResponse("You don't have permission to delete this recipe", status=403)
+
+    if request.method == 'POST':
+        resep.delete()
+        messages.success(request, "Recipe successfully deleted!")
+        return redirect('resep:list_resep')
+
+    # If it's a GET request, show the confirmation page
+    context = {'resep': resep}
+    return render(request, 'resep/delete_resep.html', context)
 
 def detail_resep(request, id):
     resep = get_object_or_404(Resep, pk=id)
