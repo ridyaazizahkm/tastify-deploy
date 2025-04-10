@@ -8,6 +8,7 @@ from django.core.cache import cache
 from .models import Komentar, Report
 from .forms import KomentarForm
 from resep.models import Resep
+from django.contrib.auth.models import User 
 import json
 import bleach
 import time
@@ -33,8 +34,7 @@ OFFENSIVE_WORDS = [
 @login_required
 def add_komentar(request, resep_id):
     resep = get_object_or_404(Resep, id=resep_id)
-    
-    # Admin can't comment
+
     if request.user.is_staff or request.user.is_superuser:
         messages.error(request, 'Admin accounts cannot add comments.')
         return redirect('resep:detail_resep', id=resep_id)
@@ -80,9 +80,7 @@ def add_komentar(request, resep_id):
 @login_required
 def delete_komentar(request, komentar_id):
     komentar = get_object_or_404(Komentar, id=komentar_id)
-    
-    # Only allow regular users to delete their own comments
-    # Admin can't delete comments from detail page
+
     if request.user.is_staff or request.user.is_superuser:
         messages.error(request, 'Admin can only delete comments from the admin dashboard.')
         return redirect('resep:detail_resep', id=komentar.resep.id)
@@ -99,8 +97,7 @@ def delete_komentar(request, komentar_id):
 @login_required
 def report_comment(request, comment_id):
     comment = get_object_or_404(Komentar, id=comment_id)
-    
-    # Admin can't report comments
+
     if request.user.is_staff or request.user.is_superuser:
         messages.error(request, 'Admin accounts cannot report comments.')
         return redirect('resep:detail_resep', id=comment.resep.id)
@@ -127,6 +124,82 @@ def report_comment(request, comment_id):
         messages.success(request, 'Comment reported successfully. Our admin will review it.')
         return redirect('resep:detail_resep', id=comment.resep.id)
     
+    return redirect('resep:detail_resep', id=comment.resep.id)
+
+@login_required
+def admin_moderate_comment(request, comment_id):
+    """Function for admin to directly moderate comments from the detail page"""
+    if not request.user.is_staff and not request.user.is_superuser:
+        messages.error(request, 'Only admin can use this feature.')
+        return redirect('resep:detail_resep', id=1)  
+    
+    comment = get_object_or_404(Komentar, id=comment_id)
+    
+    if request.method == 'POST':
+        reason = request.POST.get('reason')
+        action = request.POST.get('action')
+        
+        valid_reasons = [reason_code for reason_code, _ in Report.REPORT_REASONS]
+        if reason not in valid_reasons:
+            messages.error(request, 'Invalid report reason.')
+            return redirect('resep:detail_resep', id=comment.resep.id)
+        
+        tastify_user, created = User.objects.get_or_create(
+            username='Tastify',
+            defaults={
+                'is_active': False,
+                'email': 'system@tastify.example.com'
+            }
+        )
+
+        report = Report.objects.create(
+            reporter=tastify_user,
+            comment=comment,
+            reason=reason,
+            status='pending'  
+        )
+    
+        report.save_comment_info()
+        report.save()
+        
+        if action == 'delete_comment':
+            report.status = 'deleted'
+            report.save()
+            other_reports = Report.objects.filter(comment_id=comment.id, status='pending')
+            for other_report in other_reports:
+                other_report.save_comment_info()
+                other_report.status = 'deleted'
+                other_report.save()
+        
+            comment.delete()
+            messages.success(request, 'Comment has been deleted and reported.')
+            
+        elif action == 'ban_user':
+            user = comment.user
+            user_comments = Komentar.objects.filter(user=user)
+            comment_ids = list(user_comments.values_list('id', flat=True))
+            report.status = 'banned'
+            report.save()
+            
+            Report.objects.filter(comment_id__in=comment_ids, status='pending').update(status='banned')
+            for user_comment in user_comments:
+                if not Report.objects.filter(comment=user_comment, reporter=tastify_user).exists():
+                    new_report = Report.objects.create(
+                        reporter=tastify_user,
+                        comment=user_comment,
+                        reason=reason,
+                        status='banned'
+                    )
+                    new_report.save_comment_info()
+                    new_report.save()
+
+            user_comments.delete()
+            user.is_active = False
+            user.save()
+            
+            messages.success(request, f'User {user.username} has been banned and all their comments have been deleted.')
+        
+        return redirect('resep:detail_resep', id=comment.resep.id)
     return redirect('resep:detail_resep', id=comment.resep.id)
 
 def check_rate_limit(user_id, action_type, max_attempts, period):

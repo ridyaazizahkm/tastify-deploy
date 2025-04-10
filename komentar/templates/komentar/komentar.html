@@ -28,7 +28,7 @@
         {% elif not user.is_authenticated %}
         <div class="p-6 border-b border-gray-100 bg-gray-50">
             <p class="text-center text-gray-600">
-                Please <a href="{% url 'login' %}" class="text-[#62191c] hover:underline">login</a> to add a comment.
+                Please <a href="{% url 'authentication:login' %}" class="text-[#62191c] hover:underline">login</a> to add a comment.
             </p>
         </div>
         {% endif %}
@@ -48,27 +48,40 @@
                         </div>
                         <p class="text-gray-700 whitespace-pre-line">{{ komentar.isi_komentar }}</p>
                         
-                        <!-- Action buttons - Hidden for admins -->
+                        <!-- Regular user actions -->
                         {% if not user.is_staff and not user.is_superuser %}
-                        <div class="mt-3 flex justify-end space-x-3">
-                            {% if user.is_authenticated and user != komentar.user %}
-                            <button class="flex items-center text-sm text-gray-500 hover:text-gray-700 hover:underline report-comment-link" 
-                                    data-comment-id="{{ komentar.id }}">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
-                                </svg>
-                                Report
-                            </button>
-
-                            {% endif %}
-                            
-                            {% if user == komentar.user %}
-                            <a href="{% url 'komentar:delete_komentar' komentar.id %}" 
-                               class="text-sm text-red-600 hover:text-red-800 hover:underline delete-comment-link">
-                                Delete
-                            </a>
-                            {% endif %}
-                        </div>
+                            <div class="mt-3 flex justify-end space-x-3">
+                                {% if user.is_authenticated and user != komentar.user %}
+                                <button class="flex items-center text-sm text-gray-500 hover:text-gray-700 hover:underline report-comment-link" 
+                                        data-comment-id="{{ komentar.id }}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+                                    </svg>
+                                    Report
+                                </button>
+                                {% endif %}
+                                
+                                {% if user == komentar.user %}
+                                <a href="{% url 'komentar:delete_komentar' komentar.id %}" 
+                                   class="text-sm text-red-600 hover:text-red-800 hover:underline delete-comment-link">
+                                    Delete
+                                </a>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Admin actions -->
+                        {% if user.is_staff or user.is_superuser %}
+                            <div class="mt-3 flex justify-end space-x-3">
+                                <button class="flex items-center text-sm text-gray-500 hover:text-gray-700 hover:underline admin-report-link" 
+                                        data-comment-id="{{ komentar.id }}"
+                                        data-user-id="{{ komentar.user.id }}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+                                    </svg>
+                                    Moderate
+                                </button>
+                            </div>
                         {% endif %}
                     </div>
                 </div>
@@ -103,7 +116,7 @@
     </div>
 </div>
 
-<!-- Report Comment Dialog -->
+<!-- User Report Comment Dialog -->
 <div id="reportCommentDialog" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 hidden z-50">
     <div class="bg-white p-6 rounded-lg shadow-lg w-96 max-w-full">
         <div class="text-center mb-4">
@@ -151,6 +164,68 @@
     </div>
 </div>
 
+<!-- Admin Moderation Dialog -->
+<div id="adminModerationDialog" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 hidden z-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-96 max-w-full">
+        <div class="text-center mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-[#62191c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+            </svg>
+        </div>
+        <h3 class="text-lg font-semibold mb-2 text-center text-[#62191c]">Moderate Comment</h3>
+        <p class="text-gray-600 mb-4 text-center">Please select a reason and action:</p>
+        
+        <form id="adminModerationForm" method="post" action="">
+            {% csrf_token %}
+            <div class="space-y-3 mb-6">
+                <div class="flex items-center">
+                    <input id="admin_hate_speech" name="reason" type="radio" value="hate_speech" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-gray-300">
+                    <label for="admin_hate_speech" class="ml-2 block text-sm text-gray-700">Hate speech (racism, sexism, homophobia, etc.)</label>
+                </div>
+                <div class="flex items-center">
+                    <input id="admin_harassment" name="reason" type="radio" value="harassment" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-gray-300">
+                    <label for="admin_harassment" class="ml-2 block text-sm text-gray-700">Harassment or bullying</label>
+                </div>
+                <div class="flex items-center">
+                    <input id="admin_threats" name="reason" type="radio" value="threats" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-gray-300">
+                    <label for="admin_threats" class="ml-2 block text-sm text-gray-700">Threats of violence or physical harm</label>
+                </div>
+                <div class="flex items-center">
+                    <input id="admin_offensive" name="reason" type="radio" value="offensive" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-gray-300">
+                    <label for="admin_offensive" class="ml-2 block text-sm text-gray-700">Offensive or abusive language</label>
+                </div>
+                <div class="flex items-center">
+                    <input id="admin_spam" name="reason" type="radio" value="spam" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-gray-300">
+                    <label for="admin_spam" class="ml-2 block text-sm text-gray-700">Spam (repeated or irrelevant promotions)</label>
+                </div>
+                
+                <div class="border-t border-gray-200 pt-4 mt-4">
+                    <p class="text-sm font-medium text-gray-700 mb-2">Select action to take:</p>
+                    <div class="space-y-2">
+                        <div class="flex items-center">
+                            <input id="delete_comment" name="action" type="radio" value="delete_comment" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-gray-300" checked>
+                            <label for="delete_comment" class="ml-2 block text-sm text-gray-700">Delete Comment Only</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input id="ban_user" name="action" type="radio" value="ban_user" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-gray-300">
+                            <label for="ban_user" class="ml-2 block text-sm text-gray-700">Ban User & Delete All Comments</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex justify-center space-x-3">
+                <button type="button" id="cancelAdminModerationBtn" class="px-4 py-2 border border-gray-300 rounded text-gray-600 hover:bg-gray-100">
+                    Cancel
+                </button>
+                <button type="submit" class="px-4 py-2 bg-[#62191c] text-white rounded hover:bg-[#62191c]/90">
+                    Submit
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
     window.addEventListener('load', function() {
         // Delete comment functionality
@@ -176,7 +251,7 @@
             });
         }
         
-        // Report comment functionality
+        // User report
         const reportLinks = document.querySelectorAll('.report-comment-link');
         const reportCommentDialog = document.getElementById('reportCommentDialog');
         const reportForm = document.getElementById('reportForm');
@@ -196,6 +271,31 @@
         if (cancelReportBtn) {
             cancelReportBtn.addEventListener('click', function() {
                 reportCommentDialog.classList.add('hidden');
+            });
+        }
+        
+        // Admin moderation (report)
+        const adminReportLinks = document.querySelectorAll('.admin-report-link');
+        const adminModerationDialog = document.getElementById('adminModerationDialog');
+        const adminModerationForm = document.getElementById('adminModerationForm');
+        const cancelAdminModerationBtn = document.getElementById('cancelAdminModerationBtn');
+        
+        if (adminReportLinks.length > 0) {
+            adminReportLinks.forEach(function(link) {
+                link.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    const commentId = this.getAttribute('data-comment-id');
+                    const userId = this.getAttribute('data-user-id');
+                    adminModerationForm.action = "{% url 'komentar:admin_moderate_comment' 0 %}".replace('0', commentId);
+                    adminModerationForm.querySelector('input[name="action"][value="ban_user"]').dataset.userId = userId;
+                    adminModerationDialog.classList.remove('hidden');
+                });
+            });
+        }
+        
+        if (cancelAdminModerationBtn) {
+            cancelAdminModerationBtn.addEventListener('click', function() {
+                adminModerationDialog.classList.add('hidden');
             });
         }
     });

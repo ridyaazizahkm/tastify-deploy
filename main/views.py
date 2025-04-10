@@ -29,30 +29,41 @@ def admin_dashboard(request):
 
 @login_required
 @user_passes_test(is_admin)
-def approve_report(request, report_id):
+def delete_comment(request, report_id):
     report = get_object_or_404(Report, id=report_id)
     
     if request.method == 'POST':
-        report.status = 'approved'
+        if report.comment:
+            report.save_comment_info()  
+            
+        report.status = 'deleted'
         report.save()
         
-        comment = report.comment
-        comment.delete()
+        if report.comment:
+            comment_id = report.comment.id 
+
+            other_reports = Report.objects.filter(comment_id=comment_id, status='pending')
+            for other_report in other_reports:
+                other_report.save_comment_info()  
+                other_report.status = 'deleted'
+                other_report.save()
+
+            report.comment.delete()
         
-        messages.success(request, 'Report approved and comment removed.')
+        messages.success(request, 'Comment has been deleted.')
     
     return redirect('main:admin_dashboard')
 
 @login_required
 @user_passes_test(is_admin)
-def decline_report(request, report_id):
+def ignore_report(request, report_id):
     report = get_object_or_404(Report, id=report_id)
     
     if request.method == 'POST':
-        report.status = 'declined'
+        report.status = 'ignore'
         report.save()
         
-        messages.success(request, 'Report declined.')
+        messages.success(request, 'Report has been ignored.')
     
     return redirect('main:admin_dashboard')
 
@@ -62,13 +73,15 @@ def ban_user(request, user_id):
     user = get_object_or_404(User, id=user_id)
     
     if request.method == 'POST':
+        comment_ids = list(Komentar.objects.filter(user=user).values_list('id', flat=True))
+        
+        # Update semua report untuk komentar user yg diban menjadi status 'banned'
+        Report.objects.filter(comment_id__in=comment_ids, status='pending').update(status='banned')
+        
+        Komentar.objects.filter(user=user).delete()
+        
         user.is_active = False
         user.save()
-        
-        user_reports = Report.objects.filter(comment__user=user, status='pending')
-        for report in user_reports:
-            report.status = 'approved'
-            report.save()
 
         try:
             profile = UserProfile.objects.get(user=user)
@@ -76,6 +89,17 @@ def ban_user(request, user_id):
         except UserProfile.DoesNotExist:
             pass
         
-        messages.success(request, f'User {user.username} has been banned.')
+        messages.success(request, f'User {user.username} has been banned and all their comments have been removed.')
+    
+    return redirect('main:admin_dashboard')
+
+@login_required
+@user_passes_test(is_admin)
+def clear_report_history(request):
+    """Clear all processed (non-pending) reports from the system"""
+    if request.method == 'POST':
+        count = Report.objects.exclude(status='pending').count()
+        Report.objects.exclude(status='pending').delete()
+        messages.success(request, f'Successfully cleared {count} processed reports.')
     
     return redirect('main:admin_dashboard')
