@@ -86,7 +86,7 @@ def rate_limit_bookmark(max_requests=10, window_seconds=60):
         return _wrapped_view
     return decorator
 
-@login_required
+@login_required(login_url='/auth/login/')
 def bookmark_list(request):
     # Ensure user profile exists
     user_profile, _ = UserProfile.objects.get_or_create(
