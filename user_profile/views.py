@@ -6,7 +6,7 @@ from authentication.forms import UserUpdateForm
 from .forms import ProfileUpdateForm
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
-from authentication.models import UserProfile 
+from authentication.models import UserProfile
 from resep.models import Resep
 from django.shortcuts import render, get_object_or_404
 from resep.models import Resep
