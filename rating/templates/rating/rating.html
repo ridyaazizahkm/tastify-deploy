@@ -81,7 +81,7 @@
                         const totalRatingsDisplay = document.querySelector('.flex.items-center .text-sm.text-gray-500');
                         
                         if (ratingDisplay && totalRatingsDisplay) {
-                            ratingDisplay.textContent = data.average_rating.toFixed(1);
+                            ratingDisplay.textContent = data.average_rating.toFixed(2);
                             totalRatingsDisplay.textContent = `(${data.total_ratings})`;
                         }
                         
