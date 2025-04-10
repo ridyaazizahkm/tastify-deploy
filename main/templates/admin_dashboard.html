@@ -33,6 +33,7 @@
                       <th class="px-6 py-3">Email</th>
                       <th class="px-6 py-3">Bio</th>
                       <th class="px-6 py-3">Role</th>
+                      <th class="px-6 py-3">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -56,6 +57,18 @@
                       </td>
                       <td class="px-6 py-4">{{ profile.bio|default:"-" }}</td>
                       <td class="px-6 py-4">{% if profile.user.is_superuser %}Admin{% else %}User{% endif %}</td>
+                      <td class="px-6 py-4">
+                        {% if profile.user and not profile.user.is_superuser and profile.user.is_active %}
+                        <form method="post" action="{% url 'main:ban_user' profile.user.id %}">
+                          {% csrf_token %}
+                          <button type="submit" class="px-3 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700" onclick="return confirm('Are you sure you want to ban this user? This will delete all their comments.')">
+                            Ban User
+                          </button>
+                        </form>
+                        {% elif profile.user and not profile.user.is_active %}
+                        <span class="text-gray-500 text-xs">Banned</span>
+                        {% endif %}
+                      </td>
                     </tr>
                     {% endfor %}
                   </tbody>
@@ -81,45 +94,129 @@
                   <tbody>
                     {% for report in reported_comments %}
                     <tr class="bg-white border-b hover:bg-gray-50">
-                      <td class="px-6 py-4">{{ report.reporter.username }}</td>
-                      <td class="px-6 py-4">{{ report.comment.user.username }}</td>
+                      <td class="px-6 py-4">{{ report.reporter.username|default:"Anonymous" }}</td>
+                      <td class="px-6 py-4">
+                        {% if report.status == 'deleted' %}
+                          <span class="text-gray-500">
+                            {% if report.comment and report.comment.user %}
+                              {{ report.comment.user.username }}
+                            {% elif report.comment_info %}
+                              {{ report.comment_info.username }}
+                            {% endif %}
+                          </span>
+                        {% elif report.status == 'banned' %}
+                          <!-- Untuk status 'banned', tampilkan - -->
+                          <span class="text-gray-500">-</span>
+                        {% else %}
+                          <!-- Untuk status lain, tampilkan normal -->
+                          {% if report.comment and report.comment.user %}
+                            {{ report.comment.user.username }}
+                          {% elif report.comment_info %}
+                            {{ report.comment_info.username }}
+                          {% else %}
+                            -
+                          {% endif %}
+                        {% endif %}
+                      </td>
                       <td class="px-6 py-4">
                         <div class="max-w-xs overflow-hidden text-ellipsis">
-                          {{ report.comment.content }}
+                          {% if report.status == 'deleted' %}
+                            <span class="line-through text-gray-500">
+                              {% if report.comment %}
+                                {{ report.comment.isi_komentar }}
+                              {% elif report.comment_info %}
+                                {{ report.comment_info.content }}
+                              {% endif %}
+                            </span>
+                          {% elif report.status == 'banned' %}
+                            <!-- Untuk status 'banned', tampilkan - -->
+                            <span class="text-gray-500">-</span>
+                          {% else %}
+                            <!-- Untuk status lain, tampilkan normal -->
+                            {% if report.comment %}
+                              {{ report.comment.isi_komentar }}
+                            {% elif report.comment_info %}
+                              {{ report.comment_info.content }}
+                            {% else %}
+                              -
+                            {% endif %}
+                          {% endif %}
                         </div>
                       </td>
-                      <td class="px-6 py-4">{{ report.reason }}</td>
-                      <td class="px-6 py-4">{{ report.created_at|date:"M d, Y" }}</td>
+                      <td class="px-6 py-4">
+                        {% if report.reason == 'hate_speech' %}
+                          Hate speech
+                        {% elif report.reason == 'harassment' %}
+                          Harassment or bullying
+                        {% elif report.reason == 'threats' %}
+                          Threats of violence
+                        {% elif report.reason == 'offensive' %}
+                          Offensive language
+                        {% elif report.reason == 'spam' %}
+                          Spam
+                        {% else %}
+                          {{ report.reason|default:"-" }}
+                        {% endif %}
+                      </td>
+                      <td class="px-6 py-4">{{ report.created_at|date:"M d, Y"|default:"-" }}</td>
                       <td class="px-6 py-4">
                         <span class="px-2 py-1 rounded text-xs font-medium 
                           {% if report.status == 'pending' %}
                             bg-yellow-100 text-yellow-800
-                          {% elif report.status == 'approved' %}
+                          {% elif report.status == 'deleted' %}
                             bg-red-100 text-red-800
-                          {% else %}
+                          {% elif report.status == 'banned' %}
+                            bg-purple-100 text-purple-800
+                          {% elif report.status == 'ignore' %}
                             bg-green-100 text-green-800
                           {% endif %}">
-                          {{ report.status|title }}
+                          {% if report.status == 'pending' %}
+                            Pending
+                          {% elif report.status == 'deleted' %}
+                            Deleted
+                          {% elif report.status == 'banned' %}
+                            User Banned
+                          {% elif report.status == 'ignore' %}
+                            Ignored
+                          {% else %}
+                            {{ report.status|title }}
+                          {% endif %}
                         </span>
                       </td>
                       <td class="px-6 py-4">
                         {% if report.status == 'pending' %}
                         <div class="flex space-x-2">
-                          <form method="post" action="{% url 'admin:approve_report' report.id %}">
+                          <form method="post" action="{% url 'main:delete_comment' report.id %}">
                             {% csrf_token %}
-                            <button type="submit" class="px-3 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700">
-                              Approve
+                            <button type="submit" class="px-3 py-1 h-8 bg-red-600 text-white rounded text-xs hover:bg-red-700">
+                              Delete
                             </button>
                           </form>
-                          <form method="post" action="{% url 'admin:decline_report' report.id %}">
+                          {% if report.comment and report.comment.user %}
+                          <form method="post" action="{% url 'main:ban_user' report.comment.user.id %}">
                             {% csrf_token %}
-                            <button type="submit" class="px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700">
-                              Decline
+                            <button type="submit" class="px-3 py-1 h-8 bg-gray-600 text-white rounded text-xs hover:bg-gray-700">
+                              Ban
+                            </button>
+                          </form>
+                          {% endif %}
+                          <form method="post" action="{% url 'main:ignore_report' report.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="px-3 py-1 h-8 bg-green-600 text-white rounded text-xs hover:bg-green-700">
+                              Ignore
                             </button>
                           </form>
                         </div>
                         {% else %}
-                        <span class="text-gray-500 text-xs">Processed</span>
+                        <span class="text-gray-500 text-xs">
+                          {% if report.status == 'deleted' or report.status == 'banned' %}
+                            Processed
+                          {% elif report.status == 'ignore' %}
+                            Ignored
+                          {% else %}
+                            {{ report.status|title }}
+                          {% endif %}
+                        </span>
                         {% endif %}
                       </td>
                     </tr>
@@ -131,11 +228,21 @@
                   </tbody>
                 </table>
               </div>
+              
             </div>
           </div> 
           
-          <!-- Button -->
-          <div class="flex justify-end mt-6">
+          <!-- Buttons - Clear History & Back to Home in the same row -->
+          <div class="flex justify-between mt-6">
+            <!-- Clear History Button -->
+            <form method="POST" action="{% url 'main:clear_report_history' %}">
+              {% csrf_token %}
+              <button type="submit" class="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none" onclick="return confirm('Are you sure you want to clear all processed reports? This action cannot be undone.')">
+                Clear History
+              </button>
+            </form>
+            
+            <!-- Back to Home Button -->
             <a href="{% url 'main:show_main' %}" class="px-4 py-2 bg-[#62191c] text-white rounded hover:bg-[#634443]">Back to Home</a>
           </div>
         </div>
@@ -147,6 +254,7 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    // Tab switching
     const tabButtons = document.querySelectorAll('[data-bs-toggle="tab"]');
     const tabContents = document.querySelectorAll('[role="tabpanel"]');
     
