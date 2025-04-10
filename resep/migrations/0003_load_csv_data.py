@@ -29,7 +29,7 @@ def load_csv_data(apps, schema_editor):
 
     default_profile, profile_created = UserProfile.objects.get_or_create(
         user=default_user,
-        defaults={'email': 'tastify@example.com'}
+        defaults={'encrypted_email': 'tastify@example.com'}
     )
     if profile_created:
         print(f"Created UserProfile for default user: {default_username}")

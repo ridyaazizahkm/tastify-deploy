@@ -70,7 +70,6 @@ def rate_limit_bookmark(max_requests=10, window_seconds=60):
                 return JsonResponse({
                     'error': True,
                     'show_popup': True,
-                    'message': f'Anda telah mencapai batas maksimal {max_requests} bookmark dalam 1 menit.',
                     'is_bookmarked': is_bookmarked,
                     'bookmarks_count': Bookmark.objects.filter(resep=resep).count(),
                     'likes_count': resep.likes_count,
@@ -86,7 +85,7 @@ def rate_limit_bookmark(max_requests=10, window_seconds=60):
         return _wrapped_view
     return decorator
 
-@login_required
+@login_required(login_url='/auth/login/')
 def bookmark_list(request):
     # Ensure user profile exists
     user_profile, _ = UserProfile.objects.get_or_create(

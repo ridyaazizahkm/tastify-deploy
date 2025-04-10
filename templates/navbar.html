@@ -10,36 +10,27 @@
 
     body {
         padding-top: 64px;
-        /* Adjust this to your navbar height */
     }
 
     .nav-link {
         color: white;
-        /* Default text color */
     }
 
     .nav-link.active {
         color: #e0cfc2;
-        /* Color when on the active page */
     }
 
     .nav-link:hover {
         color: #e0cfc2;
-        /* Hover color */
     }
 
-    /* Additional styles for user greeting */
     .greeting {
         display: flex;
         align-items: center;
-        /* Center align items vertically */
-        color: black;
-        /* Adjust text color */
+        color: white;
         margin-right: 1rem;
-        /* Space between greeting and profile picture */
     }
 
-    /* Mobile menu styles */
     .mobile-menu {
         display: none;
         position: fixed;
@@ -55,7 +46,6 @@
         animation: slideDown 0.3s ease-in-out;
     }
 
-    /* Logo container for proper centering */
     .logo-container {
         display: flex;
         justify-content: center;
@@ -92,7 +82,6 @@
         padding: 0.5rem 0;
     }
 
-    /* Hamburger icon styles */
     .hamburger {
         display: none;
         cursor: pointer;
@@ -100,7 +89,6 @@
         z-index: 1010;
     }
 
-    /* User menu container to ensure it stays on the right */
     .user-menu-container {
         z-index: 1010;
     }
@@ -125,7 +113,6 @@
         transform: rotate(45deg) translate(-5px, -6px);
     }
 
-    /* Show hamburger on mobile */
     @media (max-width: 768px) {
         nav .max-w-screen-xl {
             justify-content: space-between;
@@ -231,6 +218,12 @@
 
         <!-- User Menu -->
         <div class="flex items-center md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse user-menu-container order-last">
+             <!-- Greeting -->
+            {% if user.is_authenticated %}
+            <div class="greeting font-medium text-white hidden md:flex">
+                Welcome, {{ user.username }}👋🏻
+            </div>
+            {% endif %}
             <button type="button" class="flex text-sm bg-gray-800 rounded-full md:me-0 focus:ring-4 focus:ring-gray-300"
                 id="user-menu-button" aria-expanded="false" data-dropdown-toggle="user-dropdown"
                 data-dropdown-placement="bottom">
@@ -244,13 +237,18 @@
                 id="user-dropdown">
                 <div class="px-4 py-3">
                     {% if user.is_authenticated %}
-                    <a href="{% url 'user_profile:profile' %}" class="block text-sm text-gray-900 hover:underline">
-                        {{ user.username }}
-                    </a>
+                        {% if not user.is_staff %}
+                            <a href="{% url 'user_profile:profile' %}" class="block text-sm text-gray-900 hover:underline">
+                                {{ user.username }}
+                            </a>
+                        {% else %}
+                            <span class="block text-sm text-gray-900">{{ user.username }}</span>
+                        {% endif %}
                     {% else %}
-                    <span class="block text-sm text-gray-900">Guest</span>
+                        <span class="block text-sm text-gray-900">Guest</span>
                     {% endif %}
                 </div>
+                
                 <ul class="py-2" aria-labelledby="user-menu-button">
                     {% if user.is_authenticated %}
                     <li>

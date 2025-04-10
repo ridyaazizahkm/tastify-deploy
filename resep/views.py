@@ -128,6 +128,22 @@ def list_resep(request):
         resep_items = paginator.page(page_number)
     except:
         resep_items = paginator.page(1)
+    
+    # bookmark status for each recipe
+    if request.user.is_authenticated:
+        user_profile = UserProfile.objects.get(user=request.user)
+        bookmarked_reseps = set(Bookmark.objects.filter(
+            user=user_profile, 
+            resep__in=resep_items.object_list
+        ).values_list('resep_id', flat=True))
+        
+        # Add is_bookmarked attribute to each recipe
+        for resep in resep_items.object_list:
+            resep.is_bookmarked = resep.id in bookmarked_reseps
+    else:
+        # If user is not logged in, no recipes are bookmarked
+        for resep in resep_items.object_list:
+            resep.is_bookmarked = False
 
     context = {
         'resep_items': resep_items,
@@ -192,9 +208,35 @@ def create_resep(request):
     response.set_cookie('csrftoken', request.META.get('CSRF_COOKIE', ''), samesite='Lax')
     return response
 
+@login_required(login_url='/auth/login/')
+@csrf_protect
+def edit_resep(request, id):
+    resep = get_object_or_404(Resep, pk=id)
+    user_profile = UserProfile.objects.get(user=request.user)
+
+    # Check if the current user is the author of the recipe
+    if resep.user != user_profile:
+        return HttpResponse("You don't have permission to edit this recipe", status=403)
+
+    if request.method == 'POST':
+        form = ResepForm(request.POST, instance=resep)
+        if form.is_valid():
+            form.save()
+            return redirect('resep:detail_resep', id=id)
+        else:
+            print(f"Form errors: {form.errors}")
+    else:
+        form = ResepForm(instance=resep)
+
+    context = {'form': form, 'editing': True, 'resep': resep}
+    response = render(request, 'resep/edit_resep.html', context)
+
+    response.set_cookie('csrftoken', request.META.get('CSRF_COOKIE', ''), samesite='Lax')
+    return response
+
 def detail_resep(request, id):
     resep = get_object_or_404(Resep, pk=id)
-    
+
     is_bookmarked = False
     if request.user.is_authenticated:
         user_profile = UserProfile.objects.get(user=request.user)
@@ -202,10 +244,10 @@ def detail_resep(request, id):
 
     komentar_form = KomentarForm()
     context = {
-        'resep': resep, 
-        "average_rating": resep.average_rating(), 
-        "total_ratings": resep.total_ratings(), 
-        'form': komentar_form, 
+        'resep': resep,
+        "average_rating": resep.average_rating(),
+        "total_ratings": resep.total_ratings(),
+        'form': komentar_form,
         'is_bookmarked': is_bookmarked,
     }
 
