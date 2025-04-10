@@ -137,6 +137,31 @@
         const bookmarkIcon = bookmarkButton ? bookmarkButton.querySelector('svg') : null;
         const recipeCard = bookmarkButton ? bookmarkButton.closest('a') : null;
 
+        const isBookmarked = bookmarkIcon && bookmarkIcon.getAttribute('fill') === 'currentColor';
+
+        if (isBookmarked) {
+            const confirmDialog = document.getElementById('unbookmarkConfirmationDialog');
+            const confirmButton = document.getElementById('confirmUnbookmarkBtn');
+            const cancelButton = document.getElementById('cancelUnbookmarkBtn');
+            
+            confirmButton.setAttribute('data-resep-id', resepId);
+            confirmDialog.classList.remove('hidden');
+            
+            cancelButton.onclick = function() {
+                confirmDialog.classList.add('hidden');
+            };
+            
+            confirmButton.onclick = function() {
+                confirmDialog.classList.add('hidden');
+                processBookmarkToggle(resepId, bookmarkIcon, recipeCard);
+            };
+        } else {
+            processBookmarkToggle(resepId, bookmarkIcon, recipeCard);
+        }
+    }
+
+    // Fungsi untuk memproses toggle bookmark setelah konfirmasi
+    function processBookmarkToggle(resepId, bookmarkIcon, recipeCard) {
         const likesCountElement = recipeCard ? recipeCard.querySelector('.likes-count') : null;
 
         fetch(`/bookmark/toggle/${resepId}/`, {
@@ -186,8 +211,12 @@
                         bookmarkCountElement.textContent = currentCount - 1;
                     }
 
-                    // Tampilkan pesan jika tidak ada bookmark tersisa
                     const bookmarkContainer = document.querySelector('.space-y-4');
+                        if (bookmarkContainer && bookmarkContainer.children.length <= 1) {
+                        // Jika ini adalah bookmark terakhir, reload halaman
+                        window.location.reload();
+                    }
+
                     const paginationContainer = document.querySelector('.pagination');
                     const noBookmarksContainer = document.querySelector('.no-bookmarks-container');
 
