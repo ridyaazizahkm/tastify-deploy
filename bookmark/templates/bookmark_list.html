@@ -1,5 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
+<style>
+    .recipe-card {
+        transition: all 0.3s ease;
+    }
+    
+    .recipe-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+</style>
+
 <div class="container mx-auto px-4 py-8 mt-4">
     <div class="flex justify-between items-center mb-4">
         <h1 class="text-3xl font-bold mb-4 sm:mb-0">My Bookmarks</h1>
@@ -19,7 +30,7 @@
                         </svg>
                     </div>
 
-                    <!-- Select -->
+                    <!-- Sorting -->
                     <select id="bookmark-sort" name="sort" onchange="this.form.submit()" 
                       class="pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-[#62191c] focus:border-[#62191c] appearance-none">
                       <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>
@@ -48,7 +59,9 @@
     {% if bookmark_items %}
     <div class="space-y-4">
         {% for bookmark in bookmark_items %}
-            {% include "recipe_card_bookmark.html" with resep=bookmark.resep bookmark=bookmark is_bookmarked=True %}
+            <div class="recipe-card">
+                {% include "recipe_card_bookmark.html" with resep=bookmark.resep bookmark=bookmark is_bookmarked=True %}
+            </div>
         {% endfor %}
     </div>
 
@@ -79,6 +92,26 @@
             <span class="font-medium">{{ bookmark_items.paginator.num_pages }}</span> 
             page{% if bookmark_items.paginator.num_pages != 1 %}s{% endif %}
         </p>
+    </div>
+    <!-- Unbookmark Confirmation Dialog -->
+    <div id="unbookmarkConfirmationDialog" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 hidden z-50">
+        <div class="bg-white p-6 rounded-lg shadow-lg w-80">
+            <div class="text-center mb-4">
+                <svg class="h-12 w-12 mx-auto text-[#62191c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+            </div>
+            <h3 class="text-lg font-semibold mb-2 text-center text-[#62191c]">Remove Bookmark</h3>
+            <p class="text-gray-600 mb-6 text-center">Are you sure you want to remove this recipe from your bookmarks?</p>
+            <div class="flex justify-center space-x-3">
+                <button id="cancelUnbookmarkBtn" class="px-4 py-2 border border-gray-300 rounded text-gray-600 hover:bg-gray-100">
+                    Cancel
+                </button>
+                <button id="confirmUnbookmarkBtn" data-resep-id="" class="px-4 py-2 bg-[#62191c] text-white rounded hover:bg-[#62191c]/90">
+                    Remove
+                </button>
+            </div>
+        </div>
     </div>
     {% endif %}
 </div>
