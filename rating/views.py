@@ -49,7 +49,7 @@ def add_rating(request, resep_id):
             return JsonResponse({
                 'success': True,
                 'message': message,
-                'average_rating': float(average_rating),
+                'average_rating': round(float(average_rating), 2),
                 'total_ratings': total_ratings
             })
             

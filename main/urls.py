@@ -10,4 +10,6 @@ urlpatterns = [
     path('admin-dashboard/reports/ignore/<int:report_id>/', views.ignore_report, name='ignore_report'),
     path('admin-dashboard/users/ban/<int:user_id>/', views.ban_user, name='ban_user'),
     path('admin-dashboard/reports/clear-history/', views.clear_report_history, name='clear_report_history'),
+    path('admin-dashboard/recipe-reports/delete/<int:report_id>/', views.delete_recipe, name='delete_recipe'),
+    path('admin-dashboard/recipe-reports/ignore/<int:report_id>/', views.ignore_recipe_report, name='ignore_recipe_report'),
 ]
