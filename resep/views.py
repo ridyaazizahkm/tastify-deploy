@@ -16,20 +16,13 @@ import html
 from bookmark.models import Bookmark
 
 def sanitize_post_data(post_data):
-    """
-    Sanitize POST data to prevent XSS attacks
-    """
     sanitized_data = post_data.copy()
-    text_fields = ['q']
-    filter_fields = ['category', 'cooking_method', 'main_ingredient']
 
-    for field in text_fields:
-        if field in sanitized_data:
-            sanitized_data[field] = escape(sanitized_data[field])
-
-    for field in filter_fields:
-        if field in sanitized_data and sanitized_data[field]:
-            sanitized_data[field] = html.unescape(sanitized_data[field])
+    for key, value in sanitized_data.items():
+        if isinstance(value, str) and key not in ['category', 'cooking_method', 'main_ingredient']:
+            sanitized_data[key] = html.escape(value).replace('&quot;', '"')
+        elif key in ['category', 'cooking_method', 'main_ingredient']:
+            sanitized_data[key] = html.unescape(value) if value else value
 
     return sanitized_data
 
