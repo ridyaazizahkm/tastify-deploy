@@ -128,17 +128,19 @@ def list_resep(request):
 
     # bookmark status for each recipe
     if request.user.is_authenticated:
-        user_profile = UserProfile.objects.get(user=request.user)
-        bookmarked_reseps = set(Bookmark.objects.filter(
-            user=user_profile,
-            resep__in=resep_items.object_list
-        ).values_list('resep_id', flat=True))
+        try:
+            user_profile = UserProfile.objects.get(user=request.user)
+            bookmarked_reseps = set(Bookmark.objects.filter(
+                user=user_profile,
+                resep__in=resep_items.object_list
+            ).values_list('resep_id', flat=True))
 
-        # Add is_bookmarked attribute to each recipe
-        for resep in resep_items.object_list:
-            resep.is_bookmarked = resep.id in bookmarked_reseps
+            for resep in resep_items.object_list:
+                resep.is_bookmarked = resep.id in bookmarked_reseps
+        except UserProfile.DoesNotExist:
+            for resep in resep_items.object_list:
+                resep.is_bookmarked = False
     else:
-        # If user is not logged in, no recipes are bookmarked
         for resep in resep_items.object_list:
             resep.is_bookmarked = False
 
