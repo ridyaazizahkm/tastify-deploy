@@ -126,16 +126,33 @@
                         <p class="text-sm font-medium">{{ resep.user.user.username }}</p>
                         <p class="text-xs text-gray-500">Recipe Creator</p>
                     </div>
-                    {% if request.user.is_authenticated and resep.user.user == request.user %}
-                    <div class="ml-auto">
+                    
+                    <div class="ml-auto flex space-x-2">
+                        {% if request.user.is_authenticated and resep.user.user == request.user %}
                         <a href="{% url 'resep:edit_resep' id=resep.id %}" class="inline-flex items-center px-4 py-2 bg-[#62191c] text-white rounded-lg hover:bg-[#4a1317] transition-colors duration-200">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
                             Edit Recipe
                         </a>
+                        {% elif user.is_authenticated and user != resep.user.user %}
+                        <button class="inline-flex items-center px-3 py-1 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200 text-sm report-recipe-link" data-recipe-id="{{ resep.id }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+                            </svg>
+                            Report
+                        </button>
+                        {% endif %}
+                        
+                        {% if user.is_staff or user.is_superuser %}
+                        <button class="inline-flex items-center px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors duration-200 text-sm admin-report-recipe-link" data-recipe-id="{{ resep.id }}" data-user-id="{{ resep.user.user.id }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                            Moderate
+                        </button>
+                        {% endif %}
                     </div>
-                    {% endif %}
                 </div>
                 {% endif %}
             </div>
@@ -200,6 +217,180 @@
 
 <!-- Comments Section -->
 {% include 'komentar/komentar.html' with resep=resep %}
+
+<!-- User Report Recipe Dialog -->
+<div id="reportRecipeDialog" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 hidden z-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-96 max-w-full">
+        <div class="text-center mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-[#62191c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+            </svg>
+        </div>
+        <h3 class="text-lg font-semibold mb-2 text-center text-[#62191c]">Report Recipe</h3>
+        <p class="text-gray-600 mb-4 text-center">Please select a reason for reporting this recipe:</p>
+        
+        <form id="reportRecipeForm" method="post" action="">
+            {% csrf_token %}
+            <div class="space-y-3 mb-6">
+                <div class="flex items-center">
+                    <input id="inappropriate" name="reason" type="radio" value="inappropriate" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-gray-300">
+                    <label for="inappropriate" class="ml-2 block text-sm text-gray-700">Inappropriate content</label>
+                </div>
+                <div class="flex items-center">
+                    <input id="copyright" name="reason" type="radio" value="copyright" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-gray-300">
+                    <label for="copyright" class="ml-2 block text-sm text-gray-700">Copyright violation</label>
+                </div>
+                <div class="flex items-center">
+                    <input id="offensive" name="reason" type="radio" value="offensive" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-gray-300">
+                    <label for="offensive" class="ml-2 block text-sm text-gray-700">Offensive content</label>
+                </div>
+                <div class="flex items-center">
+                    <input id="spam" name="reason" type="radio" value="spam" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-gray-300">
+                    <label for="spam" class="ml-2 block text-sm text-gray-700">Spam or advertisement</label>
+                </div>
+                <div class="flex items-center">
+                    <input id="harmful" name="reason" type="radio" value="harmful" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-gray-300">
+                    <label for="harmful" class="ml-2 block text-sm text-gray-700">Harmful or dangerous content</label>
+                </div>
+            </div>
+            
+            <div class="flex justify-center space-x-3">
+                <button type="button" id="cancelReportRecipeBtn" class="px-4 py-2 border border-gray-300 rounded text-gray-600 hover:bg-gray-100">
+                    Cancel
+                </button>
+                <button type="submit" class="px-4 py-2 bg-[#62191c] text-white rounded hover:bg-[#62191c]/90">
+                    Submit Report
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Admin Moderation Recipe Dialog -->
+<div id="adminModerateRecipeDialog" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 hidden z-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-96 max-w-full">
+        <div class="text-center mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-[#62191c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+            </svg>
+        </div>
+        <h3 class="text-lg font-semibold mb-2 text-center text-[#62191c]">Moderate Recipe</h3>
+        <p class="text-gray-600 mb-4 text-center">Please select a reason and action:</p>
+        
+        <form id="adminModerateRecipeForm" method="post" action="">
+            {% csrf_token %}
+            <div class="space-y-3 mb-6">
+                <div class="flex items-center">
+                    <input id="admin_inappropriate" name="reason" type="radio" value="inappropriate" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-gray-300">
+                    <label for="admin_inappropriate" class="ml-2 block text-sm text-gray-700">Inappropriate content</label>
+                </div>
+                <div class="flex items-center">
+                    <input id="admin_copyright" name="reason" type="radio" value="copyright" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-gray-300">
+                    <label for="admin_copyright" class="ml-2 block text-sm text-gray-700">Copyright violation</label>
+                </div>
+                <div class="flex items-center">
+                    <input id="admin_offensive" name="reason" type="radio" value="offensive" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-gray-300">
+                    <label for="admin_offensive" class="ml-2 block text-sm text-gray-700">Offensive content</label>
+                </div>
+                <div class="flex items-center">
+                    <input id="admin_spam" name="reason" type="radio" value="spam" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-gray-300">
+                    <label for="admin_spam" class="ml-2 block text-sm text-gray-700">Spam or advertisement</label>
+                </div>
+                <div class="flex items-center">
+                    <input id="admin_harmful" name="reason" type="radio" value="harmful" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-gray-300">
+                    <label for="admin_harmful" class="ml-2 block text-sm text-gray-700">Harmful or dangerous content</label>
+                </div>
+                
+                <div class="border-t border-gray-200 pt-4 mt-4">
+                    <p class="text-sm font-medium text-gray-700 mb-2">Select action to take:</p>
+                    <div class="space-y-2">
+                        <div class="flex items-center">
+                            <input id="delete_recipe" name="action" type="radio" value="delete_recipe" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-gray-300" checked>
+                            <label for="delete_recipe" class="ml-2 block text-sm text-gray-700">Delete Recipe Only</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input id="ban_user" name="action" type="radio" value="ban_user" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-gray-300">
+                            <label for="ban_user" class="ml-2 block text-sm text-gray-700">Ban User & Delete All Recipes</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex justify-center space-x-3">
+                <button type="button" id="cancelAdminModerateRecipeBtn" class="px-4 py-2 border border-gray-300 rounded text-gray-600 hover:bg-gray-100">
+                    Cancel
+                </button>
+                <button type="submit" class="px-4 py-2 bg-[#62191c] text-white rounded hover:bg-[#62191c]/90">
+                    Submit
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    window.addEventListener('load', function() {
+        // User recipe report
+        const reportRecipeLinks = document.querySelectorAll('.report-recipe-link');
+        const reportRecipeDialog = document.getElementById('reportRecipeDialog');
+        const reportRecipeForm = document.getElementById('reportRecipeForm');
+        const cancelReportRecipeBtn = document.getElementById('cancelReportRecipeBtn');
+        
+        if (reportRecipeLinks.length > 0) {
+            reportRecipeLinks.forEach(function(link) {
+                link.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    const recipeId = this.getAttribute('data-recipe-id');
+                    reportRecipeForm.action = "{% url 'resep:report_recipe' 0 %}".replace('0', recipeId);
+                    reportRecipeDialog.classList.remove('hidden');
+                });
+            });
+        }
+        
+        if (cancelReportRecipeBtn) {
+            cancelReportRecipeBtn.addEventListener('click', function() {
+                reportRecipeDialog.classList.add('hidden');
+            });
+        }
+        
+        // Admin moderation (report)
+        const adminReportRecipeLinks = document.querySelectorAll('.admin-report-recipe-link');
+        const adminModerateRecipeDialog = document.getElementById('adminModerateRecipeDialog');
+        const adminModerateRecipeForm = document.getElementById('adminModerateRecipeForm');
+        const cancelAdminModerateRecipeBtn = document.getElementById('cancelAdminModerateRecipeBtn');
+        
+        if (adminReportRecipeLinks.length > 0) {
+            adminReportRecipeLinks.forEach(function(link) {
+                link.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    const recipeId = this.getAttribute('data-recipe-id');
+                    const userId = this.getAttribute('data-user-id');
+                    adminModerateRecipeForm.action = "{% url 'resep:admin_moderate_recipe' 0 %}".replace('0', recipeId);
+                    adminModerateRecipeForm.querySelector('input[name="action"][value="ban_user"]').dataset.userId = userId;
+                    adminModerateRecipeDialog.classList.remove('hidden');
+                });
+            });
+        }
+        
+        if (cancelAdminModerateRecipeBtn) {
+            cancelAdminModerateRecipeBtn.addEventListener('click', function() {
+                adminModerateRecipeDialog.classList.add('hidden');
+            });
+        }
+        
+        // Auto-dismiss messages after 5 seconds
+        const messages = document.querySelectorAll('.message-alert');
+        if (messages.length > 0) {
+            messages.forEach(function(message) {
+                if (message.classList.contains('auto-dismiss')) {
+                    setTimeout(function() {
+                        message.remove();
+                    }, 5000);
+                }
+            });
+        }
+    });
+</script>
 
 {% csrf_token %}
 {% endblock %}
