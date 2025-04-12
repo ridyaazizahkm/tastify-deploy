@@ -50,7 +50,6 @@ def admin_dashboard(request):
         access_time=timezone.now(),
         action="Viewed user profiles"
     )  
-    user_profiles = UserProfile.objects.select_related('user').all()
     reported_comments = Report.objects.select_related('reporter', 'comment', 'comment__user').all().order_by('-created_at')
     reported_recipes = RecipeReport.objects.select_related('reporter', 'recipe', 'recipe__user').all().order_by('-created_at')
 

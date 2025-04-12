@@ -168,10 +168,12 @@
                     <a href="/recipe/"
                         class="nav-link {% if request.path == '/recipe/' %}active{% endif %} block py-2 px-3 rounded">Recipe</a>
                 </li>
+                {% if not user.is_superuser %}
                 <li>
                     <a href="/bookmark/"
                         class="nav-link {% if request.path == '/bookmark/' %}active{% endif %} block py-2 px-3 rounded">Bookmark</a>
                 </li>
+                {% endif %}
                 <li>
                     {% if user.is_superuser %}
                         <a href="{% url 'main:admin_dashboard' %}" class="nav-link {% if request.path == '/admin_dashboard/' %}active{% endif %} block py-2 px-3 rounded">
@@ -198,10 +200,12 @@
                     <a href="/recipe/"
                         class="nav-link {% if request.path == '/recipe/' %}active{% endif %}">Recipe</a>
                 </li>
+                {% if not user.is_superuser %}
                 <li>
-                    <a href="/merchant/"
-                        class="nav-link {% if request.path == '/merchant/' %}active{% endif %}">Bookmark</a>
+                    <a href="/bookmark/"
+                        class="nav-link {% if request.path == '/bookmark/' %}active{% endif %}">Bookmark</a>
                 </li>
+                {% endif %}
                 <li>
                     {% if user.is_superuser %}
                         <a href="{% url 'main:admin_dashboard' %}" class="nav-link {% if request.path == '/admin_dashboard/' %}active{% endif %}">
@@ -237,13 +241,18 @@
                 id="user-dropdown">
                 <div class="px-4 py-3">
                     {% if user.is_authenticated %}
-                    <a href="{% url 'user_profile:profile' %}" class="block text-sm text-gray-900 hover:underline">
-                        {{ user.username }}
-                    </a>
+                        {% if not user.is_staff %}
+                            <a href="{% url 'user_profile:profile' %}" class="block text-sm text-gray-900 hover:underline">
+                                {{ user.username }}
+                            </a>
+                        {% else %}
+                            <span class="block text-sm text-gray-900">{{ user.username }}</span>
+                        {% endif %}
                     {% else %}
-                    <span class="block text-sm text-gray-900">Guest</span>
+                        <span class="block text-sm text-gray-900">Guest</span>
                     {% endif %}
                 </div>
+                
                 <ul class="py-2" aria-labelledby="user-menu-button">
                     {% if user.is_authenticated %}
                     <li>
