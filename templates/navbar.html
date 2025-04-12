@@ -168,10 +168,12 @@
                     <a href="/recipe/"
                         class="nav-link {% if request.path == '/recipe/' %}active{% endif %} block py-2 px-3 rounded">Recipe</a>
                 </li>
+                {% if not user.is_superuser %}
                 <li>
                     <a href="/bookmark/"
                         class="nav-link {% if request.path == '/bookmark/' %}active{% endif %} block py-2 px-3 rounded">Bookmark</a>
                 </li>
+                {% endif %}
                 <li>
                     {% if user.is_superuser %}
                         <a href="{% url 'main:admin_dashboard' %}" class="nav-link {% if request.path == '/admin_dashboard/' %}active{% endif %} block py-2 px-3 rounded">
@@ -198,10 +200,12 @@
                     <a href="/recipe/"
                         class="nav-link {% if request.path == '/recipe/' %}active{% endif %}">Recipe</a>
                 </li>
+                {% if not user.is_superuser %}
                 <li>
-                    <a href="/merchant/"
-                        class="nav-link {% if request.path == '/merchant/' %}active{% endif %}">Bookmark</a>
+                    <a href="/bookmark/"
+                        class="nav-link {% if request.path == '/bookmark/' %}active{% endif %}">Bookmark</a>
                 </li>
+                {% endif %}
                 <li>
                     {% if user.is_superuser %}
                         <a href="{% url 'main:admin_dashboard' %}" class="nav-link {% if request.path == '/admin_dashboard/' %}active{% endif %}">

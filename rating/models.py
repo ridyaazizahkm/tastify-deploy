@@ -17,7 +17,7 @@ class Rating(models.Model):
     
     @classmethod
     def average_rating(cls, resep):
-        return cls.objects.filter(resep=resep).aggregate(avg_rating=Avg('score'))['avg_rating'] or 0
+        return round(cls.objects.filter(resep=resep).aggregate(avg_rating=Avg('score'))['avg_rating'] or 0, 2)
 
     @classmethod
     def total_reviews(cls, resep):
