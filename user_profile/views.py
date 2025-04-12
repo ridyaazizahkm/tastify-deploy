@@ -55,7 +55,7 @@ def resep_detail(request, pk):
 def profile_detail(request):
     if request.user.is_staff:
         messages.error(request, "You do not have permission to edit your profile.")
-        return redirect('cards_makanan:restaurant_list')
+        return redirect('user_profile:profile')
 
     user_profile = request.user.userprofile
     resep_list = Resep.objects.filter(user=user_profile)
