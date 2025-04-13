@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('resep', '0009_merge_20250410_1626'),
+        ('resep', '0003_load_csv_data'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
