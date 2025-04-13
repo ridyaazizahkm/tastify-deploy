@@ -1,0 +1,315 @@
+{% load static %}
+<style>
+    nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+    }
+
+    body {
+        padding-top: 64px;
+    }
+
+    .nav-link {
+        color: white;
+    }
+
+    .nav-link.active {
+        color: #e0cfc2;
+    }
+
+    .nav-link:hover {
+        color: #e0cfc2;
+    }
+
+    .greeting {
+        display: flex;
+        align-items: center;
+        color: white;
+        margin-right: 1rem;
+    }
+
+    .mobile-menu {
+        display: none;
+        position: fixed;
+        top: 64px;
+        left: 0;
+        right: 0;
+        background-color: #62191c;
+        padding: 1rem;
+        border-bottom-left-radius: 8px;
+        border-bottom-right-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        animation: slideDown 0.3s ease-in-out;
+    }
+
+    .logo-container {
+        display: flex;
+        justify-content: center;
+        z-index: 900;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .mobile-menu.show {
+        display: block;
+    }
+
+    .mobile-menu ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .mobile-menu li {
+        padding: 0.5rem 0;
+    }
+
+    .mobile-menu .nav-link {
+        display: block;
+        padding: 0.5rem 0;
+    }
+
+    .hamburger {
+        display: none;
+        cursor: pointer;
+        padding: 10px;
+        z-index: 1010;
+    }
+
+    .user-menu-container {
+        z-index: 1010;
+    }
+
+    .hamburger-line {
+        width: 25px;
+        height: 3px;
+        background-color: white;
+        margin: 5px 0;
+        transition: 0.4s;
+    }
+
+    .hamburger-line.active:nth-child(1) {
+        transform: rotate(-45deg) translate(-5px, 6px);
+    }
+
+    .hamburger-line.active:nth-child(2) {
+        opacity: 0;
+    }
+
+    .hamburger-line.active:nth-child(3) {
+        transform: rotate(45deg) translate(-5px, -6px);
+    }
+
+    @media (max-width: 768px) {
+        nav .max-w-screen-xl {
+            justify-content: space-between;
+            position: relative;
+        }
+
+        nav .logo-container {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .hamburger {
+            display: block;
+            order: 1;
+        }
+
+        /* Swap positions for mobile */
+        .user-menu-container {
+            order: 3;
+        }
+
+        .desktop-menu {
+            display: none;
+        }
+    }
+</style>
+
+<nav class="bg-[#62191c] border-gray-200">
+    <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+        <!-- Hamburger Menu Button (Left on mobile) -->
+        <div class="hamburger order-first" id="hamburger-menu">
+            <div class="hamburger-line"></div>
+            <div class="hamburger-line"></div>
+            <div class="hamburger-line"></div>
+        </div>
+
+        <!-- Logo -->
+        <a href="{% url 'main:show_main' %}" class="flex items-center space-x-3 rtl:space-x-reverse logo-container">
+            <img src="{% static 'images/logo.png' %}" class="h-14" alt="Logo" />
+        </a>
+
+        <!-- Desktop Menu -->
+        <div class="items-center justify-between hidden w-full md:flex md:w-auto md:order-1 desktop-menu" id="navbar-user">
+            <ul class="flex flex-col font-medium p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-[#62191c] md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 md:bg-[#62191c]">
+                <li>
+                    {% url 'main:show_main' as show_main_url %}
+                    <a href="{{ show_main_url }}"
+                        class="nav-link {% if request.path == show_main_url %}active{% endif %} block py-2 px-3 rounded">Home</a>
+                </li>
+
+                <li>
+                    <a href="/recipe/"
+                        class="nav-link {% if request.path == '/recipe/' %}active{% endif %} block py-2 px-3 rounded">Recipe</a>
+                </li>
+                {% if not user.is_superuser %}
+                <li>
+                    <a href="/bookmark/"
+                        class="nav-link {% if request.path == '/bookmark/' %}active{% endif %} block py-2 px-3 rounded">Bookmark</a>
+                </li>
+                {% endif %}
+                <li>
+                    {% if user.is_superuser %}
+                        <a href="{% url 'main:admin_dashboard' %}" class="nav-link {% if request.path == '/admin_dashboard/' %}active{% endif %} block py-2 px-3 rounded">
+                            Dashboard Admin
+                        </a>
+                    {% else %}
+                        <a href="/recipe/create/" class="nav-link {% if request.path == '/recipe/create/' %}active{% endif %} block py-2 px-3 rounded">
+                            Upload Your Recipes
+                        </a>
+                    {% endif %}
+                </li>              
+            </ul>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div class="mobile-menu" id="mobile-menu">
+            <ul>
+                <li>
+                    {% url 'main:show_main' as show_main_url %}
+                    <a href="{{ show_main_url }}"
+                        class="nav-link {% if request.path == show_main_url %}active{% endif %}">Home</a>
+                </li>
+                <li>
+                    <a href="/recipe/"
+                        class="nav-link {% if request.path == '/recipe/' %}active{% endif %}">Recipe</a>
+                </li>
+                {% if not user.is_superuser %}
+                <li>
+                    <a href="/bookmark/"
+                        class="nav-link {% if request.path == '/bookmark/' %}active{% endif %}">Bookmark</a>
+                </li>
+                {% endif %}
+                <li>
+                    {% if user.is_superuser %}
+                        <a href="{% url 'main:admin_dashboard' %}" class="nav-link {% if request.path == '/admin_dashboard/' %}active{% endif %}">
+                            Dashboard Admin
+                        </a>
+                    {% else %}
+                        <a href="/recipe/create/" class="nav-link {% if request.path == '/recipe/create/' %}active{% endif %}">
+                            Upload Your Recipes
+                        </a>
+                    {% endif %}
+                </li>
+            </ul>
+        </div>
+
+        <!-- User Menu -->
+        <div class="flex items-center md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse user-menu-container order-last">
+             <!-- Greeting -->
+            {% if user.is_authenticated %}
+            <div class="greeting font-medium text-white hidden md:flex">
+                Welcome, {{ user.username }}👋🏻
+            </div>
+            {% endif %}
+            <button type="button" class="flex text-sm bg-gray-800 rounded-full md:me-0 focus:ring-4 focus:ring-gray-300"
+                id="user-menu-button" aria-expanded="false" data-dropdown-toggle="user-dropdown"
+                data-dropdown-placement="bottom">
+                <span class="sr-only">Open user menu</span>
+                <img class="w-8 h-8 rounded-full"
+                    src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
+                    alt="user photo">
+            </button>
+            <!-- Dropdown menu -->
+            <div class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow"
+                id="user-dropdown">
+                <div class="px-4 py-3">
+                    {% if user.is_authenticated %}
+                        {% if not user.is_staff %}
+                            <a href="{% url 'user_profile:profile' %}" class="block text-sm text-gray-900 hover:underline">
+                                {{ user.username }}
+                            </a>
+                        {% else %}
+                            <span class="block text-sm text-gray-900">{{ user.username }}</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="block text-sm text-gray-900">Guest</span>
+                    {% endif %}
+                </div>
+                
+                <ul class="py-2" aria-labelledby="user-menu-button">
+                    {% if user.is_authenticated %}
+                    <li>
+                        <a href="/auth/logout" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign
+                            Out</a>
+                    </li>
+                    {% else %}
+                    <li>
+                        <a href="/auth/login" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign
+                            In</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+</nav>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // User dropdown menu toggle
+        const userMenuButton = document.getElementById('user-menu-button');
+        const userDropdown = document.getElementById('user-dropdown');
+
+        userMenuButton.addEventListener('click', function () {
+            userDropdown.classList.toggle('hidden');
+        });
+
+        // Close the dropdown if clicked outside
+        window.addEventListener('click', function (event) {
+            if (!userMenuButton.contains(event.target) && !userDropdown.contains(event.target)) {
+                userDropdown.classList.add('hidden');
+            }
+        });
+
+        // Hamburger menu toggle
+        const hamburgerButton = document.getElementById('hamburger-menu');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        hamburgerButton.addEventListener('click', function(event) {
+            event.stopPropagation(); // Prevent event bubbling
+            mobileMenu.classList.toggle('show');
+            // Animate hamburger to X
+            const lines = hamburgerButton.querySelectorAll('.hamburger-line');
+            lines.forEach(line => {
+                line.classList.toggle('active');
+            });
+        });
+
+        // Close mobile menu on window resize if it becomes desktop
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768 && mobileMenu.classList.contains('show')) {
+                mobileMenu.classList.remove('show');
+                const lines = hamburgerButton.querySelectorAll('.hamburger-line');
+                lines.forEach(line => {
+                    line.classList.remove('active');
+                });
+            }
+        });
+    });
+</script>

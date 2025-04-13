@@ -9,25 +9,28 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+import os
 from pathlib import Path
+from dotenv import load_dotenv
+from datetime import timedelta
+
+# Load environment variables
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-5&x89+=4&$$@8w@nfw%t&7vt!_w71awpub5%1p%x+iwkvog36*'
+SECRET_KEY = os.getenv('PODS_DJANGO_SECRET', 'django-insecure-5&x89+=4&$$@8w@nfw%t&7vt!_w71awpub5%1p%x+iwkvog36*')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DJANGO_ENV = os.getenv('PODS_DJANGO_ENV', 'development')
+if DJANGO_ENV == 'production':
+    DEBUG = False
+else:
+    DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
-
-
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", 'https://kelompok-64-tastify.pkpl.cs.ui.ac.id']
+CSRF_TRUSTED_ORIGINS = ["http://localhost","http://127.0.0.1", 'https://kelompok-64-tastify.pkpl.cs.ui.ac.id']
 # Application definition
 
 INSTALLED_APPS = [
@@ -37,7 +40,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'main'
+    'main',
+    'authentication',
+    'resep',
+    'bookmark',
+    'rating',
+    'komentar',
+    'user_profile'
 ]
 
 MIDDLEWARE = [
@@ -48,6 +57,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'tastify.middleware.ContentSecurityPolicyMiddleware',
 ]
 
 ROOT_URLCONF = 'tastify.urls'
@@ -55,7 +65,7 @@ ROOT_URLCONF = 'tastify.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -76,10 +86,15 @@ WSGI_APPLICATION = 'tastify.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USERNAME'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
     }
 }
+
 
 
 # Password validation
@@ -116,9 +131,20 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
+
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),  # Pastikan ini ada
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# settings.py
+from decouple import config
+from cryptography.fernet import Fernet
+
+ENCRYPTION_KEY = config('ENCRYPTION_KEY').encode()
+fernet = Fernet(ENCRYPTION_KEY)

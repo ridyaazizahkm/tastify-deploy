@@ -1,0 +1,384 @@
+from pyexpat.errors import messages
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse, JsonResponse
+
+from komentar.forms import KomentarForm
+from .models import RecipeReport, Resep
+from .forms import ResepForm
+from authentication.models import UserProfile
+from django.core.paginator import Paginator
+from django.db.models import Count
+from django.template.loader import render_to_string
+from django.views.decorators.csrf import ensure_csrf_cookie, csrf_protect
+from django.utils.html import escape
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+import html
+from bookmark.models import Bookmark
+from django.contrib.auth.models import User
+from django.contrib import messages
+
+def sanitize_post_data(post_data):
+    sanitized_data = post_data.copy()
+
+    for key, value in sanitized_data.items():
+        if isinstance(value, str) and key not in ['category', 'cooking_method', 'main_ingredient']:
+            sanitized_data[key] = html.escape(value).replace('&quot;', '"')
+        elif key in ['category', 'cooking_method', 'main_ingredient']:
+            sanitized_data[key] = html.unescape(value) if value else value
+
+    return sanitized_data
+
+@ensure_csrf_cookie
+def list_resep(request):
+    if request.method == 'POST':
+        sanitized_data = sanitize_post_data(request.POST)
+        query = sanitized_data.get('q', '')
+        category = sanitized_data.get('category', '')
+        cooking_method = sanitized_data.get('cooking_method', '')
+        main_ingredient = sanitized_data.get('main_ingredient', '')
+        sort_by = sanitized_data.get('sort_by', '')
+        page_number = sanitized_data.get('page', 1)
+        items_per_page = sanitized_data.get('items_per_page', 9)
+    else:
+        query = request.GET.get('q', '')
+        category = html.unescape(request.GET.get('category', ''))
+        cooking_method = html.unescape(request.GET.get('cooking_method', ''))
+        main_ingredient = html.unescape(request.GET.get('main_ingredient', ''))
+        sort_by = request.GET.get('sort_by', '')
+        page_number = request.GET.get('page', 1)
+        items_per_page = request.GET.get('items_per_page', 9)
+
+    try:
+        items_per_page = int(items_per_page)
+        if items_per_page not in [9, 18, 24, 36]:
+            items_per_page = 9
+    except (TypeError, ValueError):
+        items_per_page = 9
+
+    base_queryset = Resep.objects.all()
+
+    if query:
+        base_queryset = base_queryset.filter(judul__icontains=query)
+
+    category_filtered = base_queryset
+    if cooking_method:
+        category_filtered = category_filtered.filter(metode_masak__nama=cooking_method)
+    if main_ingredient:
+        category_filtered = category_filtered.filter(bahan_utama__nama=main_ingredient)
+
+    cooking_method_filtered = base_queryset
+    if category:
+        cooking_method_filtered = cooking_method_filtered.filter(kategori__nama=category)
+    if main_ingredient:
+        cooking_method_filtered = cooking_method_filtered.filter(bahan_utama__nama=main_ingredient)
+
+    main_ingredient_filtered = base_queryset
+    if category:
+        main_ingredient_filtered = main_ingredient_filtered.filter(kategori__nama=category)
+    if cooking_method:
+        main_ingredient_filtered = main_ingredient_filtered.filter(metode_masak__nama=cooking_method)
+
+    resep_list = base_queryset
+    if category:
+        resep_list = resep_list.filter(kategori__nama=category)
+    if cooking_method:
+        resep_list = resep_list.filter(metode_masak__nama=cooking_method)
+    if main_ingredient:
+        resep_list = resep_list.filter(bahan_utama__nama=main_ingredient)
+
+    if sort_by == 'cooking_time_asc':
+        resep_list = resep_list.order_by('durasi')
+    elif sort_by == 'cooking_time_desc':
+        resep_list = resep_list.order_by('-durasi')
+    elif sort_by == 'servings_desc':
+        resep_list = resep_list.order_by('-porsi')
+    elif sort_by == 'servings_asc':
+        resep_list = resep_list.order_by('porsi')
+    elif sort_by == 'name_asc':
+        resep_list = resep_list.order_by('judul')
+    elif sort_by == 'name_desc':
+        resep_list = resep_list.order_by('-judul')
+
+    categories = category_filtered.values('kategori__nama').annotate(count=Count('kategori')).order_by('kategori__nama')
+    cooking_methods = cooking_method_filtered.values('metode_masak__nama').annotate(count=Count('metode_masak')).order_by('metode_masak__nama')
+    main_ingredients = main_ingredient_filtered.values('bahan_utama__nama').annotate(count=Count('bahan_utama')).order_by('bahan_utama__nama')
+
+    categories = [{'kategori': item['kategori__nama'], 'count': item['count']} for item in categories if item['kategori__nama']]
+    cooking_methods = [{'metode_masak': item['metode_masak__nama'], 'count': item['count']} for item in cooking_methods if item['metode_masak__nama']]
+    main_ingredients = [{'bahan_utama': item['bahan_utama__nama'], 'count': item['count']} for item in main_ingredients if item['bahan_utama__nama']]
+
+    try:
+        page_number = int(page_number)
+    except (TypeError, ValueError):
+        page_number = 1
+
+    paginator = Paginator(resep_list, items_per_page)
+    total_pages = paginator.num_pages
+
+    if page_number < 1:
+        page_number = 1
+    elif page_number > total_pages and total_pages > 0:
+        page_number = total_pages
+
+    try:
+        resep_items = paginator.page(page_number)
+    except:
+        resep_items = paginator.page(1)
+
+    # bookmark status for each recipe
+    if request.user.is_authenticated:
+        try:
+            user_profile = UserProfile.objects.get(user=request.user)
+            bookmarked_reseps = set(Bookmark.objects.filter(
+                user=user_profile,
+                resep__in=resep_items.object_list
+            ).values_list('resep_id', flat=True))
+
+            for resep in resep_items.object_list:
+                resep.is_bookmarked = resep.id in bookmarked_reseps
+        except UserProfile.DoesNotExist:
+            for resep in resep_items.object_list:
+                resep.is_bookmarked = False
+    else:
+        for resep in resep_items.object_list:
+            resep.is_bookmarked = False
+
+    context = {
+        'resep_items': resep_items,
+        'query': query,
+        'selected_category': category,
+        'selected_cooking_method': cooking_method,
+        'selected_main_ingredient': main_ingredient,
+        'categories': categories,
+        'cooking_methods': cooking_methods,
+        'main_ingredients': main_ingredients,
+        'sort_by': sort_by,
+        'items_per_page': items_per_page,
+    }
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        recipe_html = render_to_string(
+            'resep/components/recipe_list.html',
+            {'resep_items': resep_items},
+            request=request
+        )
+        pagination_html = render_to_string(
+            'resep/components/pagination.html',
+            context,
+            request=request
+        )
+        return JsonResponse({
+            'recipe_html': recipe_html,
+            'pagination_html': pagination_html,
+            'has_next': resep_items.has_next(),
+            'has_previous': resep_items.has_previous(),
+            'page_number': resep_items.number,
+            'total_pages': paginator.num_pages,
+            'categories': categories,
+            'cooking_methods': cooking_methods,
+            'main_ingredients': main_ingredients,
+            'selected_category': category,
+            'selected_cooking_method': cooking_method,
+            'selected_main_ingredient': main_ingredient,
+        })
+
+    return render(request, 'resep/list_of_resep.html', context)
+
+@login_required(login_url='/auth/login/')
+@csrf_protect
+def create_resep(request):
+    if request.method == 'POST':
+        form = ResepForm(request.POST)
+        if form.is_valid():
+            resep = form.save(commit=False)
+            user_profile, created = UserProfile.objects.get_or_create(user=request.user)
+            resep.user = user_profile
+            resep.save()
+            return redirect('resep:list_resep')
+        else:
+            print(f"Form errors: {form.errors}")
+    else:
+        form = ResepForm()
+
+    context = {'form': form}
+    response = render(request, 'resep/create_resep.html', context)
+
+    response.set_cookie('csrftoken', request.META.get('CSRF_COOKIE', ''), samesite='Lax')
+    return response
+
+@login_required(login_url='/auth/login/')
+@csrf_protect
+def edit_resep(request, id):
+    resep = get_object_or_404(Resep, pk=id)
+    user_profile = UserProfile.objects.get(user=request.user)
+    if resep.user != user_profile:
+        return HttpResponse("You don't have permission to edit this recipe", status=403)
+
+    if request.method == 'POST':
+        form = ResepForm(request.POST, instance=resep)
+        if form.is_valid():
+            form.save()
+            return redirect('resep:detail_resep', id=id)
+        else:
+            print(f"Form errors: {form.errors}")
+    else:
+        form = ResepForm(instance=resep)
+
+    context = {'form': form, 'editing': True, 'resep': resep}
+    response = render(request, 'resep/edit_resep.html', context)
+
+    response.set_cookie('csrftoken', request.META.get('CSRF_COOKIE', ''), samesite='Lax')
+    return response
+
+@login_required(login_url='/auth/login/')
+@csrf_protect
+def delete_resep(request, id):
+    resep = get_object_or_404(Resep, pk=id)
+    user_profile = UserProfile.objects.get(user=request.user)
+
+    # Check if the current user is the author of the recipe
+    if resep.user != user_profile:
+        return HttpResponse("You don't have permission to delete this recipe", status=403)
+
+    if request.method == 'POST':
+        resep.delete()
+        messages.success(request, "Recipe successfully deleted!")
+        return redirect('resep:list_resep')
+
+    # If it's a GET request, show the confirmation page
+    context = {'resep': resep}
+    return render(request, 'resep/delete_resep.html', context)
+
+def detail_resep(request, id):
+    resep = get_object_or_404(Resep, pk=id)
+
+    is_bookmarked = False
+    if request.user.is_authenticated:
+        try:
+            user_profile = UserProfile.objects.get(user=request.user)
+            is_bookmarked = Bookmark.objects.filter(user=user_profile, resep=resep).exists()
+        except UserProfile.DoesNotExist:
+            # Handle case where user doesn't have a profile
+            pass
+
+    komentar_form = KomentarForm()
+    context = {
+        'resep': resep,
+        "average_rating": resep.average_rating(),
+        "total_ratings": resep.total_ratings(),
+        'form': komentar_form,
+        'is_bookmarked': is_bookmarked,
+    }
+
+    return render(request, 'resep/detail_resep.html', context)
+
+@login_required
+def report_recipe(request, recipe_id):
+    recipe = get_object_or_404(Resep, id=recipe_id)
+
+    if request.user.is_staff or request.user.is_superuser:
+        messages.error(request, 'Admin accounts cannot report recipes.')
+        return redirect('resep:detail_resep', id=recipe_id)
+    
+    if RecipeReport.objects.filter(reporter=request.user, recipe=recipe).exists():
+        messages.warning(request, 'You have already reported this recipe.')
+        return redirect('resep:detail_resep', id=recipe_id)
+    
+    if request.method == 'POST':
+        reason = request.POST.get('reason')
+
+        valid_reasons = [reason_code for reason_code, _ in RecipeReport.REPORT_REASONS]
+        if reason not in valid_reasons:
+            messages.error(request, 'Invalid report reason.')
+            return redirect('resep:detail_resep', id=recipe_id)
+
+        RecipeReport.objects.create(
+            reporter=request.user,
+            recipe=recipe,
+            reason=reason,
+            status='pending'
+        )
+        
+        messages.success(request, 'Recipe reported successfully. Our admin will review it.')
+        return redirect('resep:detail_resep', id=recipe_id)
+    
+    return redirect('resep:detail_resep', id=recipe_id)
+
+@login_required
+def admin_moderate_recipe(request, recipe_id):
+    """Function for admin to directly moderate recipes from the detail page"""
+    if not request.user.is_staff and not request.user.is_superuser:
+        messages.error(request, 'Only admin can use this feature.')
+        return redirect('resep:detail_resep', id=recipe_id)
+    
+    recipe = get_object_or_404(Resep, id=recipe_id)
+    
+    if request.method == 'POST':
+        reason = request.POST.get('reason')
+        action = request.POST.get('action')
+        
+        valid_reasons = [reason_code for reason_code, _ in RecipeReport.REPORT_REASONS]
+        if reason not in valid_reasons:
+            messages.error(request, 'Invalid report reason.')
+            return redirect('resep:detail_resep', id=recipe_id)
+        
+        tastify_user, created = User.objects.get_or_create(
+            username='Tastify',
+            defaults={
+                'is_active': False,
+                'email': 'system@tastify.example.com'
+            }
+        )
+
+        report = RecipeReport.objects.create(
+            reporter=tastify_user,
+            recipe=recipe,
+            reason=reason,
+            status='pending'
+        )
+    
+        report.save_recipe_info()
+        report.save()
+        
+        if action == 'delete_recipe':
+            report.status = 'deleted'
+            report.save()
+            other_reports = RecipeReport.objects.filter(recipe_id=recipe.id, status='pending')
+            for other_report in other_reports:
+                other_report.save_recipe_info()
+                other_report.status = 'deleted'
+                other_report.save()
+            
+            recipe.delete()
+            messages.success(request, 'Recipe has been deleted and reported.')
+            return redirect('resep:list_resep')
+            
+        elif action == 'ban_user':
+            user = recipe.user.user
+            user_recipes = Resep.objects.filter(user=recipe.user)
+            recipe_ids = list(user_recipes.values_list('id', flat=True))
+            
+            report.status = 'banned'
+            report.save()
+            
+            RecipeReport.objects.filter(recipe_id__in=recipe_ids, status='pending').update(status='banned')
+            for user_recipe in user_recipes:
+                if not RecipeReport.objects.filter(recipe=user_recipe, reporter=tastify_user).exists():
+                    new_report = RecipeReport.objects.create(
+                        reporter=tastify_user,
+                        recipe=user_recipe,
+                        reason=reason,
+                        status='banned'
+                    )
+                    new_report.save_recipe_info()
+                    new_report.save()
+
+            user_recipes.delete()
+            user.is_active = False
+            user.save()
+            
+            messages.success(request, f'User {user.username} has been banned and all their recipes have been deleted.')
+            return redirect('resep:list_resep')
+        
+    return redirect('resep:detail_resep', id=recipe_id)

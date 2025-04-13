@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<!-- PROFILE SINGKAT -->
+<div class="flex flex-col items-center mt-20 mb-12">
+    <!-- FOTO PROFIL -->
+    <div class="mb-4 relative">
+        <div class="w-32 h-32 rounded-full border-4 border-[#62191c] flex items-center justify-center relative overflow-hidden">
+            {% if user.profile.profile_picture %}
+                <img 
+                    src="{{ user.profile.profile_picture.url }}" 
+                    alt="Profile Picture" 
+                    class="absolute inset-0 w-full h-full rounded-full object-cover"
+                >
+            {% else %}
+                <img 
+                    src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png" 
+                    alt="Default Profile Picture" 
+                    class="absolute inset-0 w-full h-full rounded-full object-cover"
+                >
+            {% endif %}
+            <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center hover:opacity-0 transition-opacity duration-300">
+            </div>
+        </div>
+    </div> 
+
+    <!-- TOMBOL EDIT PROFILE -->
+    <a href="{% url 'user_profile:profile_detail' %}" 
+       class="mt-1 bg-[#62191c] text-white px-6 py-2 rounded-full hover:bg-[#8B2635] transition">
+        Edit Profile
+    </a>    
+</div>
+
+<!-- BAGIAN RESEP USER -->
+<div class="mt-16 sm:max-w-6xl sm:mx-auto px-6">
+    <h2 class="text-2xl font-bold text-[#62191c] mb-6 text-center">Your Recipe</h2>
+
+    {% if resep_list %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for resep in resep_list %}
+                <a href="{% url 'user_profile:resep_detail' resep.pk %}" class="block">
+                    <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                        <img src="{{ resep.url_foto }}" alt="{{ resep.judul }}" class="w-full h-48 object-cover">
+                        <div class="p-4">
+                            <h3 class="text-lg font-semibold text-[#62191c] mb-1">{{ resep.judul }}</h3>
+                            <p class="text-sm text-gray-600">{{ resep.deskripsi|truncatewords:20 }}</p>
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="flex flex-col items-center justify-center py-10 text-center text-gray-600">
+            <img src="https://cdn-icons-png.flaticon.com/512/2748/2748558.png" alt="Belum ada resep" class="w-40 h-40 opacity-70 mb-6">
+            <p class="text-lg font-medium italic">No recipe yet... 🍳</p>
+            <p class="text-sm mt-2">Let's create your own recipe!</p>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

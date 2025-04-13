@@ -1,0 +1,596 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 mb-16">
+    <div class="max-w-4xl mx-auto">
+        <!-- Enhanced Header Section -->
+        <div class="">
+        </div>
+
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold mb-2">Upload Your Recipe</h1>
+                </div>
+            </div>
+            <a href="{% url 'resep:list_resep' %}" class="text-sm bg-gray-50 px-4 py-2 rounded-full text-[#62191c] hover:bg-gray-100 transition-colors duration-300 flex items-center shadow-sm hover:shadow">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to recipes
+            </a>
+        </div>
+
+        {% if form.errors %}
+        <div class="bg-red-50 border-l-4 border-red-500 text-red-800 px-4 py-3 rounded-lg mb-6 shadow-sm animate-pulse">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-red-800">Please correct the errors below:</h3>
+                    <ul class="mt-2 text-sm text-red-700 list-disc list-inside">
+                        {% for field in form %}
+                            {% if field.errors %}
+                                {% for error in field.errors %}
+                                    <li>{{ field.label }}: {{ error }}</li>
+                                {% endfor %}
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+            <div class="p-6 sm:p-8">
+                <form method="POST" enctype="multipart/form-data" id="recipe-form">
+                    {% csrf_token %}
+
+                    <!-- Basic Info Section -->
+                    <div class="mb-10 recipe-section hover:transform hover:scale-[1.01] transition-all duration-300">
+                        <div class="flex items-center mb-4">
+                            <div class="bg-[#62191c] w-8 h-8 rounded-full flex items-center justify-center text-white font-bold mr-3">1</div>
+                            <h2 class="text-xl font-semibold text-gray-800">Basic Information</h2>
+                        </div>
+                        <div class="pl-11">
+                            <div class="p-6 bg-gray-50 rounded-xl">
+                                <div class="mb-6">
+                                    <label for="{{ form.judul.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Recipe Title <span class="text-red-500">*</span></label>
+                                    {{ form.judul|safe }}
+                                    {% if form.judul.errors %}
+                                        <p class="mt-1 text-sm text-red-600">{{ form.judul.errors.0 }}</p>
+                                    {% endif %}
+                                    <p class="mt-1 text-xs text-gray-500">Enter a descriptive title for your recipe</p>
+                                </div>
+
+                                <div class="mb-0">
+                                    <label for="{{ form.deskripsi.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Description <span class="text-red-500">*</span></label>
+                                    {{ form.deskripsi|safe }}
+                                    {% if form.deskripsi.errors %}
+                                        <p class="mt-1 text-sm text-red-600">{{ form.deskripsi.errors.0 }}</p>
+                                    {% endif %}
+                                    <p class="mt-1 text-xs text-gray-500">Share the story behind your recipe or describe the flavors</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Classification Section -->
+                    <div class="mb-10 recipe-section hover:transform hover:scale-[1.01] transition-all duration-300">
+                        <div class="flex items-center mb-4">
+                            <div class="bg-[#62191c] w-8 h-8 rounded-full flex items-center justify-center text-white font-bold mr-3">2</div>
+                            <h2 class="text-xl font-semibold text-gray-800">Recipe Classification</h2>
+                        </div>
+                        <div class="pl-11">
+                            <div class="p-6 bg-gray-50 rounded-xl">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div>
+                                        <label for="{{ form.kategori.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Category <span class="text-red-500">*</span></label>
+                                        {{ form.kategori|safe }}
+                                        {% if form.kategori.errors %}
+                                            <p class="mt-1 text-sm text-red-600">{{ form.kategori.errors.0 }}</p>
+                                        {% endif %}
+                                        <p class="mt-1 text-xs text-gray-500">Choose the best category</p>
+                                    </div>
+
+                                    <div>
+                                        <label for="{{ form.metode_masak.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Cooking Method <span class="text-red-500">*</span></label>
+                                        {{ form.metode_masak|safe }}
+                                        {% if form.metode_masak.errors %}
+                                            <p class="mt-1 text-sm text-red-600">{{ form.metode_masak.errors.0 }}</p>
+                                        {% endif %}
+                                        <p class="mt-1 text-xs text-gray-500">How is this dish cooked?</p>
+                                    </div>
+
+                                    <div>
+                                        <label for="{{ form.bahan_utama.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Main Ingredient <span class="text-red-500">*</span></label>
+                                        {{ form.bahan_utama|safe }}
+                                        {% if form.bahan_utama.errors %}
+                                            <p class="mt-1 text-sm text-red-600">{{ form.bahan_utama.errors.0 }}</p>
+                                        {% endif %}
+                                        <p class="mt-1 text-xs text-gray-500">Select the main ingredient</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Details Section -->
+                    <div class="mb-10 recipe-section hover:transform hover:scale-[1.01] transition-all duration-300">
+                        <div class="flex items-center mb-4">
+                            <div class="bg-[#62191c] w-8 h-8 rounded-full flex items-center justify-center text-white font-bold mr-3">3</div>
+                            <h2 class="text-xl font-semibold text-gray-800">Recipe Details</h2>
+                        </div>
+                        <div class="pl-11">
+                            <div class="p-6 bg-gray-50 rounded-xl">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                    <div>
+                                        <label for="{{ form.durasi.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Cooking Time (minutes) <span class="text-red-500">*</span></label>
+                                        <div class="mt-1 relative rounded-lg shadow-sm">
+                                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                            </span>
+                                            <input type="number" name="{{ form.durasi.html_name }}" id="{{ form.durasi.id_for_label }}" value="{{ form.durasi.value|default:'' }}"
+                                                class="block w-full rounded-lg border-gray-300 pl-10 pr-12 focus:border-[#e0cfc2] focus:ring focus:ring-[#e0cfc2] focus:ring-opacity-50" min="1" placeholder="e.g., 30">
+                                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                                <span class="text-gray-500 sm:text-sm">min</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label for="{{ form.porsi.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Portions <span class="text-red-500">*</span></label>
+                                        <div class="mt-1 relative rounded-lg shadow-sm">
+                                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+                                                </svg>
+                                            </span>
+                                            <input type="number" name="{{ form.porsi.html_name }}" id="{{ form.porsi.id_for_label }}" value="{{ form.porsi.value|default:'' }}"
+                                                class="block w-full rounded-lg border-gray-300 pl-10 pr-12 focus:border-[#e0cfc2] focus:ring focus:ring-[#e0cfc2] focus:ring-opacity-50" min="1"  placeholder="e.g., 2">
+                                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                                <span class="text-gray-500 sm:text-sm">servings</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-0">
+                                    <label for="{{ form.url_foto.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">Recipe Photo URL <span class="text-red-500">*</span></label>
+                                    <div class="mt-1 relative rounded-lg shadow-sm">
+                                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                        </span>
+                                        <input type="url" name="{{ form.url_foto.html_name }}" id="{{ form.url_foto.id_for_label }}" value="{{ form.url_foto.value|default:'' }}"
+                                            class="block w-full rounded-lg border-gray-300 pl-10 focus:border-[#e0cfc2] focus:ring focus:ring-[#e0cfc2] focus:ring-opacity-50"
+                                            placeholder="https://example.com/photo.jpg">
+                                    </div>
+                                    {% if form.url_foto.errors %}
+                                        <p class="mt-1 text-sm text-red-600">{{ form.url_foto.errors.0 }}</p>
+                                    {% else %}
+                                        <p class="mt-1 text-xs text-gray-500">Add a URL to your dish photo (e.g., https://example.com/photo.jpg)</p>
+                                        <div id="image-preview" class="hidden mt-3 rounded-lg overflow-hidden border border-gray-200 shadow-sm bg-white">
+                                            <div class="flex items-center justify-center h-32">
+                                                <p class="text-gray-500 text-sm">Image preview will appear here</p>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ingredients and Tools Section -->
+                    <div class="mb-10 recipe-section hover:transform hover:scale-[1.01] transition-all duration-300">
+                        <div class="flex items-center mb-4">
+                            <div class="bg-[#62191c] w-8 h-8 rounded-full flex items-center justify-center text-white font-bold mr-3">4</div>
+                            <h2 class="text-xl font-semibold text-gray-800">Ingredients & Tools</h2>
+                        </div>
+                        <div class="pl-11">
+                            <div class="p-6 bg-gray-50 rounded-xl grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="mb-6">
+                                    <label for="{{ form.bahan.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-[#62191c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                        </svg>
+                                        Ingredients <span class="text-red-500">*</span>
+                                    </label>
+                                    {{ form.bahan|safe }}
+                                    {% if form.bahan.errors %}
+                                        <p class="mt-1 text-sm text-red-600">{{ form.bahan.errors.0 }}</p>
+                                    {% else %}
+                                        <p class="mt-1 text-xs text-gray-500">List all ingredients with quantities (one per line)</p>
+                                    {% endif %}
+                                </div>
+
+                                <div>
+                                    <label for="{{ form.alat.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-[#62191c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                        Tools & Equipment <span class="text-red-500">*</span>
+                                    </label>
+                                    {{ form.alat|safe }}
+                                    {% if form.alat.errors %}
+                                        <p class="mt-1 text-sm text-red-600">{{ form.alat.errors.0 }}</p>
+                                    {% else %}
+                                        <p class="mt-1 text-xs text-gray-500">List all tools and equipment needed (one per line)</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Instructions Section -->
+                    <div class="mb-10 recipe-section hover:transform hover:scale-[1.01] transition-all duration-300">
+                        <div class="flex items-center mb-4">
+                            <div class="bg-[#62191c] w-8 h-8 rounded-full flex items-center justify-center text-white font-bold mr-3">5</div>
+                            <h2 class="text-xl font-semibold text-gray-800">Cooking Instructions</h2>
+                        </div>
+                        <div class="pl-11">
+                            <div class="p-6 bg-gray-50 rounded-xl">
+                                <div>
+                                    <label for="{{ form.langkah.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-[#62191c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                        </svg>
+                                        Step-by-Step Instructions <span class="text-red-500">*</span>
+                                    </label>
+                                    {{ form.langkah|safe }}
+                                    {% if form.langkah.errors %}
+                                        <p class="mt-1 text-sm text-red-600">{{ form.langkah.errors.0 }}</p>
+                                    {% else %}
+                                        <p class="mt-1 text-xs text-gray-500">Write clear, numbered steps (e.g., 1. Preheat oven. 2. Mix ingredients...)</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="mt-10 flex flex-col sm:flex-row justify-end space-y-4 sm:space-y-0 sm:space-x-4">
+                        <a href="{% url 'resep:list_resep' %}" class="inline-flex justify-center items-center px-6 py-3 border border-transparent rounded-full shadow-sm text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors duration-300">
+                            Cancel
+                        </a>
+                        <button type="submit" class="inline-flex justify-center items-center px-8 py-3 border border-transparent rounded-full shadow-sm text-sm font-bold text-white bg-[#62191c] hover:bg-[#7a1e22] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#62191c] transition-colors duration-300 transform hover:scale-105">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                            </svg>
+                            Save Recipe
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.jQuery) {
+            // Override any Select2 initialization to ensure rounded corners
+            $('.select2-selection').addClass('rounded-lg');
+
+            // Initialize Select2 for dropdowns with rounded corners
+            try {
+                $('.select2-multiple').select2({
+                    theme: 'classic',
+                    width: '100%',
+                    closeOnSelect: false,
+                    allowClear: true,
+                    placeholder: 'Select items...',
+                    containerCssClass: 'select2-rounded',
+                    dropdownCssClass: 'select2-rounded'
+                });
+
+                // Style single select elements with Select2
+                $('select').select2({
+                    theme: 'classic',
+                    width: '100%',
+                    minimumResultsForSearch: 6,
+                    placeholder: 'Select an option...',
+                    containerCssClass: 'select2-rounded',
+                    dropdownCssClass: 'select2-rounded'
+                });
+
+                // Apply rounded corners to Select2 elements
+                setTimeout(function() {
+                    $('.select2-container--classic .select2-selection').addClass('rounded-lg');
+                    $('.select2-container--classic .select2-selection--single').addClass('rounded-lg');
+                    $('.select2-container--classic .select2-selection--multiple').addClass('rounded-lg');
+                }, 100);
+
+                console.log("Select2 initialized successfully with rounded corners");
+            } catch (e) {
+                console.error("Error initializing Select2:", e);
+            }
+
+            // Add character counter for textareas
+            const textareas = document.querySelectorAll('textarea');
+            textareas.forEach(textarea => {
+                const container = document.createElement('div');
+                container.className = 'flex justify-end';
+
+                const counter = document.createElement('span');
+                counter.className = 'text-xs text-gray-500 mt-1';
+                counter.textContent = `${textarea.value.length} characters`;
+
+                container.appendChild(counter);
+                textarea.parentNode.insertBefore(container, textarea.nextSibling);
+
+                textarea.addEventListener('input', function() {
+                    counter.textContent = `${this.value.length} characters`;
+                });
+            });
+
+            // Image preview functionality
+            const urlFotoInput = document.getElementById('{{ form.url_foto.id_for_label }}');
+            const imagePreview = document.getElementById('image-preview');
+
+            urlFotoInput.addEventListener('input', function() {
+                const url = this.value.trim();
+                if (url) {
+                    // Create or update image preview
+                    imagePreview.innerHTML = '';
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.alt = 'Recipe preview';
+                    img.className = 'w-full h-32 object-cover';
+                    img.onerror = function() {
+                        imagePreview.innerHTML = '<div class="flex items-center justify-center h-32 bg-red-50"><p class="text-red-500 text-sm">Invalid image URL</p></div>';
+                    };
+                    imagePreview.appendChild(img);
+                    imagePreview.classList.remove('hidden');
+                } else {
+                    // Hide preview if URL is empty
+                    imagePreview.classList.add('hidden');
+                }
+            });
+
+            // Trigger preview if URL already exists
+            if (urlFotoInput.value.trim()) {
+                urlFotoInput.dispatchEvent(new Event('input'));
+            }
+
+            // Initialize Select2 for dropdowns
+            try {
+                $('.select2-multiple').select2({
+                    theme: 'classic',
+                    width: '100%',
+                    closeOnSelect: false,
+                    allowClear: true,
+                    placeholder: 'Select items...',
+                });
+
+                // Style single select elements with Select2
+                $('select').select2({
+                    theme: 'classic',
+                    width: '100%',
+                    minimumResultsForSearch: 6,
+                    placeholder: 'Select an option...',
+                });
+
+                $(".select2-container--classic .select2-selection--multiple .select2-selection__choice").css({
+                    "background-color": "#62191c",
+                    "color": "white",
+                    "border": "none"
+                });
+
+                console.log("Select2 initialized successfully");
+            } catch (e) {
+                console.error("Error initializing Select2:", e);
+            }
+
+            // Form validation enhancement
+            const form = document.getElementById('recipe-form');
+            form.addEventListener('submit', function(event) {
+                let hasError = false;
+                const requiredFields = form.querySelectorAll('input[required], textarea[required], select[required]');
+
+                requiredFields.forEach(field => {
+                    if (!field.value) {
+                        field.classList.add('border-red-500');
+
+                        // Add error message if not exists
+                        let errorMsg = field.nextElementSibling;
+                        if (!errorMsg || !errorMsg.classList.contains('text-red-600')) {
+                            errorMsg = document.createElement('p');
+                            errorMsg.classList.add('mt-1', 'text-sm', 'text-red-600');
+                            errorMsg.textContent = 'This field is required';
+                            field.parentNode.insertBefore(errorMsg, field.nextSibling);
+                        }
+
+                        hasError = true;
+                    } else {
+                        field.classList.remove('border-red-500');
+
+                        // Remove error message if exists
+                        let errorMsg = field.nextElementSibling;
+                        if (errorMsg && errorMsg.classList.contains('text-red-600')) {
+                            errorMsg.remove();
+                        }
+                    }
+                });
+
+                if (hasError) {
+                    event.preventDefault();
+                    // Scroll to first error with smooth animation
+                    const firstError = form.querySelector('.border-red-500');
+                    if (firstError) {
+                        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        firstError.focus();
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+<style>
+    /* Direct CSS targeting with !important to override all other styles */
+    input,
+    textarea,
+    select,
+    .form-control,
+    .select2-container--classic .select2-selection--single,
+    .select2-container--classic .select2-selection--multiple,
+    .django-select2 .select2-selection,
+    .select2-container .select2-selection,
+    .select2-selection {
+        border-radius: 0.5rem !important;  /* rounded-lg equivalent */
+    }
+
+    /* Custom Select2 rounded styles */
+    .select2-rounded .select2-selection {
+        border-radius: 0.5rem !important;
+    }
+
+    /* Style for Select2 dropdown */
+    .select2-container--classic .select2-dropdown {
+        border-radius: 0.5rem !important;
+        overflow: hidden !important;
+    }
+
+    /* Rest of your existing styles */
+    /* Direct CSS targeting all form elements regardless of how they're rendered */
+    input,
+    textarea,
+    select,
+    .select2-container--classic .select2-selection--single,
+    .select2-container--classic .select2-selection--multiple,
+    .django-select2 .select2-selection,
+    .select2-container .select2-selection {
+        border-radius: 0.5rem !important;  /* rounded-lg equivalent */
+        overflow: hidden;
+    }
+
+    /* Force override any Django generated elements */
+    form input,
+    form textarea,
+    form select,
+    .form-control,
+    .textInput,
+    .textarea,
+    .select,
+    .vTextField {
+        border-radius: 0.5rem !important;
+    }
+
+    /* Custom styling for Select2 */
+    .select2-container--classic .select2-selection--single {
+        height: 38px !important;
+        border: 1px solid #d1d5db !important;
+        border-radius: 0.5rem !important;
+    }
+
+    .select2-container--classic .select2-selection--single .select2-selection__rendered {
+        line-height: 36px !important;
+        padding-left: 12px !important;
+        color: #374151 !important;
+    }
+
+    .select2-container--classic .select2-selection--single .select2-selection__arrow {
+        height: 36px !important;
+    }
+
+    .select2-container--classic .select2-selection--multiple {
+        border: 1px solid #d1d5db !important;
+        border-radius: 0.5rem !important;
+        min-height: 38px !important;
+    }
+
+    .select2-container--classic .select2-selection--multiple .select2-selection__choice {
+        background-color: #62191c !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 0.5rem !important;
+        padding: 2px 8px !important;
+        margin-top: 4px !important;
+    }
+
+    .select2-container--classic .select2-selection--multiple .select2-selection__choice__remove {
+        color: rgba(255, 255, 255, 0.7) !important;
+        margin-right: 5px !important;
+    }
+
+    .select2-container--classic .select2-selection--multiple .select2-selection__choice__remove:hover {
+        color: white !important;
+    }
+
+    .select2-container--classic.select2-container--focus .select2-selection--multiple,
+    .select2-container--classic.select2-container--focus .select2-selection--single {
+        border-color: #e0cfc2 !important;
+        box-shadow: 0 0 0 2px rgba(224, 207, 194, 0.25) !important;
+    }
+
+    .select2-container--classic .select2-dropdown {
+        border-color: #e0cfc2 !important;
+        border-radius: 0.5rem !important;
+        overflow: hidden !important;
+    }
+
+    .select2-container--classic .select2-results__option--highlighted[aria-selected] {
+        background-color: #62191c !important;
+    }
+
+    /* Make textarea taller */
+    textarea {
+        min-height: 120px;
+    }
+
+    /* For instructions textarea */
+    #{{ form.langkah.id_for_label }} {
+        min-height: 200px;
+    }
+
+    /* Enhanced animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .bg-white {
+        animation: fadeIn 0.5s ease-in-out;
+    }
+
+    /* Additional decorative elements */
+    .recipe-section {
+        position: relative;
+    }
+
+    .recipe-section::before {
+        content: '';
+        position: absolute;
+        left: 19px; /* Centered with the number circles */
+        top: 34px;
+        bottom: 10px;
+        width: 2px;
+        background: #f3f4f6;
+        z-index: 0;
+    }
+
+    .recipe-section:last-child::before {
+        display: none;
+    }
+
+    /* Input focus effects */
+    input:focus, textarea:focus, select:focus {
+        transition: all 0.2s ease;
+        transform: translateY(-1px);
+    }
+</style>
+{% endblock %}

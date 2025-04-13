@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
+    <div class="relative py-3 sm:max-w-xl sm:mx-auto">
+        <div class="absolute inset-0 bg-[#62191c] shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 sm:rounded-3xl"></div>
+        <div class="relative px-4 py-10 bg-white shadow-lg sm:rounded-3xl sm:p-20">
+            <div class="max-w-md mx-auto">
+                <div class="divide-y divide-gray-200">
+                    <div class="py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
+
+                        <!-- ALERT -->
+                        <div id="update-message" class="hidden text-center px-4 py-3 rounded-lg font-semibold transition-all duration-500"></div>
+
+                        <form id="update-profile-form" method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+
+                            <div class="flex flex-col items-center">
+                                <!-- Profile Picture -->
+                                <div class="mb-4 relative">
+                                    <div class="w-32 h-32 rounded-full border-4 border-[#62191c] flex items-center justify-center relative overflow-hidden">
+                                        {% if user.profile.profile_picture %}
+                                            <img 
+                                                src="{{ user.profile.profile_picture.url }}" 
+                                                alt="Profile Picture" 
+                                                class="absolute inset-0 w-full h-full rounded-full object-cover"
+                                            >
+                                        {% else %}
+                                            <img 
+                                                src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png" 
+                                                alt="Default Profile Picture" 
+                                                class="absolute inset-0 w-full h-full rounded-full object-cover"
+                                            >
+                                        {% endif %}
+                                        <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center hover:opacity-0 transition-opacity duration-300">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Username -->
+                                <div class="mb-4 w-full">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2" for="username">
+                                        Username
+                                    </label>
+                                    {{ user_form.username }}
+                                </div>
+
+                                <!-- Email -->
+                                <div class="mb-4 w-full">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2" for="email">
+                                        Email
+                                    </label>
+                                    {{ user_form.email }}
+                                </div>
+
+                                <!-- Bio -->
+                                <div class="mb-4 w-full">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2" for="bio">
+                                        Bio
+                                    </label>
+                                    {{ profile_form.bio }}
+                                </div>
+
+                                <!-- Profile Picture Upload -->
+                                <div class="mb-4 w-full">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2" for="profile_picture">
+                                        Profile Picture
+                                    </label>
+                                    {{ profile_form.profile_picture }}
+                                </div>
+
+                                <!-- Submit Button -->
+                                <div class="mb-4 w-full">
+                                    <button 
+                                        type="submit" 
+                                        class="w-full bg-[#62191c] text-white py-2 px-4 rounded-full hover:bg-[#8B2635] transition duration-300"
+                                    >
+                                        Update Profile
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SCRIPT AJAX -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('update-profile-form');
+    const message = document.getElementById('update-message');
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+
+        // Show loading message
+        showMessage('Updating...', 'bg-yellow-100 text-yellow-800 border-yellow-400');
+
+        fetch(window.location.href, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showMessage('Profile updated successfully!', 'bg-green-100 text-green-800 border-green-400');
+                setTimeout(() => {
+                    message.classList.add('hidden');
+                }, 3000);
+            } else {
+                showMessage('Update failed. Please check your input.', 'bg-red-100 text-red-800 border-red-400');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showMessage('Something went wrong.', 'bg-red-100 text-red-800 border-red-400');
+        });
+    });
+
+    function showMessage(text, classNames) {
+        message.textContent = text;
+        message.className = `block text-center px-4 py-3 rounded-lg border font-semibold mb-4 ${classNames} transition-all duration-500`;
+    }
+});
+</script>
+{% endblock %}

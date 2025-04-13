@@ -4,3 +4,10 @@ whitenoise
 psycopg2-binary
 requests
 urllib3
+bleach
+cryptography
+python-decouple
+pytest
+pytest-django
+pytest-cov
+dotenv

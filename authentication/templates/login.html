@@ -1,0 +1,120 @@
+{% extends 'auth_base.html' %}
+
+{% block meta %}
+<title>Login</title>
+{% endblock meta %}
+
+{% block content %}
+{% load static %}
+<div class="min-h-screen flex items-center justify-center bg-[#e0cfc2] p-4">
+  <div class="w-full max-w-5xl bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
+    <!-- Left side - Image -->
+    <div class="hidden md:block md:w-1/2 relative">
+      <div class="absolute inset-0 flex items-center justify-center bg-[#62191c]">
+        <img src="/static/images/logo.png" alt="Logo" class="w-1/2 h-1/2 object-contain">
+      </div>
+    </div>
+
+    <!-- Mobile Logo -->
+    <div class="flex md:hidden justify-center items-center bg-[#62191c] p-6">
+      <img src="/static/images/logo.png" alt="Logo" class="h-16 object-contain">
+    </div>
+
+    <!-- Right side - Form -->
+    <div class="w-full md:w-1/2 p-5 sm:p-8 bg-[#f3ece3]">
+      <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Welcome Back</h1>
+      <p class="text-[#62191c] mb-6 sm:mb-8">
+        No account yet? 
+        <a href="{% url 'authentication:register' %}" class="hover:underline">Register</a>
+      </p>
+
+      <form method="POST" action="" class="space-y-4 sm:space-y-6">
+        {% csrf_token %}
+        <input type="hidden" name="remember" value="true">
+
+        <div>
+          <label for="username" class="block text-gray-700 font-medium mb-1 sm:mb-2 uppercase text-xs sm:text-sm">
+            Username
+          </label>
+          <input 
+            type="text" 
+            id="username" 
+            name="username" 
+            required
+            placeholder="Enter your username"
+            pattern="^[a-zA-Z0-9_.]+$" 
+              title="Only letters and numbers allowed"
+            class="w-full p-2 sm:p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#62191c]"
+          >
+        </div>
+
+        <div>
+          <label for="password" class="block text-gray-700 font-medium mb-1 sm:mb-2 uppercase text-xs sm:text-sm">
+            Password
+          </label>
+          <div class="relative">
+            <input 
+              type="password" 
+              id="password" 
+              name="password" 
+              required
+              placeholder="Enter your password"
+              class="w-full p-2 sm:p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#62191c]"
+            >
+            <button 
+              type="button"
+              onclick="togglePassword()"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+            >
+              <i class="ri-eye-line" id="password-toggle"></i>
+            </button>
+          </div>
+        </div>
+
+        <button 
+          type="submit"
+          class="w-full bg-[#873632] text-white p-2 sm:p-3 rounded-lg font-medium hover:bg-[#62191c] transition-colors"
+        >
+          Sign In
+        </button>
+      </form>
+
+      {% if messages %}
+      <div class="mt-4 sm:mt-6">
+        {% for message in messages %}
+        {% if message.tags == "success" %}
+        <div class="bg-green-100 border border-green-400 text-green-700 px-3 py-2 sm:px-4 sm:py-3 rounded-lg text-sm" role="alert">
+          <span class="block sm:inline">{{ message }}</span>
+        </div>
+        {% elif message.tags == "error" %}
+        <div class="bg-red-100 border border-red-400 text-red-700 px-3 py-2 sm:px-4 sm:py-3 rounded-lg text-sm" role="alert">
+          <span class="block sm:inline">{{ message }}</span>
+        </div>
+        {% else %}
+        <div class="bg-blue-100 border border-blue-400 text-blue-700 px-3 py-2 sm:px-4 sm:py-3 rounded-lg text-sm" role="alert">
+          <span class="block sm:inline">{{ message }}</span>
+        </div>
+        {% endif %}
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/3.5.0/remixicon.min.css" rel="stylesheet">
+<script>
+  function togglePassword() {
+    const password = document.getElementById('password');
+    const toggle = document.getElementById('password-toggle');
+    
+    if (password.type === 'password') {
+      password.type = 'text';
+      toggle.classList.replace('ri-eye-line', 'ri-eye-off-line');
+    } else {
+      password.type = 'password';
+      toggle.classList.replace('ri-eye-off-line', 'ri-eye-line');
+    }
+  }
+</script>
+{% endblock content %}

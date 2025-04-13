@@ -1,0 +1,494 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex flex-col sm:flex-row justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold mb-4 sm:mb-0">Recipes</h1>
+        <a href="{% url 'resep:create_resep' %}" class="bg-[#62191c] hover:bg-[#50151a] text-white px-5 py-2.5 rounded-full transition-colors flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+            </svg>
+            Create Recipe
+        </a>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <form id="recipe-filter-form" method="post" action="{% url 'resep:list_resep' %}">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label for="q" class="block text-sm font-medium text-gray-700 mb-1">Find Recipe</label>
+                <div class="relative">
+                    <input type="text" name="q" id="q" value="{{ query }}" placeholder="Search recipe..."
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-[#62191c] focus:border-[#62191c]">
+                    <button type="submit" class="absolute inset-y-0 right-0 px-3 flex items-center bg-[#62191c] text-white rounded-r-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                <div>
+                    <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                    <select name="category" id="category" class="filter-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-[#62191c] focus:border-[#62191c]">
+                        <option value="">All Categories</option>
+                        {% for cat in categories %}
+                            {% if cat.kategori %}
+                                <option value="{{ cat.kategori }}" {% if selected_category == cat.kategori %}selected{% endif %}>
+                                    {{ cat.kategori }} ({{ cat.count }})
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label for="cooking_method" class="block text-sm font-medium text-gray-700 mb-1">Cooking Method</label>
+                    <select name="cooking_method" id="cooking_method" class="filter-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-[#62191c] focus:border-[#62191c]">
+                        <option value="">All Cooking Methods</option>
+                        {% for method in cooking_methods %}
+                            {% if method.metode_masak %}
+                                <option value="{{ method.metode_masak }}" {% if selected_cooking_method == method.metode_masak %}selected{% endif %}>
+                                    {{ method.metode_masak }} ({{ method.count }})
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label for="main_ingredient" class="block text-sm font-medium text-gray-700 mb-1">Main Ingredient</label>
+                    <select name="main_ingredient" id="main_ingredient" class="filter-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-[#62191c] focus:border-[#62191c]">
+                        <option value="">All Main Ingredients</option>
+                        {% for ingredient in main_ingredients %}
+                            {% if ingredient.bahan_utama %}
+                                <option value="{{ ingredient.bahan_utama }}" {% if selected_main_ingredient == ingredient.bahan_utama %}selected{% endif %}>
+                                    {{ ingredient.bahan_utama }} ({{ ingredient.count }})
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="border-t pt-4 mt-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center mb-4 sm:mb-0">
+                        <span class="text-sm font-medium text-gray-700 mr-4 mb-2 sm:mb-0">Sort By:</span>
+
+                        <div class="w-full sm:w-64">
+                            <select name="sort_by" id="sort_by" class="filter-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-[#62191c] focus:border-[#62191c]">
+                                <option value="">Default</option>
+                                <option value="cooking_time_asc" {% if sort_by == 'cooking_time_asc' %}selected{% endif %}>Fastest Cooking Time</option>
+                                <option value="cooking_time_desc" {% if sort_by == 'cooking_time_desc' %}selected{% endif %}>Longest Cooking Time</option>
+                                <option value="servings_desc" {% if sort_by == 'servings_desc' %}selected{% endif %}>Most Servings</option>
+                                <option value="servings_asc" {% if sort_by == 'servings_asc' %}selected{% endif %}>Least Servings</option>
+                                <option value="name_asc" {% if sort_by == 'name_asc' %}selected{% endif %}>Name (A-Z)</option>
+                                <option value="name_desc" {% if sort_by == 'name_desc' %}selected{% endif %}>Name (Z-A)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end mt-4">
+                <button type="button" id="reset-filters" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 mr-2">
+                    Reset Filter
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div id="recipe-container" class="flex flex-wrap -mx-3">
+        {% include "resep/components/recipe_list.html" with resep_items=resep_items %}
+    </div>
+
+    <div id="pagination-container">
+        {% include "resep/components/pagination.html" with items_per_page=items_per_page %}
+    </div>
+</div>
+
+<div id="loading-indicator" class="hidden fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+    <div class="bg-white p-5 rounded-lg shadow-lg">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#62191c] mx-auto"></div>
+        <p class="text-center mt-2">Loading...</p>
+    </div>
+</div>
+
+<!-- pop up message rate limiting -->
+<div id="error-popup" class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 hidden">
+    <div class="bg-white rounded-lg shadow-lg p-8 max-w-md w-full mx-4 text-center">
+        <div class="flex justify-center mb-4">
+            <div class="w-24 h-24 flex items-center justify-center">
+                <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" width="80%" height="80%">
+                    <path d="M256 32c10.7 0 20.7 5.3 26.7 14.2l217 352.6c12.3 20-2.1 45.2-26.7 45.2H39c-24.6 0-39-25.2-26.7-45.2l217-352.6C235.3 37.3 245.3 32 256 32z"
+                        fill="#facc15" stroke="black" stroke-width="25" />
+                    <rect x="238" y="140" width="36" height="160" rx="10" fill="black" />
+                    <circle cx="256" cy="340" r="20" fill="black" />
+                </svg>
+            </div>
+        </div>
+        <h2 class="text-xl font-bold mb-2" style="color: #62191c;">WARNING!</h2>
+        <p class="text-gray-700 font-medium mb-2">Oh no, you've exceeded your rate limit!</p>
+        <!-- <p class="text-gray-500 mb-6">Please try again to complete the request.</p> -->
+        <button id="try-again-btn" class="bg-[#62191c] hover:bg-[#50151a] text-white font-medium py-2 px-6 rounded-md transition-colors duration-200 w-full">
+            Try Again
+        </button>
+        <div class="countdown-text text-sm text-gray-500 mb-4 mt-4 hidden">
+            <span><span id="countdown-timer">60</span> seconds before trying again.</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('recipe-filter-form');
+        const searchInput = document.getElementById('q');
+        const categorySelect = document.getElementById('category');
+        const cookingMethodSelect = document.getElementById('cooking_method');
+        const mainIngredientSelect = document.getElementById('main_ingredient');
+        const resetButton = document.getElementById('reset-filters');
+        const recipeContainer = document.getElementById('recipe-container');
+        const paginationContainer = document.getElementById('pagination-container');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const sortSelect = document.getElementById('sort_by');
+        const itemsPerPageSelect = document.getElementById('items_per_page');
+
+        let searchTimeout = null;
+
+        function debounce(func, wait) {
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    func.apply(context, args);
+                }, wait);
+            };
+        }
+
+        function escapeHTML(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function decodeHTMLEntities(str) {
+            if (!str) return '';
+            const textarea = document.createElement('textarea');
+            textarea.innerHTML = str;
+            return textarea.value;
+        }
+
+        function updateFilterCounts(data) {
+            if (data.categories) {
+                const selectedCategory = categorySelect.value;
+                categorySelect.innerHTML = '<option value="">All Categories</option>';
+                data.categories.forEach(cat => {
+                    if (cat.kategori) {
+                        const option = document.createElement('option');
+                        const decodedKategori = decodeHTMLEntities(cat.kategori);
+                        option.value = decodedKategori;
+                        option.textContent = `${decodedKategori} (${cat.count})`;
+                        option.selected = (decodedKategori === decodeHTMLEntities(selectedCategory));
+                        categorySelect.appendChild(option);
+                    }
+                });
+            }
+
+            if (data.cooking_methods) {
+                const selectedMethod = cookingMethodSelect.value;
+                cookingMethodSelect.innerHTML = '<option value="">All Cooking Methods</option>';
+                data.cooking_methods.forEach(method => {
+                    if (method.metode_masak) {
+                        const option = document.createElement('option');
+                        const decodedMethod = decodeHTMLEntities(method.metode_masak);
+                        option.value = decodedMethod;
+                        option.textContent = `${decodedMethod} (${method.count})`;
+                        option.selected = (decodedMethod === decodeHTMLEntities(selectedMethod));
+                        cookingMethodSelect.appendChild(option);
+                    }
+                });
+            }
+
+            if (data.main_ingredients) {
+                const selectedIngredient = mainIngredientSelect.value;
+                mainIngredientSelect.innerHTML = '<option value="">All Main Ingredients</option>';
+                data.main_ingredients.forEach(ingredient => {
+                    if (ingredient.bahan_utama) {
+                        const option = document.createElement('option');
+                        const decodedIngredient = decodeHTMLEntities(ingredient.bahan_utama);
+                        option.value = decodedIngredient;
+                        option.textContent = `${decodedIngredient} (${ingredient.count})`;
+                        option.selected = (decodedIngredient === decodeHTMLEntities(selectedIngredient));
+                        mainIngredientSelect.appendChild(option);
+                    }
+                });
+            }
+        }
+
+        function createEncodedFormData(formElement) {
+            const originalFormData = new FormData(formElement);
+            const encodedFormData = new FormData();
+
+            for (const [key, value] of originalFormData.entries()) {
+                encodedFormData.append(key, value);
+            }
+
+            return encodedFormData;
+        }
+
+        function loadRecipes(url, formData) {
+            loadingIndicator.classList.remove('hidden');
+
+            const itemsPerPage = document.getElementById('items_per_page');
+            if (itemsPerPage) {
+                formData.set('items_per_page', itemsPerPage.value);
+            }
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrfToken
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                recipeContainer.innerHTML = data.recipe_html;
+                paginationContainer.innerHTML = data.pagination_html;
+                updateFilterCounts(data);
+                attachPaginationListeners();
+                attachItemsPerPageListener();
+                loadingIndicator.classList.add('hidden');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                loadingIndicator.classList.add('hidden');
+            });
+        }
+
+        function attachItemsPerPageListener() {
+            const itemsPerPageSelect = document.getElementById('items_per_page');
+            if (itemsPerPageSelect) {
+                itemsPerPageSelect.addEventListener('change', function() {
+                    const formData = new FormData(form);
+                    formData.set('page', '1');
+                    loadRecipes(form.action, formData);
+                });
+            }
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const formData = createEncodedFormData(form);
+            loadRecipes(form.action, formData);
+        }
+
+        const debouncedSearch = debounce(function() {
+            const formData = createEncodedFormData(form);
+            loadRecipes(form.action, formData);
+        }, 500);
+
+        function handleFilterChange() {
+            const formData = createEncodedFormData(form);
+            formData.set('page', '1');
+            loadRecipes(form.action, formData);
+        }
+
+        function attachPaginationListeners() {
+            const paginationLinks = document.querySelectorAll('.pagination-link');
+            paginationLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const formData = createEncodedFormData(form);
+
+                    const pageNumber = this.getAttribute('data-page');
+                    if (pageNumber) {
+                        formData.set('page', pageNumber);
+                    }
+                    loadRecipes(form.action, formData);
+                });
+            });
+        }
+
+        resetButton.addEventListener('click', function() {
+            searchInput.value = '';
+            categorySelect.value = '';
+            cookingMethodSelect.value = '';
+            mainIngredientSelect.value = '';
+            sortSelect.value = '';
+
+            if (itemsPerPageSelect) {
+                itemsPerPageSelect.value = itemsPerPageSelect.querySelector('option').value;
+            }
+
+            const formData = new FormData();
+            formData.append('csrfmiddlewaretoken', csrfToken);
+            formData.append('page', '1');
+            loadRecipes(form.action, formData);
+        });
+
+        searchInput.addEventListener('input', debouncedSearch);
+
+        categorySelect.addEventListener('change', function() {
+            const formData = createEncodedFormData(form);
+            formData.set('page', '1');
+
+            if (this.value === '') {
+                formData.delete('category');
+            }
+
+            loadRecipes(form.action, formData);
+        });
+
+        cookingMethodSelect.addEventListener('change', function() {
+            if (this.value === '') {
+                const formData = createEncodedFormData(form);
+                formData.delete('cooking_method');
+                formData.set('page', '1');
+                loadRecipes(form.action, formData);
+            } else {
+                handleFilterChange();
+            }
+        });
+
+        mainIngredientSelect.addEventListener('change', function() {
+            if (this.value === '') {
+                const formData = createEncodedFormData(form);
+                formData.delete('main_ingredient');
+                formData.set('page', '1');
+                loadRecipes(form.action, formData);
+            } else {
+                handleFilterChange();
+            }
+        });
+
+        sortSelect.addEventListener('change', handleFilterChange);
+
+        if (itemsPerPageSelect) {
+            itemsPerPageSelect.addEventListener('change', handleFilterChange);
+        }
+
+        form.addEventListener('submit', handleFormSubmit);
+
+        attachPaginationListeners();
+        attachItemsPerPageListener();
+    });
+
+    // BOOKMARK
+    function handleBookmarkResponse(response) {
+        if (response.error && response.show_popup) {
+            // Extract data from the rate limit response
+            const message = response.message;
+            const hasCountdown = true; // Since the rate limit has a countdown
+            const seconds = response.retry_after;
+            const resepId = response.resep_id;
+            
+            // Show the error popup with countdown
+            showErrorPopup(message, hasCountdown, seconds, resepId);
+        }
+    }
+
+    function showErrorPopup(message, hasCountdown = false, seconds = 60, resepId = null) {
+        const popup = document.getElementById('error-popup');
+        const popupContentDiv = popup.querySelector('.bg-white');
+        const messageElem = popup.querySelector('p.text-gray-700.font-medium.mb-2');
+        const countdownContainer = popup.querySelector('.countdown-text');
+        const countdownElem = document.getElementById('countdown-timer');
+        const tryAgainBtn = document.getElementById('try-again-btn');
+
+        if (popupContentDiv) {
+            popupContentDiv.style.position = 'relative';
+            
+            const existingCloseBtn = popupContentDiv.querySelector('.close-button');
+            if (existingCloseBtn) {
+                existingCloseBtn.remove();
+            }
+            
+            const closeButton = document.createElement('button');
+            closeButton.className = 'close-button absolute top-4 right-4 bg-gray-200 hover:bg-gray-300 rounded-full p-1';
+            closeButton.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            `;
+            closeButton.onclick = function() {
+                popup.classList.add('hidden');
+            };
+            
+            popupContentDiv.appendChild(closeButton);
+        }
+
+        if (message && messageElem) {
+            messageElem.textContent = message;
+        }
+        
+        if (hasCountdown && seconds > 0) {
+            countdownContainer.classList.remove('hidden');
+            countdownElem.textContent = seconds;
+            
+            tryAgainBtn.disabled = true;
+            tryAgainBtn.classList.add('cursor-not-allowed');
+            
+            let remainingTime = seconds;
+            const countdownInterval = setInterval(() => {
+                remainingTime--;
+                countdownElem.textContent = remainingTime;
+                
+                if (remainingTime <= 0) {
+                    clearInterval(countdownInterval);
+                    tryAgainBtn.disabled = false;
+                    tryAgainBtn.classList.remove('cursor-not-allowed');
+                    countdownContainer.classList.add('hidden');
+                }
+            }, 1000);
+        } else {
+            countdownContainer.classList.add('hidden');
+            tryAgainBtn.disabled = false;
+            tryAgainBtn.classList.remove('cursor-not-allowed');
+        }
+       
+        popup.classList.remove('hidden');
+        
+        tryAgainBtn.onclick = function() {
+            popup.classList.add('hidden');
+            
+            if (resepId && !tryAgainBtn.disabled) {
+                resetRateLimit(resepId);
+            }
+        };
+    }
+
+    function resetRateLimit(resepId) {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        
+        fetch('/bookmark/reset-rate-limit/', {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Optional: show success message
+                if (typeof showNotification === 'function') {
+                    showNotification('Rate limit has been reset. You can bookmark again now.', false);
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error resetting rate limit:', error);
+        });
+    }
+</script>
+{% endblock %}

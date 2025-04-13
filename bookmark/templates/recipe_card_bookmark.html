@@ -1,0 +1,268 @@
+<a href="{% url 'resep:detail_resep' resep.id %}" class="block">
+    <div class="max-w-full w-full mx-auto bg-white rounded-lg shadow-md overflow-hidden flex flex-row mb-4">
+        <div class="w-1/3 relative aspect-[3/2] md:aspect-[3/1]">
+            {% if resep.url_foto %}
+            <img src="{{ resep.url_foto }}" class="w-full h-full object-cover" alt="{{ resep.judul }}">
+            {% else %}
+            <div class="w-full h-full bg-gray-100 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+            </div>
+            {% endif %}
+            
+            <div class="flex items-center text-gray-500">
+                <button class="absolute top-2 right-2 bg-white bg-opacity-75 hover:bg-opacity-100 p-2 rounded-full shadow-sm transition-all duration-200 bookmark-toggle-btn"
+                        data-resep-id="{{ resep.id }}"
+                        onclick="event.stopPropagation(); event.preventDefault(); toggleBookmark({{ resep.id }}, event)">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 bookmark-icon text-red-500" 
+                        fill="{% if is_bookmarked %}currentColor{% else %}none{% endif %}" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <div class="p-4 flex-grow flex flex-col justify-between md:w-2/3">
+            <div>
+                <div class="flex justify-between items-start mb-2">
+                    <h2 class="text-xl font-bold text-gray-800 flex-grow pr-2">{{ resep.judul }}</h2>
+                    <span class="text-sm text-gray-500 whitespace-nowrap">
+                        Added to bookmarks on {{ bookmark.created_at|date:"D, d M Y" }}
+                    </span>
+                </div>
+                
+                <div class="flex items-center mb-2">
+                    <div class="bg-[#62191c] rounded-full w-8 h-8 flex items-center justify-center text-white mr-2">
+                        <span class="text-sm font-medium">
+                            {{ resep.user.user.username|first|upper }}
+                        </span>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-800">{{ resep.user.user.username }}</p>
+                        <p class="text-xs text-gray-500">Recipe Creator</p>
+                    </div>
+                </div>
+                
+                <div class="flex flex-wrap gap-2 mb-3">
+                    <span class="bg-[#62191c] text-white px-2 py-1 rounded-full text-xs">{{ resep.kategori.nama }}</span>
+                    <span class="bg-[#62191c]/80 text-white px-2 py-1 rounded-full text-xs">{{ resep.metode_masak.nama }}</span>
+                </div>
+                
+                <p class="text-gray-600 text-sm mb-3">{{ resep.deskripsi|truncatechars:150 }}</p>
+                
+                <div class="flex items-center space-x-4 text-gray-600 text-sm">
+                    {% if resep.durasi %}
+                    <div class="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-[#62191c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {{ resep.durasi }}
+                    </div>
+                    {% endif %}
+                    
+                    {% if resep.porsi %}
+                    <div class="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-[#62191c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        {{ resep.porsi }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="flex justify-between items-center mt-4 pt-3 border-t border-gray-200">
+                <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 text-yellow-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    <span class="text-sm">
+                        {% if resep.rating %}{{ resep.rating|floatformat:"1" }}{% else %}0.0{% endif %} 
+                        ({{ resep.reviews_count|default:"0" }})
+                    </span>
+                </div>
+            </div>
+            <div class="flex justify-between items-center mt-4 pt-3 border-t border-gray-200">
+                <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="text-sm likes-count">
+                        {{ resep.likes_count|default:"0" }} Likes
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</a>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const bookmarkButtons = document.querySelectorAll('.bookmark-toggle-btn');
+        
+        bookmarkButtons.forEach(button => {
+            const resepId = button.dataset.resepId;
+            const bookmarkIcon = button.querySelector('svg');
+            
+            // Periksa status bookmark saat halaman dimuat
+            fetch(`/bookmark/check/${resepId}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.is_bookmarked) {
+                    bookmarkIcon.style.fill = 'currentColor';
+                    bookmarkIcon.classList.add('text-red-500');
+                } else {
+                    bookmarkIcon.style.fill = 'none';
+                    bookmarkIcon.classList.remove('text-red-500');
+                }
+            })
+            .catch(error => {
+                console.error('Error checking bookmark status:', error);
+            });
+        });
+    });
+
+    function toggleBookmark(resepId, event) {
+        // Hindari event bawaan
+        event.preventDefault();
+        event.stopPropagation();
+
+        // Temukan elemen SVG terlebih dahulu
+        const bookmarkButton = event.target.closest('button');
+        const bookmarkIcon = bookmarkButton ? bookmarkButton.querySelector('svg') : null;
+        const recipeCard = bookmarkButton ? bookmarkButton.closest('a') : null;
+
+        const isBookmarked = bookmarkIcon && bookmarkIcon.getAttribute('fill') === 'currentColor';
+
+        if (isBookmarked) {
+            const confirmDialog = document.getElementById('unbookmarkConfirmationDialog');
+            const confirmButton = document.getElementById('confirmUnbookmarkBtn');
+            const cancelButton = document.getElementById('cancelUnbookmarkBtn');
+            
+            confirmButton.setAttribute('data-resep-id', resepId);
+            confirmDialog.classList.remove('hidden');
+            
+            cancelButton.onclick = function() {
+                confirmDialog.classList.add('hidden');
+            };
+            
+            confirmButton.onclick = function() {
+                confirmDialog.classList.add('hidden');
+                processBookmarkToggle(resepId, bookmarkIcon, recipeCard);
+            };
+        } else {
+            processBookmarkToggle(resepId, bookmarkIcon, recipeCard);
+        }
+    }
+
+    // Fungsi untuk memproses toggle bookmark setelah konfirmasi
+    function processBookmarkToggle(resepId, bookmarkIcon, recipeCard) {
+        const likesCountElement = recipeCard ? recipeCard.querySelector('.likes-count') : null;
+
+        fetch(`/bookmark/toggle/${resepId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (bookmarkIcon) {
+                if (data.is_bookmarked) {
+                    // Pastikan fill berubah dan warna merah
+                    bookmarkIcon.style.fill = 'currentColor';
+                    bookmarkIcon.classList.add('text-red-500');
+
+                    // Tambahkan likes count
+                    if (likesCountElement) {
+                        const currentLikesCount = parseInt(likesCountElement.textContent) || 0;
+                        likesCountElement.textContent = currentLikesCount + 1;
+                    }
+
+                } else {
+                    // Kembalikan ke kondisi semula
+                    bookmarkIcon.style.fill = 'none';
+                    bookmarkIcon.classList.remove('text-red-500');
+
+                    // Kurangi likes count
+                    if (likesCountElement) {
+                        const currentLikesCount = parseInt(likesCountElement.textContent) || 0;
+                        likesCountElement.textContent = Math.max(0, currentLikesCount - 1);
+                    }
+                }
+            }
+
+            // Hapus item dari halaman bookmark secara langsung
+            if (!data.is_bookmarked && window.location.pathname.includes('/bookmark/')) {
+                if (recipeCard) {
+                    // Hilangkan seluruh card
+                    recipeCard.remove();
+
+                    // Perbarui total bookmark yang ditampilkan
+                    const bookmarkCountElement = document.querySelector('.bookmark-count');
+                    if (bookmarkCountElement) {
+                        const currentCount = parseInt(bookmarkCountElement.textContent);
+                        bookmarkCountElement.textContent = currentCount - 1;
+                    }
+
+                    const bookmarkContainer = document.querySelector('.space-y-4');
+                        if (bookmarkContainer && bookmarkContainer.children.length <= 1) {
+                        // Jika ini adalah bookmark terakhir, reload halaman
+                        window.location.reload();
+                    }
+
+                    const paginationContainer = document.querySelector('.pagination');
+                    const noBookmarksContainer = document.querySelector('.no-bookmarks-container');
+
+                    if (bookmarkContainer && bookmarkContainer.children.length === 0) {
+                        if (paginationContainer) paginationContainer.remove();
+                        
+                        if (!noBookmarksContainer) {
+                            const defaultNoBookmarkHTML = `
+                            <div class="w-full p-3 no-bookmarks-container">
+                                <div class="bg-gray-50 border border-gray-200 p-6 rounded-lg shadow-sm text-center">
+                                    <div class="flex flex-col items-center justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2m-4-1v8m0 0l3-3m-3 3L9 8m-5 5h2.586a1 1 0 01.707.293l2.414 2.414a1 1 0 00.707.293h3.172a1 1 0 00.707-.293l2.414-2.414a1 1 0 01.707-.293H20" />
+                                        </svg>
+                                        <h3 class="font-semibold text-xl text-gray-800 mb-2">No Bookmarks Yet</h3>
+                                        <p class="text-gray-600 mb-6">Discover and save your favorite recipes!</p>
+                                        <a href="/resep/" class="px-5 py-2.5 bg-[#62191c] hover:bg-[#50151a] text-white rounded-md transition-colors duration-200 font-medium">
+                                            Browse Recipes
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>`;
+                            
+                            bookmarkContainer.insertAdjacentHTML('afterend', defaultNoBookmarkHTML);
+                        }
+                    }
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error toggling bookmark:', error);
+        });
+    }
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
