@@ -4,7 +4,7 @@ variables:
   MIN_MEMORY: 256Mi
   MAX_CPU: 500m
   MAX_MEMORY: 512Mi
-  PORT: 8000
+  PORT: 80
 
   # Image and Deployment Variables, It's better to not change these variables below
   # because they are used in the deploy script
@@ -16,3 +16,5 @@ variables:
   # App Variables, you can add your own variables here
   # App variables must have the prefix "PODS_"
   PODS_TEST: tests
+  PODS_TESTNUM: 12312312
+  PODS_TESTEQ: 123123=12312312
