@@ -186,7 +186,7 @@ def toggle_bookmark(request, resep_id):
 
 @login_required
 def check_bookmark_status(request, resep_id):
-    user_profile = UserProfile.objects.get(user=request.user)
+    user_profile, _ = UserProfile.objects.get_or_create(user=request.user)
     resep = get_object_or_404(Resep, pk=resep_id)
     
     is_bookmarked = Bookmark.objects.filter(user=user_profile, resep=resep).exists()
