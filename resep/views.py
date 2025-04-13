@@ -255,8 +255,12 @@ def detail_resep(request, id):
 
     is_bookmarked = False
     if request.user.is_authenticated:
-        user_profile = UserProfile.objects.get(user=request.user)
-        is_bookmarked = Bookmark.objects.filter(user=user_profile, resep=resep).exists()
+        try:
+            user_profile = UserProfile.objects.get(user=request.user)
+            is_bookmarked = Bookmark.objects.filter(user=user_profile, resep=resep).exists()
+        except UserProfile.DoesNotExist:
+            # Handle case where user doesn't have a profile
+            pass
 
     komentar_form = KomentarForm()
     context = {
