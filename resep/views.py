@@ -1,8 +1,9 @@
+from pyexpat.errors import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 
 from komentar.forms import KomentarForm
-from .models import Resep
+from .models import RecipeReport, Resep
 from .forms import ResepForm
 from authentication.models import UserProfile
 from django.core.paginator import Paginator
@@ -14,6 +15,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 import html
 from bookmark.models import Bookmark
+from django.contrib.auth.models import User
+from django.contrib import messages
 
 def sanitize_post_data(post_data):
     sanitized_data = post_data.copy()
@@ -125,17 +128,19 @@ def list_resep(request):
 
     # bookmark status for each recipe
     if request.user.is_authenticated:
-        user_profile = UserProfile.objects.get(user=request.user)
-        bookmarked_reseps = set(Bookmark.objects.filter(
-            user=user_profile,
-            resep__in=resep_items.object_list
-        ).values_list('resep_id', flat=True))
+        try:
+            user_profile = UserProfile.objects.get(user=request.user)
+            bookmarked_reseps = set(Bookmark.objects.filter(
+                user=user_profile,
+                resep__in=resep_items.object_list
+            ).values_list('resep_id', flat=True))
 
-        # Add is_bookmarked attribute to each recipe
-        for resep in resep_items.object_list:
-            resep.is_bookmarked = resep.id in bookmarked_reseps
+            for resep in resep_items.object_list:
+                resep.is_bookmarked = resep.id in bookmarked_reseps
+        except UserProfile.DoesNotExist:
+            for resep in resep_items.object_list:
+                resep.is_bookmarked = False
     else:
-        # If user is not logged in, no recipes are bookmarked
         for resep in resep_items.object_list:
             resep.is_bookmarked = False
 
@@ -207,8 +212,6 @@ def create_resep(request):
 def edit_resep(request, id):
     resep = get_object_or_404(Resep, pk=id)
     user_profile = UserProfile.objects.get(user=request.user)
-
-    # Check if the current user is the author of the recipe
     if resep.user != user_profile:
         return HttpResponse("You don't have permission to edit this recipe", status=403)
 
@@ -252,8 +255,12 @@ def detail_resep(request, id):
 
     is_bookmarked = False
     if request.user.is_authenticated:
-        user_profile = UserProfile.objects.get(user=request.user)
-        is_bookmarked = Bookmark.objects.filter(user=user_profile, resep=resep).exists()
+        try:
+            user_profile = UserProfile.objects.get(user=request.user)
+            is_bookmarked = Bookmark.objects.filter(user=user_profile, resep=resep).exists()
+        except UserProfile.DoesNotExist:
+            # Handle case where user doesn't have a profile
+            pass
 
     komentar_form = KomentarForm()
     context = {
@@ -265,3 +272,113 @@ def detail_resep(request, id):
     }
 
     return render(request, 'resep/detail_resep.html', context)
+
+@login_required
+def report_recipe(request, recipe_id):
+    recipe = get_object_or_404(Resep, id=recipe_id)
+
+    if request.user.is_staff or request.user.is_superuser:
+        messages.error(request, 'Admin accounts cannot report recipes.')
+        return redirect('resep:detail_resep', id=recipe_id)
+    
+    if RecipeReport.objects.filter(reporter=request.user, recipe=recipe).exists():
+        messages.warning(request, 'You have already reported this recipe.')
+        return redirect('resep:detail_resep', id=recipe_id)
+    
+    if request.method == 'POST':
+        reason = request.POST.get('reason')
+
+        valid_reasons = [reason_code for reason_code, _ in RecipeReport.REPORT_REASONS]
+        if reason not in valid_reasons:
+            messages.error(request, 'Invalid report reason.')
+            return redirect('resep:detail_resep', id=recipe_id)
+
+        RecipeReport.objects.create(
+            reporter=request.user,
+            recipe=recipe,
+            reason=reason,
+            status='pending'
+        )
+        
+        messages.success(request, 'Recipe reported successfully. Our admin will review it.')
+        return redirect('resep:detail_resep', id=recipe_id)
+    
+    return redirect('resep:detail_resep', id=recipe_id)
+
+@login_required
+def admin_moderate_recipe(request, recipe_id):
+    """Function for admin to directly moderate recipes from the detail page"""
+    if not request.user.is_staff and not request.user.is_superuser:
+        messages.error(request, 'Only admin can use this feature.')
+        return redirect('resep:detail_resep', id=recipe_id)
+    
+    recipe = get_object_or_404(Resep, id=recipe_id)
+    
+    if request.method == 'POST':
+        reason = request.POST.get('reason')
+        action = request.POST.get('action')
+        
+        valid_reasons = [reason_code for reason_code, _ in RecipeReport.REPORT_REASONS]
+        if reason not in valid_reasons:
+            messages.error(request, 'Invalid report reason.')
+            return redirect('resep:detail_resep', id=recipe_id)
+        
+        tastify_user, created = User.objects.get_or_create(
+            username='Tastify',
+            defaults={
+                'is_active': False,
+                'email': 'system@tastify.example.com'
+            }
+        )
+
+        report = RecipeReport.objects.create(
+            reporter=tastify_user,
+            recipe=recipe,
+            reason=reason,
+            status='pending'
+        )
+    
+        report.save_recipe_info()
+        report.save()
+        
+        if action == 'delete_recipe':
+            report.status = 'deleted'
+            report.save()
+            other_reports = RecipeReport.objects.filter(recipe_id=recipe.id, status='pending')
+            for other_report in other_reports:
+                other_report.save_recipe_info()
+                other_report.status = 'deleted'
+                other_report.save()
+            
+            recipe.delete()
+            messages.success(request, 'Recipe has been deleted and reported.')
+            return redirect('resep:list_resep')
+            
+        elif action == 'ban_user':
+            user = recipe.user.user
+            user_recipes = Resep.objects.filter(user=recipe.user)
+            recipe_ids = list(user_recipes.values_list('id', flat=True))
+            
+            report.status = 'banned'
+            report.save()
+            
+            RecipeReport.objects.filter(recipe_id__in=recipe_ids, status='pending').update(status='banned')
+            for user_recipe in user_recipes:
+                if not RecipeReport.objects.filter(recipe=user_recipe, reporter=tastify_user).exists():
+                    new_report = RecipeReport.objects.create(
+                        reporter=tastify_user,
+                        recipe=user_recipe,
+                        reason=reason,
+                        status='banned'
+                    )
+                    new_report.save_recipe_info()
+                    new_report.save()
+
+            user_recipes.delete()
+            user.is_active = False
+            user.save()
+            
+            messages.success(request, f'User {user.username} has been banned and all their recipes have been deleted.')
+            return redirect('resep:list_resep')
+        
+    return redirect('resep:detail_resep', id=recipe_id)

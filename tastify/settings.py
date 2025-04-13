@@ -9,25 +9,28 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+import os
 from pathlib import Path
+from dotenv import load_dotenv
+from datetime import timedelta
+
+# Load environment variables
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-5&x89+=4&$$@8w@nfw%t&7vt!_w71awpub5%1p%x+iwkvog36*'
+SECRET_KEY = os.getenv('PODS_DJANGO_SECRET', 'django-insecure-5&x89+=4&$$@8w@nfw%t&7vt!_w71awpub5%1p%x+iwkvog36*')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DJANGO_ENV = os.getenv('PODS_DJANGO_ENV', 'development')
+if DJANGO_ENV == 'production':
+    DEBUG = False
+else:
+    DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
-
-
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", 'https://kelompok-64-tastify.pkpl.cs.ui.ac.id']
+CSRF_TRUSTED_ORIGINS = ["http://localhost","http://127.0.0.1", 'https://kelompok-64-tastify.pkpl.cs.ui.ac.id']
 # Application definition
 
 INSTALLED_APPS = [
@@ -83,10 +86,15 @@ WSGI_APPLICATION = 'tastify.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USERNAME'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
     }
 }
+
 
 
 # Password validation
@@ -122,7 +130,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
-import os
+
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
@@ -133,8 +141,6 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-CSRF_TRUSTED_ORIGINS = ["http://localhost","http://127.0.0.1"]
 
 # settings.py
 from decouple import config

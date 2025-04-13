@@ -16,7 +16,6 @@ from django.core import serializers
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 
-@csrf_exempt
 def register(request):
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
@@ -56,7 +55,6 @@ class CustomAuthenticationForm(AuthenticationForm):
                 raise ValidationError('Invalid username')
         return username
 
-@csrf_exempt
 def login_user(request):
     # Jika request menggunakan metode POST
     if request.method == 'POST':
@@ -123,7 +121,6 @@ def login_user(request):
         context = {'form': form}
         return render(request, 'login.html', context)
 
-@csrf_exempt
 def logout_user(request):
     logout(request)
     response = HttpResponseRedirect(reverse('main:show_main'))

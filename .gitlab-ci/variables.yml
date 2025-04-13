@@ -16,3 +16,5 @@ variables:
   # App Variables, you can add your own variables here
   # App variables must have the prefix "PODS_"
   PODS_TEST: tests
+  PODS_TESTNUM: 12312312
+  PODS_TESTEQ: 123123=12312312
