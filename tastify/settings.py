@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-import os
 from datetime import timedelta
 
 # Load environment variables
@@ -30,8 +29,8 @@ if DJANGO_ENV == 'production':
 else:
     DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "kelompok-64-tastify.pkpl.cs.ui.ac.id"]
-
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", 'https://kelompok-64-tastify.pkpl.cs.ui.ac.id']
+CSRF_TRUSTED_ORIGINS = ["http://localhost","http://127.0.0.1", 'https://kelompok-64-tastify.pkpl.cs.ui.ac.id']
 # Application definition
 
 INSTALLED_APPS = [
@@ -89,10 +88,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.getenv('DB_NAME'),
-        'USER' : os.getenv('DB_USERNAME'),
-        'PASSWORD' : os.getenv('DB_PASSWORD'),
-        'HOST' : os.getenv('DB_HOST'),
-        'PORT' : os.getenv('DB_PORT'),
+        'USER': os.getenv('DB_USERNAME'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
     }
 }
 
@@ -142,8 +141,6 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-CSRF_TRUSTED_ORIGINS = ["http://localhost","http://127.0.0.1"]
 
 # settings.py
 from decouple import config

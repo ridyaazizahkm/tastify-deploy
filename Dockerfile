@@ -45,7 +45,7 @@ ENV PYTHONUNBUFFERED=1
 USER appuser
 
 # Expose the application port
-EXPOSE 8000
+EXPOSE 80
 
 # Set the entrypoint script
 RUN chmod +x entrypoint.sh
