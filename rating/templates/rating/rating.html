@@ -46,7 +46,89 @@
                 selectedRating = 0;
             });
         }
-        
+        // Add this function to create a message alert
+        function showMessageAlert(message, type = 'success') {
+            const messageContainer = document.getElementById('message-container');
+            
+            if (!messageContainer) {
+                // Create container if it doesn't exist
+                const newContainer = document.createElement('div');
+                newContainer.id = 'message-container';
+                newContainer.className = 'fixed top-5 right-5 z-50 max-w-md';
+                document.body.appendChild(newContainer);
+                messageContainer = newContainer;
+            }
+            
+            // Create the alert element
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `message-alert bg-white border-l-4 ${type === 'success' ? 'border-green-500' : 'border-red-500'} p-4 mb-3 shadow-lg rounded-r flex items-start auto-dismiss`;
+            alertDiv.role = 'alert';
+            
+            // Create the icon
+            const iconDiv = document.createElement('div');
+            iconDiv.className = 'flex-shrink-0 mr-3';
+            const iconSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            iconSvg.setAttribute('class', `h-5 w-5 ${type === 'success' ? 'text-green-500' : 'text-red-500'}`);
+            iconSvg.setAttribute('fill', 'none');
+            iconSvg.setAttribute('viewBox', '0 0 24 24');
+            iconSvg.setAttribute('stroke', 'currentColor');
+            
+            const iconPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            if (type === 'success') {
+                iconPath.setAttribute('d', 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z');
+            } else {
+                iconPath.setAttribute('d', 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z');
+            }
+            iconPath.setAttribute('stroke-linecap', 'round');
+            iconPath.setAttribute('stroke-linejoin', 'round');
+            iconPath.setAttribute('stroke-width', '2');
+            
+            iconSvg.appendChild(iconPath);
+            iconDiv.appendChild(iconSvg);
+            
+            // Create the message content
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'flex-1';
+            const messageText = document.createElement('p');
+            messageText.className = `font-medium ${type === 'success' ? 'text-green-800' : 'text-red-800'}`;
+            messageText.textContent = message;
+            messageDiv.appendChild(messageText);
+            
+            // Create the close button
+            const closeButton = document.createElement('button');
+            closeButton.className = 'ml-4 text-gray-400 hover:text-gray-600 focus:outline-none';
+            closeButton.onclick = function() { alertDiv.remove(); };
+            
+            const closeSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            closeSvg.setAttribute('class', 'h-4 w-4');
+            closeSvg.setAttribute('fill', 'none');
+            closeSvg.setAttribute('viewBox', '0 0 24 24');
+            closeSvg.setAttribute('stroke', 'currentColor');
+            
+            const closePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            closePath.setAttribute('d', 'M6 18L18 6M6 6l12 12');
+            closePath.setAttribute('stroke-linecap', 'round');
+            closePath.setAttribute('stroke-linejoin', 'round');
+            closePath.setAttribute('stroke-width', '2');
+            
+            closeSvg.appendChild(closePath);
+            closeButton.appendChild(closeSvg);
+            
+            // Assemble the alert
+            alertDiv.appendChild(iconDiv);
+            alertDiv.appendChild(messageDiv);
+            alertDiv.appendChild(closeButton);
+            
+            // Add to container
+            messageContainer.appendChild(alertDiv);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(function() {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        // Modify the submitRatingBtn event listener to add success message
         if (submitRatingBtn) {
             submitRatingBtn.addEventListener('click', function() {
                 if (selectedRating > 0) {
@@ -85,11 +167,14 @@
                             totalRatingsDisplay.textContent = `(${data.total_ratings})`;
                         }
                         
+                        // Show success message
+                        showMessageAlert(`Your rating of ${selectedRating} star${selectedRating > 1 ? 's' : ''} has been added!`, 'success');
+                        
                         ratingPopup.classList.add('hidden');
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('Failed to add rating');
+                        showMessageAlert('Failed to add rating', 'error');
                     });
                 } else {
                     alert('Please select a rating first');
