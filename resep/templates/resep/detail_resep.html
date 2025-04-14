@@ -46,6 +46,7 @@
         </a>
     </div>
 
+    <!-- Recipe Header Card -->
     <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
         <div class="md:flex">
             <div class="md:w-2/5 relative">
@@ -140,24 +141,24 @@
                             </svg>
                             Delete
                         </a>
-                        {% elif user.is_authenticated and user != resep.user.user and not user.is_staff and not user.is_superuser %}
-                        <button class="inline-flex items-center px-3 py-1 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200 text-sm report-recipe-link" data-recipe-id="{{ resep.id }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
-                            </svg>
-                            Report
-                        </button>
-                        {% endif %}
-                        
-                        {% if user.is_staff or user.is_superuser %}
-                        <button class="inline-flex items-center px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors duration-200 text-sm admin-report-recipe-link" data-recipe-id="{{ resep.id }}" data-user-id="{{ resep.user.user.id }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
-                            Moderate
-                        </button>
-                        {% endif %}
                     </div>
+                    {% elif user.is_authenticated and user != resep.user.user and not resep.user.user.is_staff and not resep.user.user.is_superuser %}
+                    <button class="inline-flex items-center px-3 py-1 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200 text-sm report-recipe-link" data-recipe-id="{{ resep.id }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+                        </svg>
+                        Report
+                    </button>
+                    {% endif %}
+                    
+                    {% if user.is_staff or user.is_superuser %}
+                    <button class="inline-flex items-center px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors duration-200 text-sm admin-report-recipe-link" data-recipe-id="{{ resep.id }}" data-user-id="{{ resep.user.user.id }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        Moderate
+                    </button>
+                    {% endif %}
                 </div>
                 {% endif %}
             </div>
@@ -165,7 +166,7 @@
     </div>
 
     <!-- Recipe Details -->
-    <div class="grid md:grid-cols-2 gap-8">
+    <div class="grid md:grid-cols-2 gap-8 mb-8">
         <!-- Left Column -->
         <div class="space-y-8">
             <!-- Ingredients -->
@@ -177,9 +178,9 @@
                     <h3 class="text-xl font-bold">Ingredients</h3>
                 </div>
                 <div class="p-6">
-                        <div class="text-gray-700 prose">
-                            {{ resep.bahan|linebreaks }}
-                        </div>
+                    <div class="text-gray-700 prose">
+                        {{ resep.bahan|linebreaks }}
+                    </div>
                 </div>
             </div>
 
@@ -218,7 +219,6 @@
             </div>
         </div>
     </div>
-</div>
 
 <!-- Comments Section -->
 {% include 'komentar/komentar.html' with resep=resep %}
