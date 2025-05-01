@@ -1,6 +1,6 @@
 deploy:
   stage: deploy
-  image: alpine:latest
+  image: registry.cs.ui.ac.id/pkpl/kelompok-64/tastify:v1.8
   script:
     - '[ -n "${IMAGE_VERSION:-}" ] && export TAG_IMAGE_NAME="$registry_host/$CI_PROJECT_PATH:$IMAGE_VERSION" || true'
     - echo "Deploying Image $TAG_IMAGE_NAME"
