@@ -1,5 +1,5 @@
 # Stage 1: Builder for compiling dependencies
-FROM registry.cs.ui.ac.id/pkpl/base/python:3.13-alpine AS builder
+FROM registry.cs.ui.ac.id/pkpl/base/alpine:latest AS builder
 WORKDIR /app
 
 # Install build dependencies
@@ -17,7 +17,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Stage 2: Runtime image
-FROM registry.cs.ui.ac.id/pkpl/base/python:3.13-alpine
+FROM registry.cs.ui.ac.id/pkpl/base/alpine:latest
 WORKDIR /app
 
 # Runtime environment configuration
