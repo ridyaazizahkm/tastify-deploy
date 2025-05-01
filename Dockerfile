@@ -17,7 +17,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Stage 2: Runtime image
-FROM python:3.13-alpine
+FROM registry.cs.ui.ac.id/pkpl/base/python:3.13-alpine
 WORKDIR /app
 
 # Runtime environment configuration
