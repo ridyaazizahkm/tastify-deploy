@@ -10,7 +10,7 @@ python-decouple
 pytest
 pytest-django
 pytest-cov
-dotenv
+python-dotenv
 
 asgiref==3.8.1
 Django==5.2
