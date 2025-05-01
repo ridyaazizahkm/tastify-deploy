@@ -1,0 +1,9 @@
+.git/
+.gitlab-ci/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+*.sqlite3
