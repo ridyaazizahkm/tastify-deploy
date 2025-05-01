@@ -1,54 +1,59 @@
-# Stage 1: Base build stage
-FROM python:3.13-slim AS builder
-
-# Create the app directory
-RUN mkdir /app
-
-# Set the working directory
+# Stage 1: Builder for compiling dependencies
+FROM python:3.13-alpine AS builder
 WORKDIR /app
 
-# Set environment variables to optimize Python
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+# Install build dependencies
+RUN apk add --no-cache --virtual .build-deps \
+    postgresql-dev \
+    gcc \
+    python3-dev \
+    musl-dev
 
-# Upgrade pip and install dependencies
-RUN pip install --upgrade pip
+# Install runtime dependencies
+RUN apk add --no-cache libpq
 
-# Copy the requirements file first (better caching)
-COPY requirements.txt /app/
-
-# Install Python dependencies
+# Configure pip and install requirements
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Stage 2: Production stage
-FROM python:3.13-slim
+# Stage 2: Runtime image
+FROM python:3.13-alpine
+WORKDIR /app
 
-RUN useradd -m -r appuser && \
-   mkdir /app && \
-   chown -R appuser /app
+# Runtime environment configuration
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app \
+    DJANGO_SETTINGS_MODULE=myproject.settings
 
-# Copy the Python dependencies from the builder stage
+# Create non-root user first
+RUN adduser -D appuser
+
+# Copy Python packages from builder
 COPY --from=builder /usr/local/lib/python3.13/site-packages/ /usr/local/lib/python3.13/site-packages/
 COPY --from=builder /usr/local/bin/ /usr/local/bin/
 
-# Set the working directory
-WORKDIR /app
+# Copy application code with proper exclusions
+COPY . .
+RUN find . -type d \( -name __pycache__ -o -name .git -o -name venv \) -prune -exec rm -rf {} \; || true
 
-# Copy application code
-COPY --chown=appuser:appuser . .
+# Create static directory and set up static files
+RUN mkdir -p /app/staticfiles && \
+    python manage.py collectstatic --noinput && \
+    chown -R appuser:appuser /app/staticfiles
 
-# Set environment variables to optimize Python
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+# Set proper permissions
+RUN chown -R appuser:appuser /app && \
+    chmod +x /usr/local/bin/gunicorn
 
 # Switch to non-root user
 USER appuser
 
-# Expose the application port
+# Port and healthcheck configuration
 EXPOSE 80
 
-# Set the entrypoint script
-RUN chmod +x entrypoint.sh
+# Gunicorn execution with production settings
+CMD ["gunicorn", "--bind", "0.0.0.0:80", \
+     "--workers", "3", \
+     "--log-level", "info", \
+     "myproject.wsgi:application"]
 
-# Set the entrypoint
-CMD ["/app/entrypoint.sh"]
