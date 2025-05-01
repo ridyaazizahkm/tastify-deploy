@@ -7,6 +7,7 @@ deploy:
     - cd .gitlab-ci/scripts
     - sh ./init_deployment.sh
     - sh ./generate_pods_env.sh
+    - python manage.py collectstatic --noinput
     - sh ./deploy.sh
 
   rules:
