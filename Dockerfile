@@ -1,5 +1,5 @@
 # Stage 1: Builder for compiling dependencies
-FROM registry.cs.ui.ac.id/pkpl/base/python:3.13-alpine AS builder
+FROM alpine:latest AS builder
 WORKDIR /app
 
 # Install build dependencies
@@ -17,7 +17,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Stage 2: Runtime image
-FROM registry.cs.ui.ac.id/pkpl/base/python:3.13-alpine
+FROM alpine:latest
 WORKDIR /app
 
 # Runtime environment configuration
@@ -38,6 +38,7 @@ RUN find . -type d \( -name __pycache__ -o -name .git -o -name venv \) -prune -e
 
 # Create static directory and set up static files
 RUN mkdir -p /app/staticfiles && \
+    python manage.py collectstatic --noinput && \
     chown -R appuser:appuser /app/staticfiles
 
 # Set proper permissions
