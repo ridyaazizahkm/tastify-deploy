@@ -1,5 +1,5 @@
 # Stage 1: Builder for compiling dependencies
-FROM python:3.13-alpine AS builder
+FROM registry.cs.ui.ac.id/pkpl/base/python:3.13-alpine AS builder
 WORKDIR /app
 
 # Install build dependencies
