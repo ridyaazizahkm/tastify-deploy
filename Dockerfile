@@ -1,5 +1,5 @@
 # Stage 1: Builder for compiling dependencies
-FROM alpine:latest AS builder
+FROM registry.cs.ui.ac.id/pkpl/base/python:3.13-slim AS builder
 WORKDIR /app
 
 # Install build dependencies
@@ -17,7 +17,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Stage 2: Runtime image
-FROM alpine:latest
+FROM registry.cs.ui.ac.id/pkpl/base/python:3.13-slim
 WORKDIR /app
 
 # Runtime environment configuration
@@ -55,5 +55,5 @@ EXPOSE 80
 CMD ["gunicorn", "--bind", "0.0.0.0:80", \
      "--workers", "3", \
      "--log-level", "info", \
-     "tastify.wsgi:application"]
+     "myproject.wsgi:application"]
 
