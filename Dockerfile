@@ -23,7 +23,7 @@ WORKDIR /app
 # Runtime environment configuration
 ENV PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app \
-    DJANGO_SETTINGS_MODULE=myproject.settings
+    DJANGO_SETTINGS_MODULE=tastify.settings
 
 # Create non-root user first
 RUN adduser -D appuser
