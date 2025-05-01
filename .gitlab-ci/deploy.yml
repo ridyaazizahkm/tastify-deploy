@@ -1,6 +1,6 @@
 deploy:
   stage: deploy
-  image: http://registry.cs.ui.ac.id/pkpl/base/python:3.13-alpine
+  image: http://registry.cs.ui.ac.id/pkpl/base/alpine:latest
   script:
     - '[ -n "${IMAGE_VERSION:-}" ] && export TAG_IMAGE_NAME="$registry_host/$CI_PROJECT_PATH:$IMAGE_VERSION" || true'
     - echo "Deploying Image $TAG_IMAGE_NAME"
