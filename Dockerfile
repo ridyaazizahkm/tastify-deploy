@@ -38,6 +38,7 @@ RUN find . -type d \( -name __pycache__ -o -name .git -o -name venv \) -prune -e
 
 # Create static directory and set up static files
 RUN mkdir -p /app/staticfiles && \
+    python manage.py collectstatic --noinput && \
     chown -R appuser:appuser /app/staticfiles
 
 # Set proper permissions

@@ -155,10 +155,11 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # settings.py
-from decouple import config
+# from decouple import config
 from cryptography.fernet import Fernet
 
-ENCRYPTION_KEY = config('ENCRYPTION_KEY').encode()
+# ENCRYPTION_KEY = config('ENCRYPTION_KEY').encode()
+ENCRYPTION_KEY = os.getenv(Fernet.generate_key().decode()).encode()
 fernet = Fernet(ENCRYPTION_KEY)
 
 # TAMBAHAN
