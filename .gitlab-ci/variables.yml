@@ -6,7 +6,7 @@ variables:
   MAX_MEMORY: 512Mi
   PORT: 80
   PROXY_BODY_SIZE: 5m #5 Megabyte
-  
+
   # Image and Deployment Variables, It's better to not change these variables below
   # because they are used in the deploy script
   VERSION: $CI_COMMIT_TAG
@@ -20,3 +20,4 @@ variables:
   PODS_TESTNUM: 12312312
   PODS_TESTEQ: 123123=12312312
   NEXT_PUBLIC_TEST: true
+  PODS_ENCRYPTION_KEY: "${ENCRYPTION_KEY}"
