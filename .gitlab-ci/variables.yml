@@ -6,7 +6,7 @@ variables:
   MAX_MEMORY: 512Mi
   PORT: 80
   PROXY_BODY_SIZE: 5m #5 Megabyte
-  
+
   # Image and Deployment Variables, It's better to not change these variables below
   # because they are used in the deploy script
   VERSION: $CI_COMMIT_TAG
