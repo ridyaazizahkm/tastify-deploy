@@ -29,7 +29,7 @@ if DJANGO_ENV == 'production':
 else:
     DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", 'https://kelompok-64-tastify.pkpl.cs.ui.ac.id']
+ALLOWED_HOSTS = ["*"]
 CSRF_TRUSTED_ORIGINS = ["http://localhost","http://127.0.0.1", 'https://kelompok-64-tastify.pkpl.cs.ui.ac.id']
 # Application definition
 
@@ -162,5 +162,5 @@ if env_key:
     ENCRYPTION_KEY = env_key.encode()
 else:
     ENCRYPTION_KEY = Fernet.generate_key()
-    
+
 fernet = Fernet(ENCRYPTION_KEY)
