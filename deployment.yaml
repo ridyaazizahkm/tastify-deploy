@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tastify-deployment
+  labels:
+    app: tastify
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: tastify
+  template:
+    metadata:
+      labels:
+        app: tastify
+    spec:
+      imagePullSecrets:
+        - name: pkpl-registry
+      containers:
+        - name: tastify
+          image: registry.cs.ui.ac.id/pkpl/base/python:3.13-alpine
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          env:
+            - name: ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: tastify-secret
+                  key: ENCRYPTION_KEY
+            - name: DJANGO_SETTINGS_MODULE
+              value: "tastify.settings"
+            - name: PYTHONUNBUFFERED
+              value: "1"
+            - name: PYTHONPATH
+              value: "/app"
+          resources:
+            requests:
+              cpu: "125m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          volumeMounts:
+            - name: static-files
+              mountPath: /app/staticfiles
+      volumes:
+        - name: static-files
+          emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tastify-service
+spec:
+  selector:
+    app: tastify
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tastify-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "5m"  # Sesuaikan dengan proxy body size yang diinginkan
+spec:
+  rules:
+    - host: "tastify"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: tastify-service
+                port:
+                  number: 80
