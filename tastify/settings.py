@@ -157,13 +157,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # settings.py
 # from decouple import config
 from cryptography.fernet import Fernet
-
 env_key = os.getenv('ENCRYPTION_KEY')
 if env_key:
     ENCRYPTION_KEY = env_key.encode()
 else:
     ENCRYPTION_KEY = Fernet.generate_key()
-
+    
 fernet = Fernet(ENCRYPTION_KEY)
-
-# TAMBAHAN
