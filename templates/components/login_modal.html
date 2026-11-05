@@ -1,0 +1,233 @@
+<!-- Tastify Global Auth / Login Modal -->
+<div id="tastifyLoginModal" 
+     class="fixed inset-0 z-[120] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 hidden transition-opacity duration-300"
+     aria-modal="true" 
+     role="dialog">
+    
+    <!-- Modal Card -->
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full border border-stone-200/80 shadow-2xl relative transform transition-transform duration-300 scale-95"
+         id="loginModalContent">
+        
+        <!-- Close Button -->
+        <button type="button" 
+                onclick="closeLoginModal()"
+                class="absolute top-4 right-4 text-stone-400 hover:text-stone-700 bg-stone-100 hover:bg-stone-200 rounded-full p-1.5 transition-colors focus:outline-none"
+                aria-label="Tutup">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+
+        <!-- Brand Icon & Header -->
+        <div class="text-center mb-5">
+            <div class="w-12 h-12 rounded-2xl bg-[#62191c]/10 text-[#62191c] flex items-center justify-center mx-auto mb-3 border border-[#62191c]/15">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+            </div>
+            <h3 class="font-heading font-extrabold text-xl sm:text-2xl text-stone-900 tracking-tight" id="loginModalTitle">
+                Login Diperlukan
+            </h3>
+            <p class="text-xs sm:text-sm text-stone-500 mt-1 max-w-xs mx-auto leading-relaxed" id="loginModalDesc">
+                Silakan masuk ke akun Tastify untuk melanjutkan aksi ini.
+            </p>
+        </div>
+
+        <!-- Alert Error Box -->
+        <div id="loginModalError" class="hidden mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-xs font-semibold text-red-700 text-center">
+        </div>
+
+        <!-- Quick Login Form -->
+        <form id="quickLoginForm" method="post" action="{% url 'authentication:login' %}" class="space-y-3.5">
+            {% csrf_token %}
+            <input type="hidden" name="next" id="loginModalNext" value="">
+            <input type="hidden" name="is_ajax" value="true">
+
+            <div>
+                <label for="loginModalUsername" class="block text-xs font-semibold text-stone-700 mb-1">Username</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                    </span>
+                    <input type="text" 
+                           id="loginModalUsername" 
+                           name="username" 
+                           required 
+                           autocomplete="username"
+                           placeholder="Masukkan username"
+                           class="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs sm:text-sm font-medium text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-[#62191c]/20 focus:border-[#62191c] transition-all">
+                </div>
+            </div>
+
+            <div>
+                <label for="loginModalPassword" class="block text-xs font-semibold text-stone-700 mb-1">Password</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                        </svg>
+                    </span>
+                    <input type="password" 
+                           id="loginModalPassword" 
+                           name="password" 
+                           required 
+                           autocomplete="current-password"
+                           placeholder="Masukkan password"
+                           class="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs sm:text-sm font-medium text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-[#62191c]/20 focus:border-[#62191c] transition-all">
+                </div>
+            </div>
+
+            <button type="submit" 
+                    id="loginModalSubmitBtn"
+                    class="w-full mt-2 inline-flex items-center justify-center gap-2 py-3 px-5 bg-[#62191c] hover:bg-[#873632] text-white rounded-xl text-xs sm:text-sm font-bold shadow-sm hover:shadow transition-all duration-200">
+                <span>Masuk Sekarang</span>
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+            </button>
+        </form>
+
+        <!-- Portfolio Helper Callout -->
+        <div class="mt-4 p-3 rounded-2xl bg-amber-50/80 border border-amber-200/70 text-stone-700 text-xs flex items-start gap-2.5">
+            <span class="text-amber-600 text-sm">💡</span>
+            <div class="flex-1 leading-snug">
+                <span class="font-bold text-stone-900">Uji Coba Portofolio:</span>
+                Gunakan akun demo <button type="button" onclick="fillDemoCredentials()" class="underline font-bold text-[#62191c] hover:text-[#873632]">user</button> dengan password apa saja, atau buat akun baru.
+            </div>
+        </div>
+
+        <!-- Footer Links -->
+        <div class="mt-4 pt-3.5 border-t border-stone-100 text-center text-xs text-stone-500">
+            Belum punya akun? 
+            <a href="{% url 'authentication:register' %}" class="font-bold text-[#62191c] hover:underline ml-1">
+                Daftar sekarang &rarr;
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openLoginModal(context = 'default', nextUrl = '') {
+        const modal = document.getElementById('tastifyLoginModal');
+        const modalContent = document.getElementById('loginModalContent');
+        const titleElem = document.getElementById('loginModalTitle');
+        const descElem = document.getElementById('loginModalDesc');
+        const nextInput = document.getElementById('loginModalNext');
+        const errorBox = document.getElementById('loginModalError');
+
+        if (!modal) return;
+
+        if (errorBox) {
+            errorBox.classList.add('hidden');
+            errorBox.textContent = '';
+        }
+
+        if (nextInput) {
+            nextInput.value = nextUrl || window.location.href;
+        }
+
+        // Custom contextual titles & descriptions
+        if (context === 'bookmark') {
+            titleElem.textContent = 'Simpan ke Bookmark';
+            descElem.textContent = 'Silakan masuk ke akun Tastify untuk menyimpan resep favorit ke koleksi pribadi Anda.';
+        } else if (context === 'upload') {
+            titleElem.textContent = 'Upload Resep Masakan';
+            descElem.textContent = 'Silakan masuk terlebih dahulu untuk mempublikasikan resep kulinermu ke komunitas Tastify.';
+        } else if (context === 'rating') {
+            titleElem.textContent = 'Beri Penilaian Resep';
+            descElem.textContent = 'Silakan masuk ke akun Tastify untuk memberikan bintang rating dan ulasan.';
+        } else if (context === 'comment') {
+            titleElem.textContent = 'Gabung Diskusi';
+            descElem.textContent = 'Silakan masuk ke akun Tastify untuk menulis komentar dan tips memasak.';
+        } else {
+            titleElem.textContent = 'Login Diperlukan';
+            descElem.textContent = 'Silakan masuk ke akun Tastify untuk melanjutkan aksi ini.';
+        }
+
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            if (modalContent) modalContent.classList.remove('scale-95');
+        }, 10);
+    }
+
+    function closeLoginModal() {
+        const modal = document.getElementById('tastifyLoginModal');
+        const modalContent = document.getElementById('loginModalContent');
+        if (!modal) return;
+        if (modalContent) modalContent.classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 150);
+    }
+
+    function fillDemoCredentials() {
+        const userInput = document.getElementById('loginModalUsername');
+        const passInput = document.getElementById('loginModalPassword');
+        if (userInput) userInput.value = 'user';
+        if (passInput) passInput.value = 'password';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('tastifyLoginModal');
+        if (modal) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeLoginModal();
+                }
+            });
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
+                closeLoginModal();
+            }
+        });
+
+        // Quick AJAX Login Form Handler
+        const form = document.getElementById('quickLoginForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const errorBox = document.getElementById('loginModalError');
+                const submitBtn = document.getElementById('loginModalSubmitBtn');
+                const formData = new FormData(form);
+
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('opacity-75', 'cursor-wait');
+                }
+
+                fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                })
+                .then(r => r.json().then(data => ({ status: r.status, ok: r.ok, data })))
+                .then(({ status, ok, data }) => {
+                    if (ok && data.success) {
+                        // Successfully logged in! Redirect to next or reload
+                        window.location.href = data.redirect_url || window.location.href;
+                    } else {
+                        if (errorBox) {
+                            errorBox.textContent = data.message || 'Username atau password tidak valid.';
+                            errorBox.classList.remove('hidden');
+                        }
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.classList.remove('opacity-75', 'cursor-wait');
+                        }
+                    }
+                })
+                .catch(err => {
+                    // Fallback to normal form submit if fetch fails
+                    form.submit();
+                });
+            });
+        }
+    });
+</script>
+

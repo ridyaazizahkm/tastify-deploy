@@ -1,13 +1,18 @@
 {% load static %}
-<footer class="bg-[#62191c] shadow w-full">
-    <div class="w-full max-w-screen-xl mx-auto p-4 md:py-8">
+<footer class="bg-[#62191c] border-t border-[#752525] w-full text-white">
+    <div class="w-full max-w-7xl mx-auto px-4 py-8 md:py-10">
         <div class="sm:flex sm:items-center sm:justify-between">
             <a href="{% url 'main:show_main' %}" class="flex items-center mb-4 sm:mb-0 space-x-3 rtl:space-x-reverse">
-                <img src="{% static 'images/logo.png' %}" class="h-14" alt="Logo" />
+                <img src="{% static 'images/logo.png' %}" class="h-12 w-auto" alt="Tastify Logo" />
             </a>
+            <p class="text-xs md:text-sm text-stone-200/90 font-light max-w-md">
+                Platform berbagi inspirasi resep masakan rumahan lezat, cepat, dan terpercaya.
+            </p>
         </div>
-        <hr class="my-6 border-gray-200 sm:mx-auto border-gray-300 lg:my-8" />
-        <span class="block text-sm text-white sm:text-center">© 2025 <a href="{% url 'main:show_main' %}"
-                class="hover:underline">Tastify™</a>. All Rights Reserved.</span>
+        <hr class="my-6 border-white/15" />
+        <div class="flex flex-col sm:flex-row items-center justify-between text-xs text-stone-300 gap-2">
+            <span>© 2025 <a href="{% url 'main:show_main' %}" class="hover:underline font-semibold text-white">Tastify™</a>. All Rights Reserved.</span>
+            <span>Crafted with ❤️ for food lovers everywhere.</span>
+        </div>
     </div>
 </footer>

@@ -54,6 +54,45 @@ class Resep(models.Model):
 
     def total_ratings(self):
         return self.ratings.count()
+
+    def get_bahan_list(self):
+        if not self.bahan:
+            return []
+        import re
+        items = []
+        for line in self.bahan.splitlines():
+            line = line.strip()
+            if line:
+                cleaned = re.sub(r'^[-•*–—]\s*', '', line).strip()
+                if cleaned:
+                    items.append(cleaned)
+        return items
+
+    def get_alat_list(self):
+        if not self.alat:
+            return []
+        import re
+        items = []
+        for line in self.alat.splitlines():
+            line = line.strip()
+            if line:
+                cleaned = re.sub(r'^[-•*–—]\s*', '', line).strip()
+                if cleaned:
+                    items.append(cleaned)
+        return items
+
+    def get_langkah_list(self):
+        if not self.langkah:
+            return []
+        import re
+        items = []
+        for line in self.langkah.splitlines():
+            line = line.strip()
+            if line:
+                cleaned = re.sub(r'^\d+[\.\)]\s*', '', line).strip()
+                if cleaned:
+                    items.append(cleaned)
+        return items
     
 
 class RecipeReport(models.Model):

@@ -1,7 +1,10 @@
 """
-Middleware untuk mengimplementasikan Content Security Policy
+Middleware untuk mengimplementasikan Content Security Policy dan Portfolio Guest Mode
 """
+import sys
 from django.utils.deprecation import MiddlewareMixin
+from django.contrib.auth import login
+from django.contrib.auth.models import User
 
 class ContentSecurityPolicyMiddleware(MiddlewareMixin):
     """
@@ -39,3 +42,13 @@ class ContentSecurityPolicyMiddleware(MiddlewareMixin):
         response['Referrer-Policy'] = 'strict-origin-when-cross-origin'
         
         return response
+
+
+class PortfolioGuestMiddleware(MiddlewareMixin):
+    """
+    Middleware portofolio: pengunjung dapat menjelajahi seluruh halaman
+    sebagai tamu (unauthenticated). Saat melakukan aksi tertentu seperti
+    bookmark atau submit resep, alur akan diarahkan ke pop-up login.
+    """
+    def process_request(self, request):
+        return None

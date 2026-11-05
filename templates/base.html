@@ -7,7 +7,7 @@
     {% endblock meta %}
 </head>
 
-<body class="flex flex-col min-h-screen">
+<body class="flex flex-col min-h-screen" data-user-authenticated="{% if user.is_authenticated %}true{% else %}false{% endif %}">
     {% include "navbar.html" %}
 
     <!-- Messages section -->
@@ -27,8 +27,7 @@
     </main>
 
     {% include "footer.html" %}
-
-    <script src="https://cdn.tailwindcss.com"></script>
+    {% include "components/login_modal.html" %}
 
     {% block js %}
     {% endblock js %}

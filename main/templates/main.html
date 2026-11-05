@@ -2,277 +2,473 @@
 {% load static %}
 
 {% block meta %}
-<title>Homepage</title>
+<title>Tastify - Discover & Share Delicious Recipes</title>
 {% endblock meta %}
 
 {% block content %}
-<!-- Recipe Slider Section -->
-<section class="relative py-4 bg-[#f5f5f5]">
-    <div class="container mx-auto px-4 py-12">
-      <div class="relative w-full h-[400px] overflow-hidden rounded-2xl shadow-lg" id="slider-wrapper">
-        <!-- Slider container -->
-        <div class="flex h-full transition-transform duration-500 ease-in-out" id="slider-container">
-          {% for recipe in random_recipes %}
-          <div class="w-full h-full flex-shrink-0 relative">
-            <!-- Use a fallback image if url_foto is not available -->
-            <img src="{{ recipe.url_foto|default:'https://via.placeholder.com/1200x400?text=No+Image' }}"
-                 alt="{{ recipe.judul }}"
-                 class="w-full h-full object-cover">
-            <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center">
-              <div class="container mx-auto px-8 md:px-12">
-                <div class="max-w-2xl">
-                  <h1 class="text-2xl md:text-3xl font-bold text-white mb-2">{{ recipe.judul }}</h1>
-                  <p class="text-base text-white mb-4">{{ recipe.deskripsi|truncatechars:80 }}</p>
-                  <a href="{% url 'resep:detail_resep' recipe.id %}" class="inline-block bg-[#62191c] hover:bg-[#873632] text-white py-2 px-6 rounded-lg font-medium transition duration-300">
-                    Check Now!
-                  </a>
+<!-- Editorial Hero Section (Bre Wora & Gourmet Style) -->
+<section class="pt-5 pb-6 md:pt-8 md:pb-8">
+    <div class="container mx-auto px-4 sm:px-6 max-w-6xl">
+        <div class="bg-gradient-to-r from-stone-50 via-white to-amber-50/20 rounded-3xl md:rounded-[36px] border border-stone-200/80 shadow-[0_4px_24px_rgba(0,0,0,0.03)] overflow-hidden relative">
+            <div class="grid grid-cols-1 lg:grid-cols-12 items-center min-h-[380px] md:min-h-[420px]">
+                
+                <!-- Left Column: Editorial Headline & Action Buttons -->
+                <div class="lg:col-span-6 p-7 sm:p-10 lg:p-12 flex flex-col justify-center z-20">
+                    <h1 class="font-heading text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-900 tracking-tight leading-[1.16] mb-4">
+                        Masak Lezat, <br>
+                        <span class="font-serif italic font-bold text-[#62191c]">Penuh Cerita.</span>
+                    </h1>
+
+                    <p class="text-stone-600 text-sm sm:text-base leading-relaxed mb-6 max-w-md">
+                        Temukan inspirasi hidangan rumahan teruji, panduan memasak langkah demi langkah, dan bagikan karya kulinermu bersama komunitas Tastify.
+                    </p>
+
+                    <div class="flex flex-wrap items-center gap-3 mb-6">
+                        <a href="{% url 'resep:list_resep' %}" 
+                           class="inline-flex items-center gap-2 bg-[#62191c] hover:bg-[#873632] text-white px-7 py-3 rounded-full font-semibold text-sm shadow-sm hover:shadow transition-all duration-200 group">
+                            <span>Jelajahi Resep</span>
+                            <svg class="w-4 h-4 transform group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                            </svg>
+                        </a>
+                        
+                        <a href="{% url 'resep:create_resep' %}" 
+                           class="inline-flex items-center gap-2 bg-white hover:bg-stone-50 border border-stone-300 hover:border-stone-800 text-stone-800 px-6 py-3 rounded-full font-semibold text-sm shadow-2xs transition-all duration-200">
+                            <span>+ Bagikan Resep</span>
+                        </a>
+                    </div>
+
+                    <!-- Slide Indicator Dots -->
+                    {% if random_recipes|length > 1 %}
+                    <div class="flex items-center space-x-1.5" id="hero-dots">
+                        {% for recipe in random_recipes %}
+                        <button type="button" 
+                                class="h-1.5 rounded-full transition-all duration-300 focus:outline-none {% if forloop.first %}w-6 bg-[#62191c]{% else %}w-2 bg-stone-300 hover:bg-stone-400{% endif %}" 
+                                data-index="{{ forloop.counter0 }}" 
+                                aria-label="Slide {{ forloop.counter }}"></button>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                 </div>
-              </div>
+
+                <!-- Right Column: Hero Photo Slideshow with Soft Gradient Blend (Bre Wora Style) -->
+                <div class="lg:col-span-6 relative h-64 sm:h-80 lg:h-[420px] overflow-hidden bg-stone-100">
+                    <div class="relative w-full h-full" id="hero-slideshow">
+                        {% for recipe in random_recipes %}
+                        <div class="hero-slide absolute inset-0 transition-opacity duration-1000 ease-in-out {% if forloop.first %}opacity-100 z-10 pointer-events-auto{% else %}opacity-0 z-0 pointer-events-none{% endif %}"
+                             data-index="{{ forloop.counter0 }}">
+                            <img src="{{ recipe.url_foto|default:'https://images.unsplash.com/photo-1546069901-ba9599a7e63c' }}"
+                                 alt="{{ recipe.judul }}"
+                                 class="w-full h-full object-cover object-center">
+                            
+                            <!-- Floating recipe badge on bottom-right of photo -->
+                            <div class="absolute bottom-4 right-4 sm:bottom-6 sm:right-6 z-20 pointer-events-auto">
+                                <a href="{% url 'resep:detail_resep' recipe.id %}" 
+                                   class="inline-flex items-center gap-2 bg-white/95 hover:bg-white backdrop-blur-md px-4 py-2 rounded-full border border-stone-200/80 shadow-md hover:shadow-lg transition-all group/pill">
+                                    <span class="text-xs font-bold text-stone-900 group-hover/pill:text-[#62191c] truncate max-w-[150px] sm:max-w-[200px]">
+                                        {{ recipe.judul }}
+                                    </span>
+                                    {% if recipe.durasi %}
+                                    <span class="text-[11px] text-stone-400 font-medium">⏱ {{ recipe.durasi }}m</span>
+                                    {% endif %}
+                                    <span class="text-xs text-[#62191c] font-bold group-hover/pill:translate-x-0.5 transition-transform">&rarr;</span>
+                                </a>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="w-full h-full flex items-center justify-center bg-stone-100 text-stone-400">
+                            <p class="text-xs">Belum ada resep unggulan.</p>
+                        </div>
+                        {% endfor %}
+
+                        <!-- Soft Linear Gradient Blend into card body (Bre Wora Style) -->
+                        <div class="absolute inset-y-0 left-0 w-24 sm:w-36 lg:w-48 bg-gradient-to-r from-stone-50 via-stone-50/80 to-transparent z-10 pointer-events-none hidden lg:block"></div>
+                        <!-- Top/bottom mobile gradients for seamless edge blending -->
+                        <div class="absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-stone-50 to-transparent z-10 pointer-events-none lg:hidden"></div>
+                        <div class="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-stone-50 to-transparent z-10 pointer-events-none lg:hidden"></div>
+                    </div>
+                </div>
+
             </div>
-          </div>
-          {% endfor %}
-        </div>
-        
-        <!-- Navigation arrows -->
-        <button type="button" class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-40 text-white p-2 rounded-full focus:outline-none" id="prev-btn">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        <button type="button" class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-40 text-white p-2 rounded-full focus:outline-none" id="next-btn">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-        
-        <!-- Pagination dots -->
-        <div class="absolute bottom-4 left-0 right-0 flex justify-center space-x-2" id="pagination-dots">
-          {% for recipe in random_recipes %}
-          <button type="button" class="h-2 w-2 rounded-full bg-white {% if forloop.first %}bg-opacity-100{% else %}bg-opacity-50{% endif %} transition-all duration-300 focus:outline-none" data-index="{{ forloop.counter0 }}"></button>
-          {% endfor %}
-        </div>
-      </div>
-    </div>
-</section>
-
-<!-- Recipe Explorer Section -->
-<section class="py-12 bg-[#f5f5f5]">
-    <div class="container mx-auto px-4">
-        <h2 class="text-4xl font-bold text-center mb-2 text-gray-800">Explore Recipe</h2>
-        <p class="text-center text-gray-600 mb-10">Find recipes according to your taste and needs</p>
-       <!-- Category Explorer -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-            <!-- Categories -->
-            <a href="{% url 'resep:list_resep' %}?category=Beverage" class="block group">
-                <div class="relative h-60 rounded-lg overflow-hidden shadow-md">
-                    <img src="https://i.pinimg.com/736x/8e/0e/ff/8e0effa24aacbc1eba4646b84a1529f1.jpg" alt="Beverage" class="w-full h-full object-cover transition duration-300 brightness-75 group-hover:brightness-50 group-hover:scale-105">
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <span class="bg-white/90 text-gray-800 font-medium px-6 py-2 rounded-full text-lg">Beverage</span>
-                    </div>
-                </div>
-            </a>
-            
-            <a href="{% url 'resep:list_resep' %}?category=Dessert" class="block group">
-                <div class="relative h-60 rounded-lg overflow-hidden shadow-md">
-                    <img src="https://images.unsplash.com/photo-1551024601-bec78aea704b" alt="Dessert" class="w-full h-full object-cover transition duration-300 brightness-75 group-hover:brightness-50 group-hover:scale-105">
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <span class="bg-white/90 text-gray-800 font-medium px-6 py-2 rounded-full text-lg">Dessert</span>
-                    </div>
-                </div>
-            </a>
-            
-            <a href="{% url 'resep:list_resep' %}?category=Fast Food" class="block group">
-                <div class="relative h-60 rounded-lg overflow-hidden shadow-md">
-                    <img src="https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5" alt="Fast Food" class="w-full h-full object-cover transition duration-300 brightness-75 group-hover:brightness-50 group-hover:scale-105">
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <span class="bg-white/90 text-gray-800 font-medium px-6 py-2 rounded-full text-lg">Fast Food</span>
-                    </div>
-                </div>
-            </a>
-            
-            <a href="{% url 'resep:list_resep' %}?category=Healthy Food" class="block group">
-                <div class="relative h-60 rounded-lg overflow-hidden shadow-md">
-                    <img src="https://i.pinimg.com/736x/72/d9/af/72d9af964d384fc2a16fd087c1062a7c.jpg" alt="Healthy Food" class="w-full h-full object-cover transition duration-300 brightness-75 group-hover:brightness-50 group-hover:scale-105">
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <span class="bg-white/90 text-gray-800 font-medium px-6 py-2 rounded-full text-lg">Healthy Food</span>
-                    </div>
-                </div>
-            </a>
-            
-            <a href="{% url 'resep:list_resep' %}?category=Traditional Food" class="block group">
-                <div class="relative h-60 rounded-lg overflow-hidden shadow-md">
-                    <img src="https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd" alt="Traditional Food" class="w-full h-full object-cover transition duration-300 brightness-75 group-hover:brightness-50 group-hover:scale-105">
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <span class="bg-white/90 text-gray-800 font-medium px-6 py-2 rounded-full text-lg">Traditional Food</span>
-                    </div>
-                </div>
-            </a>
-        </div>
-        
-        <!-- Second Row -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mt-6">
-            <!-- Main Ingredients -->
-            <a href="{% url 'resep:list_resep' %}?main_ingredient=Buah%20%26%20Sayur" class="block group">
-                <div class="relative h-60 rounded-lg overflow-hidden shadow-md">
-                    <img src="https://images.unsplash.com/photo-1610832958506-aa56368176cf" alt="Buah&Sayur" class="w-full h-full object-cover transition duration-300 brightness-75 group-hover:brightness-50 group-hover:scale-105">
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <span class="bg-white/90 text-gray-800 font-medium px-6 py-2 rounded-full text-lg">Buah & Sayur</span>
-                    </div>
-                </div>
-            </a>
-            
-            <a href="{% url 'resep:list_resep' %}?main_ingredient=Coklat" class="block group">
-                <div class="relative h-60 rounded-lg overflow-hidden shadow-md">
-                    <img src="https://images.unsplash.com/photo-1606312619070-d48b4c652a52" alt="Coklat" class="w-full h-full object-cover transition duration-300 brightness-75 group-hover:brightness-50 group-hover:scale-105">
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <span class="bg-white/90 text-gray-800 font-medium px-6 py-2 rounded-full text-lg">Coklat</span>
-                    </div>
-                </div>
-            </a>
-            
-            <a href="{% url 'resep:list_resep' %}?main_ingredient=Daging" class="block group">
-                <div class="relative h-60 rounded-lg overflow-hidden shadow-md">
-                    <img src="https://images.unsplash.com/photo-1560781290-7dc94c0f8f4f" alt="Daging" class="w-full h-full object-cover transition duration-300 brightness-75 group-hover:brightness-50 group-hover:scale-105">
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <span class="bg-white/90 text-gray-800 font-medium px-6 py-2 rounded-full text-lg">Daging</span>
-                    </div>
-                </div>
-            </a>
-            
-            <a href="{% url 'resep:list_resep' %}?main_ingredient=Roti" class="block group">
-                <div class="relative h-60 rounded-lg overflow-hidden shadow-md">
-                    <img src="https://images.unsplash.com/photo-1608198093002-ad4e005484ec" alt="Roti" class="w-full h-full object-cover transition duration-300 brightness-75 group-hover:brightness-50 group-hover:scale-105">
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <span class="bg-white/90 text-gray-800 font-medium px-6 py-2 rounded-full text-lg">Roti</span>
-                    </div>
-                </div>
-            </a>
-
-            <a href="{% url 'resep:list_resep' %}?main_ingredient=Seafood" class="block group">
-                <div class="relative h-60 rounded-lg overflow-hidden shadow-md">
-                    <img src="https://i.pinimg.com/736x/55/69/92/55699222d5461ae11a4524628a778a32.jpg" alt="Seafood" class="w-full h-full object-cover transition duration-300 brightness-75 group-hover:brightness-50 group-hover:scale-105">
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <span class="bg-white/90 text-gray-800 font-medium px-6 py-2 rounded-full text-lg">Seafood</span>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <!-- Third Row -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mt-6">
-            <!-- Cooking Method -->
-            <a href="{% url 'resep:list_resep' %}?cooking_method=Baked" class="block group">
-                <div class="relative h-60 rounded-lg overflow-hidden shadow-md">
-                    <img src="https://i.pinimg.com/736x/3b/b2/e6/3bb2e6f48e44a075179bbc04fca9de66.jpg" alt="Baked" class="w-full h-full object-cover transition duration-300 brightness-75 group-hover:brightness-50 group-hover:scale-105">
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <span class="bg-white/90 text-gray-800 font-medium px-6 py-2 rounded-full text-lg">Baked</span>
-                    </div>
-                </div>
-            </a>
-            
-            <a href="{% url 'resep:list_resep' %}?cooking_method=Blender" class="block group">
-                <div class="relative h-60 rounded-lg overflow-hidden shadow-md">
-                    <img src="http://www.eatyourselfskinny.com/wp-content/uploads/2017/08/smoothie-bowl-4.jpg" alt="Blender" class="w-full h-full object-cover transition duration-300 brightness-75 group-hover:brightness-50 group-hover:scale-105">
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <span class="bg-white/90 text-gray-800 font-medium px-6 py-2 rounded-full text-lg">Blender</span>
-                    </div>
-                </div>
-            </a>
-            
-            <a href="{% url 'resep:list_resep' %}?cooking_method=Boiled" class="block group">
-                <div class="relative h-60 rounded-lg overflow-hidden shadow-md">
-                    <img src="https://i.pinimg.com/736x/a7/5f/14/a75f14b2364b7c56aa318c7437513050.jpg" alt="Boiled" class="w-full h-full object-cover transition duration-300 brightness-75 group-hover:brightness-50 group-hover:scale-105">
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <span class="bg-white/90 text-gray-800 font-medium px-6 py-2 rounded-full text-lg">Boiled</span>
-                    </div>
-                </div>
-            </a>
-
-            <a href="{% url 'resep:list_resep' %}?cooking_method=Fried" class="block group">
-                <div class="relative h-60 rounded-lg overflow-hidden shadow-md">
-                    <img src="https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58" alt="Fried" class="w-full h-full object-cover transition duration-300 brightness-75 group-hover:brightness-50 group-hover:scale-105">
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <span class="bg-white/90 text-gray-800 font-medium px-6 py-2 rounded-full text-lg">Fried</span>
-                    </div>
-                </div>
-            </a>
-
-            <a href="{% url 'resep:list_resep' %}?cooking_method=Steamed" class="block group">
-                <div class="relative h-60 rounded-lg overflow-hidden shadow-md">
-                    <img src="https://i.pinimg.com/736x/46/f9/94/46f994cf30a299cc6857431537f5ea0b.jpg" alt="Steamed" class="w-full h-full object-cover transition duration-300 brightness-75 group-hover:brightness-50 group-hover:scale-105">
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <span class="bg-white/90 text-gray-800 font-medium px-6 py-2 rounded-full text-lg">Steamed</span>
-                    </div>
-                </div>
-            </a>
-        </div>
-        
-        <!-- View All Button -->
-        <div class="text-center mt-10">
-            <a href="{% url 'resep:list_resep' %}" class="inline-block bg-[#62191c] hover:bg-[#873632] text-white py-3 px-8 rounded-lg font-medium transition duration-300">
-                View All Recipes
-            </a>
         </div>
     </div>
 </section>
 
-<!-- Top Rating Recipes -->
-<section class="py-12 bg-white">
-    <div class="container mx-auto px-4">
-        <h2 class="text-4xl font-bold text-center mb-10 text-gray-800">Top Rating Recipes</h2>
-        
-        <!-- Recipe Cards -->
-        <div class="flex flex-wrap -mx-3">
-            {% for resep in top_rated_recipes %}
+<!-- Value Highlights Bar -->
+<section class="py-5 md:py-6 bg-white border-y border-stone-200/70">
+    <div class="container mx-auto px-4 sm:px-6 max-w-6xl">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:divide-x md:divide-stone-200/80">
+            
+            <div class="flex items-center gap-4 py-1 px-2">
+                <div class="w-11 h-11 rounded-2xl bg-[#62191c]/10 text-[#62191c] flex items-center justify-center flex-shrink-0 border border-[#62191c]/15">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="font-heading font-bold text-stone-900 text-sm md:text-base">75+ Resep Teruji</h3>
+                    <p class="text-xs text-stone-500 mt-0.5">Dari masakan rumahan hingga kreasi lezat</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4 py-1 px-2 md:pl-8">
+                <div class="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0 border border-amber-200/70">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="font-heading font-bold text-stone-900 text-sm md:text-base">4.9 ★ Rating Komunitas</h3>
+                    <p class="text-xs text-stone-500 mt-0.5">Dinilai langsung oleh sesama pecinta masak</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4 py-1 px-2 md:pl-8">
+                <div class="w-11 h-11 rounded-2xl bg-stone-100 text-[#873632] flex items-center justify-center flex-shrink-0 border border-stone-200/80">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="font-heading font-bold text-stone-900 text-sm md:text-base">Panduan Step-by-Step</h3>
+                    <p class="text-xs text-stone-500 mt-0.5">Takaran bahan presisi & panduan langkah jelas</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- Section: Resep Favorit Pekan Ini -->
+<section class="py-7 md:py-9 bg-[#faf8f5]">
+    <div class="container mx-auto px-4 sm:px-6 max-w-6xl">
+        <div class="flex items-center justify-between mb-5">
+            <div>
+                <h2 class="font-heading text-xl md:text-2xl font-extrabold text-stone-900 tracking-tight">
+                    Resep Pilihan Pekan Ini
+                </h2>
+                <p class="text-stone-500 text-xs md:text-sm mt-0.5">
+                    Hidangan favorit yang paling banyak dicoba dan dinikmati pembaca Tastify.
+                </p>
+            </div>
+            <a href="{% url 'resep:list_resep' %}" class="inline-flex items-center gap-1.5 text-xs md:text-sm font-semibold text-[#62191c] hover:text-[#873632] group transition-colors">
+                <span>Lihat Semua</span>
+                <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </a>
+        </div>
+
+        <!-- Recipe Cards Grid -->
+        <div class="flex flex-wrap -mx-2">
+            {% for resep in random_recipes %}
                 {% include 'resep/components/recipe_card.html' %}
             {% empty %}
-                <div class="col-span-full py-10 text-center">
-                    <p class="text-gray-600">Belum ada resep yang tersedia.</p>
+                <div class="w-full py-8 text-center bg-white rounded-2xl border border-dashed border-stone-200">
+                    <p class="text-stone-500 text-sm">Belum ada resep pilihan.</p>
                 </div>
             {% endfor %}
         </div>
+    </div>
+</section>
+
+<!-- Section: Categories (Sleek Photo Cards) -->
+<section class="py-7 md:py-9 bg-white border-y border-stone-200/60">
+    <div class="container mx-auto px-4 sm:px-6 max-w-6xl">
+        <!-- Group 1: Kategori Hidangan -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="font-heading font-bold text-lg md:text-xl text-stone-900 tracking-tight">Kategori Hidangan</h3>
+                    <p class="text-xs text-stone-500 mt-0.5">Pilih resep berdasarkan jenis sajian favoritmu</p>
+                </div>
+                <a href="{% url 'resep:list_resep' %}" class="inline-flex items-center gap-1 text-xs font-semibold text-[#62191c] hover:text-[#873632] group transition-colors">
+                    <span>Lihat Semua</span>
+                    <svg class="w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-3.5">
+                <a href="{% url 'resep:list_resep' %}?category=Beverage" class="block group">
+                    <div class="bg-white rounded-2xl border border-stone-200/80 p-2 sm:p-2.5 shadow-2xs hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 flex flex-col h-full">
+                        <div class="relative aspect-[4/3] rounded-xl overflow-hidden bg-stone-100 mb-2">
+                            <img src="https://i.pinimg.com/736x/8e/0e/ff/8e0effa24aacbc1eba4646b84a1529f1.jpg" alt="Beverage" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out">
+                        </div>
+                        <div class="text-center px-1 pb-1">
+                            <h4 class="font-heading font-bold text-stone-900 text-xs sm:text-sm group-hover:text-[#62191c] transition-colors line-clamp-1 mb-0.5">Beverage</h4>
+                            <span class="text-[11px] text-stone-400 group-hover:text-stone-600 transition-colors inline-block">Lihat Resep &rarr;</span>
+                        </div>
+                    </div>
+                </a>
+                
+                <a href="{% url 'resep:list_resep' %}?category=Dessert" class="block group">
+                    <div class="bg-white rounded-2xl border border-stone-200/80 p-2 sm:p-2.5 shadow-2xs hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 flex flex-col h-full">
+                        <div class="relative aspect-[4/3] rounded-xl overflow-hidden bg-stone-100 mb-2">
+                            <img src="https://images.unsplash.com/photo-1551024601-bec78aea704b" alt="Dessert" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out">
+                        </div>
+                        <div class="text-center px-1 pb-1">
+                            <h4 class="font-heading font-bold text-stone-900 text-xs sm:text-sm group-hover:text-[#62191c] transition-colors line-clamp-1 mb-0.5">Dessert</h4>
+                            <span class="text-[11px] text-stone-400 group-hover:text-stone-600 transition-colors inline-block">Lihat Resep &rarr;</span>
+                        </div>
+                    </div>
+                </a>
+                
+                <a href="{% url 'resep:list_resep' %}?category=Fast Food" class="block group">
+                    <div class="bg-white rounded-2xl border border-stone-200/80 p-2 sm:p-2.5 shadow-2xs hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 flex flex-col h-full">
+                        <div class="relative aspect-[4/3] rounded-xl overflow-hidden bg-stone-100 mb-2">
+                            <img src="https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5" alt="Fast Food" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out">
+                        </div>
+                        <div class="text-center px-1 pb-1">
+                            <h4 class="font-heading font-bold text-stone-900 text-xs sm:text-sm group-hover:text-[#62191c] transition-colors line-clamp-1 mb-0.5">Fast Food</h4>
+                            <span class="text-[11px] text-stone-400 group-hover:text-stone-600 transition-colors inline-block">Lihat Resep &rarr;</span>
+                        </div>
+                    </div>
+                </a>
+                
+                <a href="{% url 'resep:list_resep' %}?category=Healthy Food" class="block group">
+                    <div class="bg-white rounded-2xl border border-stone-200/80 p-2 sm:p-2.5 shadow-2xs hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 flex flex-col h-full">
+                        <div class="relative aspect-[4/3] rounded-xl overflow-hidden bg-stone-100 mb-2">
+                            <img src="https://i.pinimg.com/736x/72/d9/af/72d9af964d384fc2a16fd087c1062a7c.jpg" alt="Healthy Food" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out">
+                        </div>
+                        <div class="text-center px-1 pb-1">
+                            <h4 class="font-heading font-bold text-stone-900 text-xs sm:text-sm group-hover:text-[#62191c] transition-colors line-clamp-1 mb-0.5">Healthy Food</h4>
+                            <span class="text-[11px] text-stone-400 group-hover:text-stone-600 transition-colors inline-block">Lihat Resep &rarr;</span>
+                        </div>
+                    </div>
+                </a>
+                
+                <a href="{% url 'resep:list_resep' %}?category=Traditional Food" class="block group">
+                    <div class="bg-white rounded-2xl border border-stone-200/80 p-2 sm:p-2.5 shadow-2xs hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 flex flex-col h-full">
+                        <div class="relative aspect-[4/3] rounded-xl overflow-hidden bg-stone-100 mb-2">
+                            <img src="https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd" alt="Traditional Food" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out">
+                        </div>
+                        <div class="text-center px-1 pb-1">
+                            <h4 class="font-heading font-bold text-stone-900 text-xs sm:text-sm group-hover:text-[#62191c] transition-colors line-clamp-1 mb-0.5">Traditional</h4>
+                            <span class="text-[11px] text-stone-400 group-hover:text-stone-600 transition-colors inline-block">Lihat Resep &rarr;</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
         
-        <!-- View All Button -->
-        <div class="text-center mt-10">
-            <a href="{% url 'resep:list_resep' %}" class="inline-block bg-[#62191c] hover:bg-[#873632] text-white py-3 px-8 rounded-lg font-medium transition duration-300">
-                View All Recipes
-            </a>
+        <!-- Group 2: Bahan Utama -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="font-heading font-bold text-lg md:text-xl text-stone-900 tracking-tight">Bahan Utama</h3>
+                    <p class="text-xs text-stone-500 mt-0.5">Masak praktis dari bahan yang ada di dapur</p>
+                </div>
+                <a href="{% url 'resep:list_resep' %}" class="inline-flex items-center gap-1 text-xs font-semibold text-[#62191c] hover:text-[#873632] group transition-colors">
+                    <span>Lihat Semua</span>
+                    <svg class="w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-3.5">
+                <a href="{% url 'resep:list_resep' %}?main_ingredient=Buah%20%26%20Sayur" class="block group">
+                    <div class="bg-white rounded-2xl border border-stone-200/80 p-2 sm:p-2.5 shadow-2xs hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 flex flex-col h-full">
+                        <div class="relative aspect-[4/3] rounded-xl overflow-hidden bg-stone-100 mb-2">
+                            <img src="https://images.unsplash.com/photo-1610832958506-aa56368176cf" alt="Buah & Sayur" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out">
+                        </div>
+                        <div class="text-center px-1 pb-1">
+                            <h4 class="font-heading font-bold text-stone-900 text-xs sm:text-sm group-hover:text-[#62191c] transition-colors line-clamp-1 mb-0.5">Buah & Sayur</h4>
+                            <span class="text-[11px] text-stone-400 group-hover:text-stone-600 transition-colors inline-block">Lihat Resep &rarr;</span>
+                        </div>
+                    </div>
+                </a>
+                
+                <a href="{% url 'resep:list_resep' %}?main_ingredient=Coklat" class="block group">
+                    <div class="bg-white rounded-2xl border border-stone-200/80 p-2 sm:p-2.5 shadow-2xs hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 flex flex-col h-full">
+                        <div class="relative aspect-[4/3] rounded-xl overflow-hidden bg-stone-100 mb-2">
+                            <img src="https://images.unsplash.com/photo-1606312619070-d48b4c652a52" alt="Coklat" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out">
+                        </div>
+                        <div class="text-center px-1 pb-1">
+                            <h4 class="font-heading font-bold text-stone-900 text-xs sm:text-sm group-hover:text-[#62191c] transition-colors line-clamp-1 mb-0.5">Coklat</h4>
+                            <span class="text-[11px] text-stone-400 group-hover:text-stone-600 transition-colors inline-block">Lihat Resep &rarr;</span>
+                        </div>
+                    </div>
+                </a>
+                
+                <a href="{% url 'resep:list_resep' %}?main_ingredient=Daging" class="block group">
+                    <div class="bg-white rounded-2xl border border-stone-200/80 p-2 sm:p-2.5 shadow-2xs hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 flex flex-col h-full">
+                        <div class="relative aspect-[4/3] rounded-xl overflow-hidden bg-stone-100 mb-2">
+                            <img src="https://images.unsplash.com/photo-1560781290-7dc94c0f8f4f" alt="Daging" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out">
+                        </div>
+                        <div class="text-center px-1 pb-1">
+                            <h4 class="font-heading font-bold text-stone-900 text-xs sm:text-sm group-hover:text-[#62191c] transition-colors line-clamp-1 mb-0.5">Daging</h4>
+                            <span class="text-[11px] text-stone-400 group-hover:text-stone-600 transition-colors inline-block">Lihat Resep &rarr;</span>
+                        </div>
+                    </div>
+                </a>
+                
+                <a href="{% url 'resep:list_resep' %}?main_ingredient=Roti" class="block group">
+                    <div class="bg-white rounded-2xl border border-stone-200/80 p-2 sm:p-2.5 shadow-2xs hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 flex flex-col h-full">
+                        <div class="relative aspect-[4/3] rounded-xl overflow-hidden bg-stone-100 mb-2">
+                            <img src="https://images.unsplash.com/photo-1608198093002-ad4e005484ec" alt="Roti" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out">
+                        </div>
+                        <div class="text-center px-1 pb-1">
+                            <h4 class="font-heading font-bold text-stone-900 text-xs sm:text-sm group-hover:text-[#62191c] transition-colors line-clamp-1 mb-0.5">Roti</h4>
+                            <span class="text-[11px] text-stone-400 group-hover:text-stone-600 transition-colors inline-block">Lihat Resep &rarr;</span>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="{% url 'resep:list_resep' %}?main_ingredient=Seafood" class="block group">
+                    <div class="bg-white rounded-2xl border border-stone-200/80 p-2 sm:p-2.5 shadow-2xs hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 flex flex-col h-full">
+                        <div class="relative aspect-[4/3] rounded-xl overflow-hidden bg-stone-100 mb-2">
+                            <img src="https://i.pinimg.com/736x/55/69/92/55699222d5461ae11a4524628a778a32.jpg" alt="Seafood" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out">
+                        </div>
+                        <div class="text-center px-1 pb-1">
+                            <h4 class="font-heading font-bold text-stone-900 text-xs sm:text-sm group-hover:text-[#62191c] transition-colors line-clamp-1 mb-0.5">Seafood</h4>
+                            <span class="text-[11px] text-stone-400 group-hover:text-stone-600 transition-colors inline-block">Lihat Resep &rarr;</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Group 3: Metode Memasak -->
+        <div>
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="font-heading font-bold text-lg md:text-xl text-stone-900 tracking-tight">Metode Memasak</h3>
+                    <p class="text-xs text-stone-500 mt-0.5">Pilih teknik masak yang sesuai dengan peralatanmu</p>
+                </div>
+                <a href="{% url 'resep:list_resep' %}" class="inline-flex items-center gap-1 text-xs font-semibold text-[#62191c] hover:text-[#873632] group transition-colors">
+                    <span>Lihat Semua</span>
+                    <svg class="w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-3.5">
+                <a href="{% url 'resep:list_resep' %}?cooking_method=Baked" class="block group">
+                    <div class="bg-white rounded-2xl border border-stone-200/80 p-2 sm:p-2.5 shadow-2xs hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 flex flex-col h-full">
+                        <div class="relative aspect-[4/3] rounded-xl overflow-hidden bg-stone-100 mb-2">
+                            <img src="https://i.pinimg.com/736x/3b/b2/e6/3bb2e6f48e44a075179bbc04fca9de66.jpg" alt="Baked" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out">
+                        </div>
+                        <div class="text-center px-1 pb-1">
+                            <h4 class="font-heading font-bold text-stone-900 text-xs sm:text-sm group-hover:text-[#62191c] transition-colors line-clamp-1 mb-0.5">Baked</h4>
+                            <span class="text-[11px] text-stone-400 group-hover:text-stone-600 transition-colors inline-block">Lihat Resep &rarr;</span>
+                        </div>
+                    </div>
+                </a>
+                
+                <a href="{% url 'resep:list_resep' %}?cooking_method=Blender" class="block group">
+                    <div class="bg-white rounded-2xl border border-stone-200/80 p-2 sm:p-2.5 shadow-2xs hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 flex flex-col h-full">
+                        <div class="relative aspect-[4/3] rounded-xl overflow-hidden bg-stone-100 mb-2">
+                            <img src="https://images.unsplash.com/photo-1553530666-ba11a7da3888" alt="Blender" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out">
+                        </div>
+                        <div class="text-center px-1 pb-1">
+                            <h4 class="font-heading font-bold text-stone-900 text-xs sm:text-sm group-hover:text-[#62191c] transition-colors line-clamp-1 mb-0.5">Blender</h4>
+                            <span class="text-[11px] text-stone-400 group-hover:text-stone-600 transition-colors inline-block">Lihat Resep &rarr;</span>
+                        </div>
+                    </div>
+                </a>
+                
+                <a href="{% url 'resep:list_resep' %}?cooking_method=Boiled" class="block group">
+                    <div class="bg-white rounded-2xl border border-stone-200/80 p-2 sm:p-2.5 shadow-2xs hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 flex flex-col h-full">
+                        <div class="relative aspect-[4/3] rounded-xl overflow-hidden bg-stone-100 mb-2">
+                            <img src="https://i.pinimg.com/736x/a7/5f/14/a75f14b2364b7c56aa318c7437513050.jpg" alt="Boiled" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out">
+                        </div>
+                        <div class="text-center px-1 pb-1">
+                            <h4 class="font-heading font-bold text-stone-900 text-xs sm:text-sm group-hover:text-[#62191c] transition-colors line-clamp-1 mb-0.5">Boiled</h4>
+                            <span class="text-[11px] text-stone-400 group-hover:text-stone-600 transition-colors inline-block">Lihat Resep &rarr;</span>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="{% url 'resep:list_resep' %}?cooking_method=Fried" class="block group">
+                    <div class="bg-white rounded-2xl border border-stone-200/80 p-2 sm:p-2.5 shadow-2xs hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 flex flex-col h-full">
+                        <div class="relative aspect-[4/3] rounded-xl overflow-hidden bg-stone-100 mb-2">
+                            <img src="https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58" alt="Fried" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out">
+                        </div>
+                        <div class="text-center px-1 pb-1">
+                            <h4 class="font-heading font-bold text-stone-900 text-xs sm:text-sm group-hover:text-[#62191c] transition-colors line-clamp-1 mb-0.5">Fried</h4>
+                            <span class="text-[11px] text-stone-400 group-hover:text-stone-600 transition-colors inline-block">Lihat Resep &rarr;</span>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="{% url 'resep:list_resep' %}?cooking_method=Steamed" class="block group">
+                    <div class="bg-white rounded-2xl border border-stone-200/80 p-2 sm:p-2.5 shadow-2xs hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 flex flex-col h-full">
+                        <div class="relative aspect-[4/3] rounded-xl overflow-hidden bg-stone-100 mb-2">
+                            <img src="https://i.pinimg.com/736x/46/f9/94/46f994cf30a299cc6857431537f5ea0b.jpg" alt="Steamed" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out">
+                        </div>
+                        <div class="text-center px-1 pb-1">
+                            <h4 class="font-heading font-bold text-stone-900 text-xs sm:text-sm group-hover:text-[#62191c] transition-colors line-clamp-1 mb-0.5">Steamed</h4>
+                            <span class="text-[11px] text-stone-400 group-hover:text-stone-600 transition-colors inline-block">Lihat Resep &rarr;</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
         </div>
     </div>
 </section>
 
-<!-- Create Recipe CTA -->
-<section class="py-16 bg-gradient-to-r from-[#62191c] to-[#873632] text-white">
-    <div class="container mx-auto px-4 text-center">
-        <h2 class="text-3xl font-bold mb-4">Have a Recipe to Share?</h2>
-        <p class="text-lg mb-8 max-w-2xl mx-auto">Share your favorite recipes with our community so they can experience the deliciousness too!</p>
-        <a href="{% url 'resep:create_resep' %}" class="inline-block bg-white text-[#62191c] hover:bg-gray-100 py-3 px-8 rounded-lg font-medium transition duration-300">
-            Submit Your Recipe
-        </a>
-    </div>
-</section>
-
-<!-- Latest Recipes -->
-<section class="py-12 bg-white">
-    <div class="container mx-auto px-4">
-        <h2 class="text-4xl font-bold text-center mb-10 text-gray-800">Our Latest Recipes</h2>
+<!-- Section: Latest Recipes -->
+<section class="py-7 md:py-9 bg-[#faf8f5]">
+    <div class="container mx-auto px-4 sm:px-6 max-w-6xl">
+        <div class="flex items-center justify-between mb-5">
+            <div>
+                <h2 class="font-heading text-xl md:text-2xl font-extrabold text-stone-900 tracking-tight">
+                    Resep Terbaru
+                </h2>
+                <p class="text-stone-500 text-xs md:text-sm mt-0.5">
+                    Resep terbaru yang baru saja diunggah oleh komunitas Tastify.
+                </p>
+            </div>
+            <a href="{% url 'resep:list_resep' %}" class="inline-flex items-center gap-1.5 text-xs md:text-sm font-semibold text-[#62191c] hover:text-[#873632] group transition-colors">
+                <span>Lihat Semua</span>
+                <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </a>
+        </div>
         
-        <!-- Recipe Cards -->
-        <div class="flex flex-wrap -mx-3">
+        <!-- Recipe Cards Grid -->
+        <div class="flex flex-wrap -mx-2">
             {% for resep in latest_recipes %}
                 {% include 'resep/components/recipe_card.html' %}
             {% empty %}
-                <div class="col-span-full py-10 text-center">
-                    <p class="text-gray-600">Belum ada resep yang tersedia.</p>
+                <div class="w-full py-8 text-center bg-white rounded-2xl border border-dashed border-stone-200">
+                    <p class="text-stone-500 text-sm">Belum ada resep terbaru.</p>
                 </div>
             {% endfor %}
         </div>
-        
-        <!-- View All Button -->
-        <div class="text-center mt-10">
-            <a href="{% url 'resep:list_resep' %}" class="inline-block bg-[#62191c] hover:bg-[#873632] text-white py-3 px-8 rounded-lg font-medium transition duration-300">
-                View All Recipes
-            </a>
+    </div>
+</section>
+
+<!-- Community Deep Burgundy Callout Banner (Tightened Spacing) -->
+<section class="pt-2 pb-10 md:pb-12 bg-[#faf8f5]">
+    <div class="container mx-auto px-4 sm:px-6 max-w-6xl">
+        <div class="relative overflow-hidden rounded-3xl bg-[#62191c] text-white p-7 sm:p-10 md:p-12 shadow-xl">
+            <!-- Subtle organic circle glows -->
+            <div class="absolute -right-10 -top-10 w-64 h-64 rounded-full bg-white/5 pointer-events-none"></div>
+            <div class="absolute right-24 -bottom-16 w-48 h-48 rounded-full bg-white/5 pointer-events-none"></div>
+            
+            <div class="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                <div class="max-w-xl">
+                    <h2 class="font-heading text-2xl md:text-3xl font-extrabold tracking-tight leading-snug mb-2">
+                        Punya Resep Andalan Keluarga?
+                    </h2>
+                    <p class="text-xs md:text-sm text-stone-200/90 leading-relaxed">
+                        Bagikan rahasia resep lezatmu dan jadilah inspirasi bagi ribuan pecinta kuliner rumahan di seluruh penjuru.
+                    </p>
+                </div>
+                
+                <div class="flex-shrink-0">
+                    <a href="{% url 'resep:create_resep' %}" 
+                       class="inline-flex items-center gap-2 bg-white text-[#62191c] hover:bg-amber-50 px-7 py-3.5 rounded-full font-bold text-sm shadow-md hover:shadow-lg transition-all duration-200 group">
+                        <span>+ Upload Resep Sekarang</span>
+                        <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </section>
@@ -281,162 +477,73 @@
 {% block js %}
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const slider = {
-            container: document.getElementById('slider-container'),
-            wrapper: document.getElementById('slider-wrapper'),
-            prevBtn: document.getElementById('prev-btn'),
-            nextBtn: document.getElementById('next-btn'),
-            dots: document.querySelectorAll('#pagination-dots button'),
-            currentIndex: 0,
-            autoplayTimer: null,
-            slideWidth: 0,
-            slideDuration: 3000, // Auto-slide every 3 seconds
+        const slideshowContainer = document.getElementById('hero-slideshow');
+        if (!slideshowContainer) return;
 
-            init() {
-                this.slides = Array.from(this.container.children);
-                if (this.slides.length === 0) return; // Exit if no slides
-                
-                this.updateSlideWidth();
-                this.goToSlide(0);
-                this.addEventListeners();
-                this.startAutoplay();
-                this.observeResize();
-            },
+        const slides = Array.from(slideshowContainer.querySelectorAll('.hero-slide'));
+        const dots = Array.from(document.querySelectorAll('#hero-dots button'));
+        
+        if (slides.length <= 1) return;
 
-            updateSlideWidth() {
-                this.slideWidth = this.wrapper.offsetWidth;
-                this.slides.forEach(slide => {
-                    slide.style.width = `${this.slideWidth}px`;
-                });
-                this.container.style.width = `${this.slideWidth * this.slides.length}px`;
-            },
+        let currentIndex = 0;
+        let autoplayTimer = null;
+        const intervalTime = 4500;
 
-            goToSlide(index) {
-                if (index < 0) index = this.slides.length - 1;
-                if (index >= this.slides.length) index = 0;
-                
-                this.currentIndex = index;
-                const offset = this.slideWidth * index;
-                this.container.style.transform = `translateX(-${offset}px)`;
-                this.updateDots();
-            },
+        function showSlide(index) {
+            if (index < 0) index = slides.length - 1;
+            if (index >= slides.length) index = 0;
 
-            nextSlide() {
-                this.goToSlide(this.currentIndex + 1);
-            },
-
-            prevSlide() {
-                this.goToSlide(this.currentIndex - 1);
-            },
-
-            updateDots() {
-                this.dots.forEach((dot, i) => {
-                    dot.classList.toggle('bg-opacity-100', i === this.currentIndex);
-                    dot.classList.toggle('bg-opacity-50', i !== this.currentIndex);
-                });
-            },
-
-            startAutoplay() {
-                if (this.slides.length <= 1) return; // Don't autoplay if only one slide
-                
-                this.stopAutoplay();
-                this.autoplayTimer = setInterval(() => {
-                    this.nextSlide();
-                }, this.slideDuration);
-            },
-
-            stopAutoplay() {
-                if (this.autoplayTimer) {
-                    clearInterval(this.autoplayTimer);
-                    this.autoplayTimer = null;
-                }
-            },
-
-            addEventListeners() {
-                // Button navigation
-                this.prevBtn.addEventListener('click', () => {
-                    this.prevSlide();
-                    this.stopAutoplay();
-                    this.startAutoplay(); // Restart autoplay after manual navigation
-                });
-                
-                this.nextBtn.addEventListener('click', () => {
-                    this.nextSlide();
-                    this.stopAutoplay();
-                    this.startAutoplay(); // Restart autoplay after manual navigation
-                });
-
-                // Dot navigation
-                this.dots.forEach((dot, i) => {
-                    dot.addEventListener('click', () => {
-                        this.goToSlide(i);
-                        this.stopAutoplay();
-                        this.startAutoplay(); // Restart autoplay after manual navigation
-                    });
-                });
-
-                // Pause autoplay on hover
-                this.wrapper.addEventListener('mouseenter', () => {
-                    this.stopAutoplay();
-                });
-                
-                this.wrapper.addEventListener('mouseleave', () => {
-                    this.startAutoplay();
-                });
-
-                // Touch navigation
-                let startX = 0;
-                let isDragging = false;
-                
-                this.wrapper.addEventListener('touchstart', (e) => {
-                    startX = e.touches[0].clientX;
-                    isDragging = true;
-                    this.stopAutoplay();
-                }, { passive: true });
-                
-                this.wrapper.addEventListener('touchmove', (e) => {
-                    if (!isDragging) return;
-                    const currentX = e.touches[0].clientX;
-                    const diff = startX - currentX;
-                }, { passive: true });
-                
-                this.wrapper.addEventListener('touchend', (e) => {
-                    if (!isDragging) return;
-                    isDragging = false;
-                    
-                    const endX = e.changedTouches[0].clientX;
-                    const diff = startX - endX;
-                    
-                    if (diff > 50) { // Swipe left 
-                        this.nextSlide();
-                    } else if (diff < -50) { // Swipe right
-                        this.prevSlide();
-                    } else {
-                        // Not enough swipe - restore position
-                        this.goToSlide(this.currentIndex);
-                    }
-                    
-                    this.startAutoplay();
-                }, { passive: true });
-            },
-
-            observeResize() {
-                if (window.ResizeObserver) {
-                    const resizeObserver = new ResizeObserver(() => {
-                        this.updateSlideWidth();
-                        this.goToSlide(this.currentIndex);
-                    });
-                    resizeObserver.observe(this.wrapper);
+            slides.forEach((slide, i) => {
+                if (i === index) {
+                    slide.classList.remove('opacity-0', 'z-0', 'pointer-events-none');
+                    slide.classList.add('opacity-100', 'z-10', 'pointer-events-auto');
                 } else {
-                    window.addEventListener('resize', () => {
-                        this.updateSlideWidth();
-                        this.goToSlide(this.currentIndex);
-                    });
+                    slide.classList.remove('opacity-100', 'z-10', 'pointer-events-auto');
+                    slide.classList.add('opacity-0', 'z-0', 'pointer-events-none');
                 }
-            }
-        };
+            });
 
-        slider.init();
+            dots.forEach((dot, i) => {
+                if (i === index) {
+                    dot.classList.remove('w-2', 'bg-stone-300');
+                    dot.classList.add('w-6', 'bg-[#62191c]');
+                } else {
+                    dot.classList.remove('w-6', 'bg-[#62191c]');
+                    dot.classList.add('w-2', 'bg-stone-300');
+                }
+            });
+
+            currentIndex = index;
+        }
+
+        function nextSlide() {
+            showSlide(currentIndex + 1);
+        }
+
+        function startAutoplay() {
+            stopAutoplay();
+            autoplayTimer = setInterval(nextSlide, intervalTime);
+        }
+
+        function stopAutoplay() {
+            if (autoplayTimer) {
+                clearInterval(autoplayTimer);
+                autoplayTimer = null;
+            }
+        }
+
+        dots.forEach((dot) => {
+            dot.addEventListener('click', function () {
+                const targetIndex = parseInt(this.dataset.index, 10);
+                showSlide(targetIndex);
+                startAutoplay();
+            });
+        });
+
+        slideshowContainer.addEventListener('mouseenter', stopAutoplay);
+        slideshowContainer.addEventListener('mouseleave', startAutoplay);
+
+        startAutoplay();
     });
 </script>
 {% endblock js %}

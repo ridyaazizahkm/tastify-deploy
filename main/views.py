@@ -24,7 +24,7 @@ def show_main(request):
     for recipe in top_rated_recipes:
         recipe.average_rating_rounded = round(recipe.average_rating) if recipe.average_rating else 0
 
-    all_recipes = list(Resep.objects.all())
+    all_recipes = list(Resep.objects.select_related('kategori', 'metode_masak', 'bahan_utama').all())
     random_recipes = random.sample(all_recipes, min(5, len(all_recipes))) if all_recipes else []
 
     context = {

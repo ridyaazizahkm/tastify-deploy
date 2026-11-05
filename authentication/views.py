@@ -1,6 +1,6 @@
 import datetime
 import re
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 from django.shortcuts import render, redirect
@@ -80,12 +80,18 @@ def login_user(request):
         login_attempts = cache.get(login_attempts_key, 0)
         last_attempt_time = cache.get(last_attempt_time_key)
         
+        is_ajax = (request.headers.get('x-requested-with') == 'XMLHttpRequest' or 
+                   request.content_type == 'application/json' or 
+                   request.POST.get('is_ajax') == 'true')
+        
         # If more than 3 failed attempts, check cooling down period
         if login_attempts >= 3:
             if last_attempt_time:
                 # Check if 15 minutes have passed since last attempt
                 time_since_last_attempt = datetime.datetime.now() - last_attempt_time
                 if time_since_last_attempt.total_seconds() < 900:  # 15 minutes
+                    if is_ajax:
+                        return JsonResponse({'success': False, 'message': 'Terlalu banyak percobaan gagal. Silakan coba lagi setelah 15 menit.'}, status=429)
                     messages.error(request, 'Too many failed login attempts. Please try again after 15 minutes.')
                     return render(request, 'login.html', {'form': AuthenticationForm(request)})
             
@@ -103,7 +109,17 @@ def login_user(request):
             cache.delete(login_attempts_key)
             cache.delete(last_attempt_time_key)
             
-            response = HttpResponseRedirect(reverse("main:show_main"))
+            # Clear manual logout flag
+            if 'manual_logout' in request.session:
+                del request.session['manual_logout']
+            
+            next_url = request.POST.get('next') or request.GET.get('next')
+            redirect_target = next_url if next_url and next_url != '' and not next_url.startswith('/auth/login') else reverse("main:show_main")
+
+            if is_ajax:
+                return JsonResponse({'success': True, 'redirect_url': redirect_target, 'username': user.username})
+
+            response = HttpResponseRedirect(redirect_target)
             response.set_cookie('last_login', str(datetime.datetime.now()))
             return response
         else:
@@ -112,6 +128,9 @@ def login_user(request):
             cache.set(login_attempts_key, login_attempts, 900)  # Store for 15 minutes
             cache.set(last_attempt_time_key, datetime.datetime.now(), 900)
             
+            if is_ajax:
+                return JsonResponse({'success': False, 'message': 'Username atau password salah.'}, status=400)
+
             messages.error(request, 'Invalid username or password.')
             context = {'form': form}
             return render(request, 'login.html', context)
@@ -123,6 +142,7 @@ def login_user(request):
 
 def logout_user(request):
     logout(request)
+    request.session['manual_logout'] = True
     response = HttpResponseRedirect(reverse('main:show_main'))
     response.delete_cookie('last_login')
     return response

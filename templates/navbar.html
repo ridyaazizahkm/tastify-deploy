@@ -1,11 +1,12 @@
 {% load static %}
 <style>
-    nav {
+    #main-navbar {
         position: fixed;
         top: 0;
         left: 0;
         right: 0;
         z-index: 1000;
+        box-shadow: 0 4px 18px rgba(74, 17, 20, 0.22);
     }
 
     body {
@@ -13,22 +14,27 @@
     }
 
     .nav-link {
-        color: white;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 500;
+        transition: all 0.2s ease;
     }
 
     .nav-link.active {
-        color: #e0cfc2;
+        color: #ffffff;
+        font-weight: 700;
+        background-color: rgba(255, 255, 255, 0.16);
     }
 
     .nav-link:hover {
-        color: #e0cfc2;
+        color: #ffffff;
+        background-color: rgba(255, 255, 255, 0.10);
     }
 
     .greeting {
         display: flex;
         align-items: center;
-        color: white;
-        margin-right: 1rem;
+        color: rgba(255, 255, 255, 0.95);
+        margin-right: 0.75rem;
     }
 
     .mobile-menu {
@@ -37,13 +43,13 @@
         top: 64px;
         left: 0;
         right: 0;
-        background-color: #62191c;
+        background-color: #581518;
         padding: 1rem;
-        border-bottom-left-radius: 8px;
-        border-bottom-right-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border-bottom-left-radius: 16px;
+        border-bottom-right-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
         z-index: 1000;
-        animation: slideDown 0.3s ease-in-out;
+        animation: slideDown 0.25s ease-in-out;
     }
 
     .logo-container {
@@ -114,12 +120,12 @@
     }
 
     @media (max-width: 768px) {
-        nav .max-w-screen-xl {
+        #main-navbar .max-w-6xl {
             justify-content: space-between;
             position: relative;
         }
 
-        nav .logo-container {
+        #main-navbar .logo-container {
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
@@ -141,47 +147,50 @@
     }
 </style>
 
-<nav class="bg-[#62191c] border-gray-200">
-    <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+<nav id="main-navbar" class="bg-[#62191c]/95 backdrop-blur-md border-b border-white/10">
+    <div class="max-w-6xl flex flex-wrap items-center justify-between mx-auto px-4 py-2.5">
         <!-- Hamburger Menu Button (Left on mobile) -->
-        <div class="hamburger order-first" id="hamburger-menu">
+        <div class="hamburger order-first md:hidden" id="hamburger-menu" aria-label="Toggle Navigation">
             <div class="hamburger-line"></div>
             <div class="hamburger-line"></div>
             <div class="hamburger-line"></div>
         </div>
 
         <!-- Logo -->
-        <a href="{% url 'main:show_main' %}" class="flex items-center space-x-3 rtl:space-x-reverse logo-container">
-            <img src="{% static 'images/logo.png' %}" class="h-14" alt="Logo" />
+        <a href="{% url 'main:show_main' %}" class="flex items-center space-x-2.5 logo-container group">
+            <img src="{% static 'images/logo.png' %}" class="h-10 md:h-11 w-auto transition-transform duration-200 group-hover:scale-105" alt="Tastify Logo" />
         </a>
 
         <!-- Desktop Menu -->
-        <div class="items-center justify-between hidden w-full md:flex md:w-auto md:order-1 desktop-menu" id="navbar-user">
-            <ul class="flex flex-col font-medium p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-[#62191c] md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 md:bg-[#62191c]">
+        <div class="items-center justify-between hidden md:flex md:w-auto md:order-1 desktop-menu" id="navbar-user">
+            <ul class="flex items-center space-x-1.5 rtl:space-x-reverse font-medium text-xs md:text-sm">
                 <li>
                     {% url 'main:show_main' as show_main_url %}
                     <a href="{{ show_main_url }}"
-                        class="nav-link {% if request.path == show_main_url %}active{% endif %} block py-2 px-3 rounded">Home</a>
+                        class="nav-link {% if request.path == show_main_url %}active{% endif %} block px-3.5 py-1.5 rounded-xl">Home</a>
                 </li>
 
                 <li>
                     <a href="/recipe/"
-                        class="nav-link {% if request.path == '/recipe/' %}active{% endif %} block py-2 px-3 rounded">Recipe</a>
+                        class="nav-link {% if request.path == '/recipe/' %}active{% endif %} block px-3.5 py-1.5 rounded-xl">Recipe</a>
                 </li>
                 {% if not user.is_superuser %}
                 <li>
                     <a href="/bookmark/"
-                        class="nav-link {% if request.path == '/bookmark/' %}active{% endif %} block py-2 px-3 rounded">Bookmark</a>
+                        class="nav-link {% if request.path == '/bookmark/' %}active{% endif %} block px-3.5 py-1.5 rounded-xl">Bookmark</a>
                 </li>
                 {% endif %}
                 <li>
                     {% if user.is_superuser %}
-                        <a href="{% url 'main:admin_dashboard' %}" class="nav-link {% if request.path == '/admin_dashboard/' %}active{% endif %} block py-2 px-3 rounded">
+                        <a href="{% url 'main:admin_dashboard' %}" class="nav-link {% if request.path == '/admin_dashboard/' %}active{% endif %} block px-3.5 py-1.5 rounded-xl">
                             Dashboard Admin
                         </a>
                     {% else %}
-                        <a href="/recipe/create/" class="nav-link {% if request.path == '/recipe/create/' %}active{% endif %} block py-2 px-3 rounded">
-                            Upload Your Recipes
+                        <a href="/recipe/create/" class="inline-flex items-center gap-1.5 bg-white text-[#62191c] hover:bg-stone-50 px-4 py-1.5 rounded-xl font-bold text-xs md:text-sm transition-all duration-200 shadow-sm hover:shadow hover:scale-[1.02] active:scale-[0.98]">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#62191c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                            </svg>
+                            <span>Upload Recipe</span>
                         </a>
                     {% endif %}
                 </li>              
@@ -190,84 +199,142 @@
 
         <!-- Mobile Menu -->
         <div class="mobile-menu" id="mobile-menu">
-            <ul>
+            <ul class="space-y-1">
                 <li>
                     {% url 'main:show_main' as show_main_url %}
                     <a href="{{ show_main_url }}"
-                        class="nav-link {% if request.path == show_main_url %}active{% endif %}">Home</a>
+                        class="nav-link {% if request.path == show_main_url %}active{% endif %} block px-4 py-2 rounded-lg">Home</a>
                 </li>
                 <li>
                     <a href="/recipe/"
-                        class="nav-link {% if request.path == '/recipe/' %}active{% endif %}">Recipe</a>
+                        class="nav-link {% if request.path == '/recipe/' %}active{% endif %} block px-4 py-2 rounded-lg">Recipe</a>
                 </li>
                 {% if not user.is_superuser %}
                 <li>
                     <a href="/bookmark/"
-                        class="nav-link {% if request.path == '/bookmark/' %}active{% endif %}">Bookmark</a>
+                        class="nav-link {% if request.path == '/bookmark/' %}active{% endif %} block px-4 py-2 rounded-lg">Bookmark</a>
                 </li>
                 {% endif %}
                 <li>
                     {% if user.is_superuser %}
-                        <a href="{% url 'main:admin_dashboard' %}" class="nav-link {% if request.path == '/admin_dashboard/' %}active{% endif %}">
+                        <a href="{% url 'main:admin_dashboard' %}" class="nav-link {% if request.path == '/admin_dashboard/' %}active{% endif %} block px-4 py-2 rounded-lg">
                             Dashboard Admin
                         </a>
                     {% else %}
-                        <a href="/recipe/create/" class="nav-link {% if request.path == '/recipe/create/' %}active{% endif %}">
-                            Upload Your Recipes
+                        <a href="/recipe/create/" class="inline-flex items-center justify-center gap-1.5 bg-white text-[#62191c] font-bold px-4 py-2 rounded-xl text-sm shadow-sm mt-1 w-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                            </svg>
+                            <span>Upload Recipe</span>
                         </a>
+                    {% endif %}
+                </li>
+                <li class="pt-2 border-t border-white/10">
+                    {% if user.is_authenticated %}
+                        {% if not user.is_staff and not user.is_superuser %}
+                        <a href="{% url 'user_profile:profile' %}" class="nav-link block px-4 py-2 rounded-lg">Profil Saya</a>
+                        {% endif %}
+                        <a href="{% url 'authentication:logout' %}" class="block px-4 py-2 rounded-lg text-red-200 hover:text-white hover:bg-red-900/40 font-semibold transition-colors">Sign Out</a>
+                    {% else %}
+                        <a href="{% url 'authentication:login' %}" class="nav-link block px-4 py-2 rounded-lg">Sign In</a>
+                        <a href="{% url 'authentication:register' %}" class="nav-link block px-4 py-2 rounded-lg">Create Account</a>
                     {% endif %}
                 </li>
             </ul>
         </div>
 
         <!-- User Menu -->
-        <div class="flex items-center md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse user-menu-container order-last">
-             <!-- Greeting -->
+        <div class="flex items-center md:order-2 space-x-2.5 rtl:space-x-reverse user-menu-container order-last">
+            <!-- Greeting (Clean without emojis) -->
             {% if user.is_authenticated %}
-            <div class="greeting font-medium text-white hidden md:flex">
-                Welcome, {{ user.username }}👋🏻
+            <div class="greeting text-xs font-medium text-white/90 hidden lg:flex">
+                Hi, {{ user.username }}
             </div>
             {% endif %}
-            <button type="button" class="flex text-sm bg-gray-800 rounded-full md:me-0 focus:ring-4 focus:ring-gray-300"
-                id="user-menu-button" aria-expanded="false" data-dropdown-toggle="user-dropdown"
-                data-dropdown-placement="bottom">
-                <span class="sr-only">Open user menu</span>
-                <img class="w-8 h-8 rounded-full"
-                    src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
-                    alt="user photo">
-            </button>
-            <!-- Dropdown menu -->
-            <div class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow"
-                id="user-dropdown">
-                <div class="px-4 py-3">
+
+            <div class="relative">
+                <button type="button" class="flex text-sm rounded-full focus:ring-2 focus:ring-white/40 focus:outline-none transition-all"
+                    id="user-menu-button" aria-expanded="false" data-dropdown-toggle="user-dropdown">
+                    <span class="sr-only">Open user menu</span>
                     {% if user.is_authenticated %}
-                        {% if not user.is_staff %}
-                            <a href="{% url 'user_profile:profile' %}" class="block text-sm text-gray-900 hover:underline">
-                                {{ user.username }}
-                            </a>
+                    <div class="w-8 h-8 rounded-full bg-[#873632] border border-white/30 flex items-center justify-center text-white font-bold text-xs shadow-sm">
+                        {{ user.username|first|upper }}
+                    </div>
+                    {% else %}
+                    <div class="w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 flex items-center justify-center text-white text-xs transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                    </div>
+                    {% endif %}
+                </button>
+
+                <!-- Dropdown menu -->
+                <div class="z-50 hidden my-2 text-sm list-none bg-white divide-y divide-stone-100 rounded-2xl shadow-xl border border-stone-200/80 absolute right-0 min-w-[190px] overflow-hidden"
+                    id="user-dropdown">
+                    <div class="px-4 py-3 bg-stone-50/70">
+                        {% if user.is_authenticated %}
+                            <p class="text-xs text-stone-400 font-medium">Signed in as</p>
+                            <p class="text-xs font-bold text-stone-800 truncate">{{ user.username }}</p>
                         {% else %}
-                            <span class="block text-sm text-gray-900">{{ user.username }}</span>
+                            <p class="text-xs text-stone-400 font-medium">Welcome to Tastify</p>
+                            <p class="text-xs font-bold text-stone-800">Guest User</p>
                         {% endif %}
-                    {% else %}
-                        <span class="block text-sm text-gray-900">Guest</span>
-                    {% endif %}
+                    </div>
+                    
+                    <ul class="p-1.5 space-y-0.5" aria-labelledby="user-menu-button">
+                        {% if user.is_authenticated %}
+                            {% if not user.is_staff and not user.is_superuser %}
+                            <li>
+                                <a href="{% url 'user_profile:profile' %}" class="flex items-center gap-2 px-3 py-2 text-xs font-medium text-stone-700 hover:text-[#62191c] hover:bg-stone-50 rounded-xl transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                    <span>Profile</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                            {% if user.is_superuser or user.is_staff %}
+                            <li>
+                                <a href="{% url 'main:admin_dashboard' %}" class="flex items-center gap-2 px-3 py-2 text-xs font-medium text-stone-700 hover:text-[#62191c] hover:bg-stone-50 rounded-xl transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                    <span>Dashboard Admin</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                            <li>
+                                <a href="{% url 'authentication:logout' %}" class="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 rounded-xl transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                    </svg>
+                                    <span>Sign Out</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li>
+                                <a href="/auth/login" class="flex items-center gap-2 px-3 py-2 text-xs font-medium text-stone-700 hover:text-[#62191c] hover:bg-stone-50 rounded-xl transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                                    </svg>
+                                    <span>Sign In</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/auth/register" class="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-[#62191c] hover:bg-stone-50 rounded-xl transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                                    </svg>
+                                    <span>Create Account</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
                 </div>
-                
-                <ul class="py-2" aria-labelledby="user-menu-button">
-                    {% if user.is_authenticated %}
-                    <li>
-                        <a href="/auth/logout" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign
-                            Out</a>
-                    </li>
-                    {% else %}
-                    <li>
-                        <a href="/auth/login" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign
-                            In</a>
-                    </li>
-                    {% endif %}
-                </ul>
             </div>
         </div>
+    </div>
 </nav>
 
 <script>

@@ -30,7 +30,12 @@ else:
     DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
-CSRF_TRUSTED_ORIGINS = ["http://localhost","http://127.0.0.1", 'https://kelompok-64-tastify.pkpl.cs.ui.ac.id']
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost",
+    "http://127.0.0.1",
+    "https://*.vercel.app",
+    "https://kelompok-64-tastify.pkpl.cs.ui.ac.id",
+]
 # Application definition
 
 INSTALLED_APPS = [
@@ -57,6 +62,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'tastify.middleware.PortfolioGuestMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'tastify.middleware.ContentSecurityPolicyMiddleware',
@@ -85,8 +91,27 @@ WSGI_APPLICATION = 'tastify.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
+import urllib.parse
 
-if all(os.environ.get(var) for var in [
+USE_SQLITE = os.getenv('USE_SQLITE', 'False').lower() in ('true', '1', 't')
+database_url = os.getenv('DATABASE_URL')
+
+if not USE_SQLITE and database_url:
+    parsed_db = urllib.parse.urlparse(database_url)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': parsed_db.path.lstrip('/'),
+            'USER': parsed_db.username,
+            'PASSWORD': parsed_db.password,
+            'HOST': parsed_db.hostname,
+            'PORT': parsed_db.port or 5432,
+            'OPTIONS': {
+                'sslmode': os.getenv('DB_SSLMODE', 'require'),
+            }
+        }
+    }
+elif not USE_SQLITE and all(os.environ.get(var) for var in [
     'DB_HOST', 'DB_NAME',
     'DB_PASSWORD', 'DB_PORT',
     'DB_USERNAME'
@@ -101,7 +126,15 @@ if all(os.environ.get(var) for var in [
             'PORT': os.getenv('DB_PORT'),
             'OPTIONS': {
                 'options': '-c search_path=public',
+                'sslmode': os.getenv('DB_SSLMODE', 'require'),
             }
+        }
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
 

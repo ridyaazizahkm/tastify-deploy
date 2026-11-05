@@ -11,22 +11,26 @@ ALLOWED_ATTRIBUTES = {
     'a': ['href', 'title', 'target'],
 }
 
+INPUT_CLASSES = 'form-control w-full px-4 py-3 bg-white border border-stone-200 rounded-2xl text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-[#62191c]/15 focus:border-[#62191c] text-sm transition-all shadow-xs'
+SELECT_CLASSES = 'form-control w-full px-4 py-3 bg-white border border-stone-200 rounded-2xl text-stone-800 focus:outline-none focus:ring-2 focus:ring-[#62191c]/15 focus:border-[#62191c] text-sm transition-all shadow-xs cursor-pointer'
+TEXTAREA_CLASSES = 'form-control w-full px-4 py-3 bg-white border border-stone-200 rounded-2xl text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-[#62191c]/15 focus:border-[#62191c] text-sm transition-all shadow-xs resize-none'
+
 class ResepForm(forms.ModelForm):
     class Meta:
         model = Resep
         fields = ['judul', 'deskripsi', 'alat', 'bahan', 'langkah', 'kategori', 'metode_masak', 'bahan_utama', 'url_foto', 'durasi', 'porsi']
         widgets = {
-            'judul': forms.TextInput(attrs={'class': 'form-control rounded-lg', 'placeholder': 'Enter recipe title'}),
-            'deskripsi': forms.Textarea(attrs={'class': 'form-control rounded-lg', 'rows': 3, 'placeholder': ' Describe your recipe'}),
-            'alat': forms.Textarea(attrs={'class': 'form-control rounded-lg', 'rows': 3, 'placeholder': ' List all equipment needed (one per line)'}),
-            'bahan': forms.Textarea(attrs={'class': 'form-control rounded-lg', 'rows': 3, 'placeholder': ' List all ingredients (one per line)'}),
-            'langkah': forms.Textarea(attrs={'class': 'form-control rounded-lg', 'rows': 5, 'placeholder': ' Write step-by-step instructions'}),
-            'kategori': forms.Select(attrs={'class': 'form-control rounded-lg'}),
-            'metode_masak': forms.Select(attrs={'class': 'form-control rounded-lg'}),
-            'bahan_utama': forms.Select(attrs={'class': 'form-control rounded-lg'}),
-            'url_foto': forms.URLInput(attrs={'class': 'form-control rounded-lg', 'placeholder': 'https://example.com/your-image.jpg'}),
-            'durasi': forms.NumberInput(attrs={'class': 'form-control rounded-lg', 'min': '1', 'placeholder': 'Time in minutes'}),
-            'porsi': forms.NumberInput(attrs={'class': 'form-control rounded-lg', 'min': '1', 'placeholder': 'Number of servings'}),
+            'judul': forms.TextInput(attrs={'class': INPUT_CLASSES, 'placeholder': 'Enter recipe title (e.g. Garlic Butter Baguette)'}),
+            'deskripsi': forms.Textarea(attrs={'class': TEXTAREA_CLASSES, 'rows': 3, 'placeholder': 'Describe your recipe, flavor profile, and story...'}),
+            'alat': forms.Textarea(attrs={'class': TEXTAREA_CLASSES, 'rows': 3, 'placeholder': 'List all tools needed (e.g. Oven, Whisk, Baking Tray) - one per line'}),
+            'bahan': forms.Textarea(attrs={'class': TEXTAREA_CLASSES, 'rows': 4, 'placeholder': 'List ingredients with measurements (e.g. 200g flour) - one per line'}),
+            'langkah': forms.Textarea(attrs={'class': TEXTAREA_CLASSES, 'rows': 5, 'placeholder': 'Write clear, numbered step-by-step instructions...'}),
+            'kategori': forms.Select(attrs={'class': SELECT_CLASSES}),
+            'metode_masak': forms.Select(attrs={'class': SELECT_CLASSES}),
+            'bahan_utama': forms.Select(attrs={'class': SELECT_CLASSES}),
+            'url_foto': forms.URLInput(attrs={'class': INPUT_CLASSES, 'placeholder': 'https://images.unsplash.com/...'}),
+            'durasi': forms.NumberInput(attrs={'class': INPUT_CLASSES, 'min': '1', 'placeholder': 'e.g. 30'}),
+            'porsi': forms.NumberInput(attrs={'class': INPUT_CLASSES, 'min': '1', 'placeholder': 'e.g. 4'}),
         }
         labels = {
             'metode_masak': 'Metode Memasak',

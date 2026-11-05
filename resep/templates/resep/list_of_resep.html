@@ -1,100 +1,137 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <div class="flex flex-col sm:flex-row justify-between items-center mb-8">
-        <h1 class="text-3xl font-bold mb-4 sm:mb-0">Recipes</h1>
-        <a href="{% url 'resep:create_resep' %}" class="bg-[#62191c] hover:bg-[#50151a] text-white px-5 py-2.5 rounded-full transition-colors flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+<div class="container mx-auto px-4 max-w-6xl py-6 md:py-8">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div>
+            <h1 class="font-heading text-2xl md:text-3xl font-extrabold text-stone-900 tracking-tight">Recipes</h1>
+            <p class="text-xs md:text-sm text-stone-500 mt-0.5">Jelajahi resep masakan yang lezat dan telah dicoba komunitas</p>
+        </div>
+        <a href="{% url 'resep:create_resep' %}" class="inline-flex items-center gap-2 bg-[#62191c] hover:bg-[#873632] text-white px-5 py-2.5 rounded-xl font-medium text-xs md:text-sm shadow-sm hover:shadow transition-all duration-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
             </svg>
-            Create Recipe
+            <span>Create Recipe</span>
         </a>
     </div>
 
-    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+    <!-- Unified Compact Filter Card -->
+    <div class="bg-white rounded-2xl border border-stone-200/80 shadow-sm p-4 sm:p-5 mb-8">
         <form id="recipe-filter-form" method="post" action="{% url 'resep:list_resep' %}">
             {% csrf_token %}
+            
+            <!-- Search Bar -->
             <div class="mb-4">
-                <label for="q" class="block text-sm font-medium text-gray-700 mb-1">Find Recipe</label>
-                <div class="relative">
-                    <input type="text" name="q" id="q" value="{{ query }}" placeholder="Search recipe..."
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-[#62191c] focus:border-[#62191c]">
-                    <button type="submit" class="absolute inset-y-0 right-0 px-3 flex items-center bg-[#62191c] text-white rounded-r-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-                        </svg>
+                <div class="flex gap-2">
+                    <div class="relative flex-1">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </span>
+                        <input type="text" name="q" id="q" value="{{ query }}" placeholder="Cari judul resep atau kata kunci..."
+                            class="w-full pl-10 pr-4 py-2.5 bg-stone-50/70 border border-stone-200 rounded-xl text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-[#62191c]/20 focus:border-[#62191c] text-xs md:text-sm transition-all">
+                    </div>
+                    <button type="submit" class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-[#62191c] hover:bg-[#873632] text-white rounded-xl text-xs md:text-sm font-semibold shadow-sm hover:shadow transition-all">
+                        <span>Cari</span>
                     </button>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+            <!-- Filter Controls Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 pt-3 border-t border-stone-100">
                 <div>
-                    <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                    <select name="category" id="category" class="filter-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-[#62191c] focus:border-[#62191c]">
-                        <option value="">All Categories</option>
-                        {% for cat in categories %}
-                            {% if cat.kategori %}
-                                <option value="{{ cat.kategori }}" {% if selected_category == cat.kategori %}selected{% endif %}>
-                                    {{ cat.kategori }} ({{ cat.count }})
-                                </option>
-                            {% endif %}
-                        {% endfor %}
-                    </select>
+                    <label for="category" class="block text-xs font-semibold text-stone-600 mb-1.5">Kategori</label>
+                    <div class="relative custom-select-wrapper">
+                        <select name="category" id="category" class="filter-select appearance-none w-full pl-3.5 pr-9 py-2.5 bg-white border border-stone-200 rounded-xl text-stone-800 text-xs md:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#62191c]/20 focus:border-[#62191c] shadow-2xs hover:border-stone-300 transition-all cursor-pointer">
+                            <option value="">Semua Kategori</option>
+                            {% for cat in categories %}
+                                {% if cat.kategori %}
+                                    <option value="{{ cat.kategori }}" {% if selected_category == cat.kategori %}selected{% endif %}>
+                                        {{ cat.kategori }} ({{ cat.count }})
+                                    </option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-stone-400 select-native-chevron">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                    </div>
                 </div>
 
                 <div>
-                    <label for="cooking_method" class="block text-sm font-medium text-gray-700 mb-1">Cooking Method</label>
-                    <select name="cooking_method" id="cooking_method" class="filter-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-[#62191c] focus:border-[#62191c]">
-                        <option value="">All Cooking Methods</option>
-                        {% for method in cooking_methods %}
-                            {% if method.metode_masak %}
-                                <option value="{{ method.metode_masak }}" {% if selected_cooking_method == method.metode_masak %}selected{% endif %}>
-                                    {{ method.metode_masak }} ({{ method.count }})
-                                </option>
-                            {% endif %}
-                        {% endfor %}
-                    </select>
+                    <label for="cooking_method" class="block text-xs font-semibold text-stone-600 mb-1.5">Metode Masak</label>
+                    <div class="relative custom-select-wrapper">
+                        <select name="cooking_method" id="cooking_method" class="filter-select appearance-none w-full pl-3.5 pr-9 py-2.5 bg-white border border-stone-200 rounded-xl text-stone-800 text-xs md:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#62191c]/20 focus:border-[#62191c] shadow-2xs hover:border-stone-300 transition-all cursor-pointer">
+                            <option value="">Semua Metode</option>
+                            {% for method in cooking_methods %}
+                                {% if method.metode_masak %}
+                                    <option value="{{ method.metode_masak }}" {% if selected_cooking_method == method.metode_masak %}selected{% endif %}>
+                                        {{ method.metode_masak }} ({{ method.count }})
+                                    </option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-stone-400 select-native-chevron">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                    </div>
                 </div>
 
                 <div>
-                    <label for="main_ingredient" class="block text-sm font-medium text-gray-700 mb-1">Main Ingredient</label>
-                    <select name="main_ingredient" id="main_ingredient" class="filter-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-[#62191c] focus:border-[#62191c]">
-                        <option value="">All Main Ingredients</option>
-                        {% for ingredient in main_ingredients %}
-                            {% if ingredient.bahan_utama %}
-                                <option value="{{ ingredient.bahan_utama }}" {% if selected_main_ingredient == ingredient.bahan_utama %}selected{% endif %}>
-                                    {{ ingredient.bahan_utama }} ({{ ingredient.count }})
-                                </option>
-                            {% endif %}
-                        {% endfor %}
-                    </select>
+                    <label for="main_ingredient" class="block text-xs font-semibold text-stone-600 mb-1.5">Bahan Utama</label>
+                    <div class="relative custom-select-wrapper">
+                        <select name="main_ingredient" id="main_ingredient" class="filter-select appearance-none w-full pl-3.5 pr-9 py-2.5 bg-white border border-stone-200 rounded-xl text-stone-800 text-xs md:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#62191c]/20 focus:border-[#62191c] shadow-2xs hover:border-stone-300 transition-all cursor-pointer">
+                            <option value="">Semua Bahan</option>
+                            {% for ingredient in main_ingredients %}
+                                {% if ingredient.bahan_utama %}
+                                    <option value="{{ ingredient.bahan_utama }}" {% if selected_main_ingredient == ingredient.bahan_utama %}selected{% endif %}>
+                                        {{ ingredient.bahan_utama }} ({{ ingredient.count }})
+                                    </option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-stone-400 select-native-chevron">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="border-t pt-4 mt-4">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
-                    <div class="flex flex-col sm:flex-row items-start sm:items-center mb-4 sm:mb-0">
-                        <span class="text-sm font-medium text-gray-700 mr-4 mb-2 sm:mb-0">Sort By:</span>
-
-                        <div class="w-full sm:w-64">
-                            <select name="sort_by" id="sort_by" class="filter-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-[#62191c] focus:border-[#62191c]">
-                                <option value="">Default</option>
-                                <option value="cooking_time_asc" {% if sort_by == 'cooking_time_asc' %}selected{% endif %}>Fastest Cooking Time</option>
-                                <option value="cooking_time_desc" {% if sort_by == 'cooking_time_desc' %}selected{% endif %}>Longest Cooking Time</option>
-                                <option value="servings_desc" {% if sort_by == 'servings_desc' %}selected{% endif %}>Most Servings</option>
-                                <option value="servings_asc" {% if sort_by == 'servings_asc' %}selected{% endif %}>Least Servings</option>
-                                <option value="name_asc" {% if sort_by == 'name_asc' %}selected{% endif %}>Name (A-Z)</option>
-                                <option value="name_desc" {% if sort_by == 'name_desc' %}selected{% endif %}>Name (Z-A)</option>
-                            </select>
+                <div>
+                    <label for="sort_by" class="block text-xs font-semibold text-stone-600 mb-1.5">Urutan</label>
+                    <div class="relative custom-select-wrapper">
+                        <select name="sort_by" id="sort_by" class="filter-select appearance-none w-full pl-3.5 pr-9 py-2.5 bg-white border border-stone-200 rounded-xl text-stone-800 text-xs md:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#62191c]/20 focus:border-[#62191c] shadow-2xs hover:border-stone-300 transition-all cursor-pointer">
+                            <option value="">Default (Rekomendasi)</option>
+                            <option value="cooking_time_asc" {% if sort_by == 'cooking_time_asc' %}selected{% endif %}>Waktu Tercepat</option>
+                            <option value="cooking_time_desc" {% if sort_by == 'cooking_time_desc' %}selected{% endif %}>Waktu Terlama</option>
+                            <option value="servings_desc" {% if sort_by == 'servings_desc' %}selected{% endif %}>Porsi Terbanyak</option>
+                            <option value="servings_asc" {% if sort_by == 'servings_asc' %}selected{% endif %}>Porsi Tersedikit</option>
+                            <option value="name_asc" {% if sort_by == 'name_asc' %}selected{% endif %}>Nama (A-Z)</option>
+                            <option value="name_desc" {% if sort_by == 'name_desc' %}selected{% endif %}>Nama (Z-A)</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-stone-400 select-native-chevron">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="flex justify-end mt-4">
-                <button type="button" id="reset-filters" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 mr-2">
-                    Reset Filter
+            <!-- Footer Action Row -->
+            <div class="flex items-center justify-between pt-3 mt-3 border-t border-stone-100 text-xs">
+                <span class="text-stone-400">Pilih kriteria untuk menyaring daftar resep</span>
+                <button type="button" id="reset-filters" class="inline-flex items-center gap-1.5 px-3 py-1.5 font-semibold text-stone-600 hover:text-[#62191c] hover:bg-stone-100 rounded-lg transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    <span>Reset Filter</span>
                 </button>
             </div>
         </form>
@@ -186,10 +223,155 @@
             return textarea.value;
         }
 
+        // --- Custom Dropdown Component ---
+        function closeAllCustomSelects() {
+            document.querySelectorAll('.custom-select-menu').forEach(m => m.classList.add('hidden'));
+            document.querySelectorAll('.custom-select-trigger').forEach(t => {
+                t.classList.remove('border-[#62191c]', 'ring-2', 'ring-[#62191c]/20');
+                const chevron = t.querySelector('.custom-chevron');
+                if (chevron) chevron.classList.remove('rotate-180');
+            });
+        }
+
+        function initCustomSelect(select, opts = {}) {
+            if (!select) return;
+            const container = select.parentElement;
+            if (!container) return;
+
+            if (select.dataset.customSelectInit === 'true') {
+                syncCustomSelect(select, opts);
+                return;
+            }
+            select.dataset.customSelectInit = 'true';
+
+            // Visually hide native select
+            select.classList.add('sr-only');
+            select.setAttribute('tabindex', '-1');
+            select.setAttribute('aria-hidden', 'true');
+
+            // Hide native static chevron in container if exists
+            const staticChevron = container.querySelector('.select-native-chevron, .pointer-events-none');
+            if (staticChevron) {
+                staticChevron.classList.add('hidden');
+            }
+
+            const isCompact = !!opts.compact;
+
+            // Create Trigger Button (Pure white, rounded-xl, soft shadow, matching design)
+            const trigger = document.createElement('button');
+            trigger.type = 'button';
+            trigger.className = isCompact
+                ? 'custom-select-trigger inline-flex items-center justify-between gap-2 px-3 py-1.5 bg-white border border-stone-200 rounded-xl text-xs md:text-sm font-semibold text-stone-800 shadow-2xs hover:border-stone-300 focus:outline-none focus:ring-2 focus:ring-[#62191c]/20 focus:border-[#62191c] transition-all text-left min-w-[4.75rem]'
+                : 'custom-select-trigger w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-xl text-stone-800 text-xs md:text-sm font-medium flex items-center justify-between shadow-2xs hover:border-stone-300 focus:outline-none focus:ring-2 focus:ring-[#62191c]/20 focus:border-[#62191c] transition-all text-left';
+
+            const labelSpan = document.createElement('span');
+            labelSpan.className = 'custom-select-label truncate pr-1 text-stone-800';
+
+            const chevronWrap = document.createElement('div');
+            chevronWrap.className = 'custom-chevron pointer-events-none flex items-center text-stone-400 transition-transform duration-200 shrink-0';
+            chevronWrap.innerHTML = `
+                <svg class="${isCompact ? 'h-3.5 w-3.5' : 'h-4 w-4'}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            `;
+
+            trigger.appendChild(labelSpan);
+            trigger.appendChild(chevronWrap);
+            container.appendChild(trigger);
+
+            // Create Dropdown Menu (Pure white popup with rounded corners, subtle border, smooth hover)
+            const menu = document.createElement('div');
+            menu.className = isCompact
+                ? 'custom-select-menu hidden absolute left-0 right-0 top-full mt-1.5 z-50 bg-white border border-stone-200/90 rounded-xl shadow-lg shadow-stone-900/10 p-1 max-h-56 overflow-y-auto space-y-0.5 custom-scrollbar min-w-[5rem]'
+                : 'custom-select-menu hidden absolute left-0 right-0 top-full mt-1.5 z-50 bg-white border border-stone-200/90 rounded-2xl shadow-xl shadow-stone-900/10 p-1.5 max-h-60 overflow-y-auto space-y-0.5 custom-scrollbar';
+            container.appendChild(menu);
+
+            trigger.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const isCurrentlyOpen = !menu.classList.contains('hidden');
+                closeAllCustomSelects();
+                if (!isCurrentlyOpen) {
+                    menu.classList.remove('hidden');
+                    chevronWrap.classList.add('rotate-180');
+                    trigger.classList.add('border-[#62191c]', 'ring-2', 'ring-[#62191c]/20');
+                }
+            });
+
+            syncCustomSelect(select, opts);
+        }
+
+        function syncCustomSelect(select, opts = {}) {
+            if (!select) return;
+            const container = select.parentElement;
+            if (!container) return;
+
+            const labelSpan = container.querySelector('.custom-select-label');
+            const menu = container.querySelector('.custom-select-menu');
+            if (!labelSpan || !menu) return;
+
+            const selectedOption = select.options[select.selectedIndex] || select.options[0];
+            labelSpan.textContent = selectedOption ? selectedOption.textContent.trim() : '';
+
+            const isCompact = !!opts.compact;
+            menu.innerHTML = '';
+
+            Array.from(select.options).forEach(opt => {
+                const item = document.createElement('div');
+                const isSelected = (opt.value === select.value);
+
+                item.className = isCompact
+                    ? `px-2.5 py-1.5 rounded-lg text-xs md:text-sm font-semibold cursor-pointer transition-colors flex items-center justify-between ${
+                        isSelected 
+                            ? 'bg-[#62191c]/5 text-[#62191c]' 
+                            : 'text-stone-700 hover:bg-stone-50 hover:text-stone-900'
+                    }`
+                    : `px-3.5 py-2.5 rounded-xl text-xs md:text-sm font-medium cursor-pointer transition-colors flex items-center justify-between ${
+                        isSelected 
+                            ? 'bg-[#62191c]/5 text-[#62191c] font-bold' 
+                            : 'text-stone-700 hover:bg-stone-50 hover:text-stone-900'
+                    }`;
+
+                const textSpan = document.createElement('span');
+                textSpan.className = 'truncate pr-2';
+                textSpan.textContent = opt.textContent.trim();
+                item.appendChild(textSpan);
+
+                if (isSelected) {
+                    const check = document.createElement('span');
+                    check.className = 'text-[#62191c] shrink-0 ml-1.5';
+                    check.innerHTML = `
+                        <svg class="${isCompact ? 'w-3.5 h-3.5' : 'w-4 h-4'}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                        </svg>
+                    `;
+                    item.appendChild(check);
+                }
+
+                item.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const valueChanged = (select.value !== opt.value);
+                    select.value = opt.value;
+                    syncCustomSelect(select, opts);
+                    closeAllCustomSelects();
+                    if (valueChanged) {
+                        select.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                });
+
+                menu.appendChild(item);
+            });
+        }
+
+        document.addEventListener('click', closeAllCustomSelects);
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeAllCustomSelects();
+        });
+
         function updateFilterCounts(data) {
             if (data.categories) {
                 const selectedCategory = categorySelect.value;
-                categorySelect.innerHTML = '<option value="">All Categories</option>';
+                categorySelect.innerHTML = '<option value="">Semua Kategori</option>';
                 data.categories.forEach(cat => {
                     if (cat.kategori) {
                         const option = document.createElement('option');
@@ -200,11 +382,12 @@
                         categorySelect.appendChild(option);
                     }
                 });
+                syncCustomSelect(categorySelect);
             }
 
             if (data.cooking_methods) {
                 const selectedMethod = cookingMethodSelect.value;
-                cookingMethodSelect.innerHTML = '<option value="">All Cooking Methods</option>';
+                cookingMethodSelect.innerHTML = '<option value="">Semua Metode</option>';
                 data.cooking_methods.forEach(method => {
                     if (method.metode_masak) {
                         const option = document.createElement('option');
@@ -215,11 +398,12 @@
                         cookingMethodSelect.appendChild(option);
                     }
                 });
+                syncCustomSelect(cookingMethodSelect);
             }
 
             if (data.main_ingredients) {
                 const selectedIngredient = mainIngredientSelect.value;
-                mainIngredientSelect.innerHTML = '<option value="">All Main Ingredients</option>';
+                mainIngredientSelect.innerHTML = '<option value="">Semua Bahan</option>';
                 data.main_ingredients.forEach(ingredient => {
                     if (ingredient.bahan_utama) {
                         const option = document.createElement('option');
@@ -230,6 +414,7 @@
                         mainIngredientSelect.appendChild(option);
                     }
                 });
+                syncCustomSelect(mainIngredientSelect);
             }
         }
 
@@ -278,6 +463,7 @@
         function attachItemsPerPageListener() {
             const itemsPerPageSelect = document.getElementById('items_per_page');
             if (itemsPerPageSelect) {
+                initCustomSelect(itemsPerPageSelect, { compact: true });
                 itemsPerPageSelect.addEventListener('change', function() {
                     const formData = new FormData(form);
                     formData.set('page', '1');
@@ -326,8 +512,14 @@
             mainIngredientSelect.value = '';
             sortSelect.value = '';
 
+            syncCustomSelect(categorySelect);
+            syncCustomSelect(cookingMethodSelect);
+            syncCustomSelect(mainIngredientSelect);
+            syncCustomSelect(sortSelect);
+
             if (itemsPerPageSelect) {
                 itemsPerPageSelect.value = itemsPerPageSelect.querySelector('option').value;
+                syncCustomSelect(itemsPerPageSelect, { compact: true });
             }
 
             const formData = new FormData();
@@ -378,6 +570,12 @@
         }
 
         form.addEventListener('submit', handleFormSubmit);
+
+        // Initialize Custom Dropdowns for all recipe filters
+        initCustomSelect(categorySelect);
+        initCustomSelect(cookingMethodSelect);
+        initCustomSelect(mainIngredientSelect);
+        initCustomSelect(sortSelect);
 
         attachPaginationListeners();
         attachItemsPerPageListener();

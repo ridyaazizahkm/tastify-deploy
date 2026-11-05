@@ -36,185 +36,266 @@
 </div>
 {% endif %}
 
-<div class="container mx-auto px-4 py-8 max-w-7xl">
-    <div class="mb-6">
-        <a href="{% url 'resep:list_resep' %}" class="inline-flex items-center px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors duration-200">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+<div class="container mx-auto px-4 max-w-5xl py-6 md:py-8">
+    
+    <!-- Top Navigation Bar -->
+    <div class="mb-6 flex items-center justify-between">
+        <a href="{% url 'resep:list_resep' %}" 
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold text-stone-700 bg-white border border-stone-200/80 shadow-sm hover:border-[#62191c] hover:text-[#62191c] hover:shadow transition-all group">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform group-hover:-translate-x-1 transition-transform text-[#62191c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Back to Recipes
+            <span>Kembali ke Daftar Resep</span>
         </a>
     </div>
 
-    <!-- Recipe Header Card -->
-    <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
+    <!-- Recipe Hero Showcase Card -->
+    <div class="bg-white rounded-3xl border border-stone-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.04)] overflow-hidden mb-8">
         <div class="md:flex">
-            <div class="md:w-2/5 relative">
+            <!-- Left: Hero Photo -->
+            <div class="md:w-5/12 relative bg-stone-100">
                 {% if resep.url_foto %}
-                <img src="{{ resep.url_foto }}" class="w-full h-full object-cover min-h-[350px]" alt="{{ resep.judul }}">
+                <img src="{{ resep.url_foto }}" 
+                     class="w-full h-full object-cover min-h-[280px] md:min-h-full max-h-[420px]" 
+                     alt="{{ resep.judul }}">
                 {% else %}
-                <div class="bg-gray-100 w-full h-full min-h-[350px] flex items-center justify-center">
-                    <span class="text-gray-400">No Image</span>
+                <div class="w-full h-full min-h-[280px] flex items-center justify-center bg-stone-100 text-stone-400">
+                    <span>No Image Available</span>
                 </div>
                 {% endif %}
-                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+
+                <!-- Floating Bookmark Button on Photo -->
+                <button class="absolute top-4 right-4 bg-white/90 hover:bg-white backdrop-blur-md p-2.5 rounded-full shadow-md hover:scale-105 active:scale-95 transition-all duration-200 bookmark-toggle-btn z-20" 
+                        data-resep-id="{{ resep.id }}"
+                        onclick="toggleBookmark({{ resep.id }}, event)"
+                        title="Simpan Resep">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 bookmark-icon {% if is_bookmarked %}text-red-500 fill-current{% else %}text-stone-700{% endif %}" 
+                        fill="{% if is_bookmarked %}currentColor{% else %}none{% endif %}" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                </button>
+
+                <!-- Floating Bottom Category Badges on Photo -->
+                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 sm:p-5">
                     <div class="flex flex-wrap gap-2">
-                        <span class="bg-[#62191c] text-white px-3 py-1 rounded-full text-sm font-medium">{{ resep.kategori.nama }}</span>
-                        <span class="bg-[#62191c]/80 text-white px-3 py-1 rounded-full text-sm font-medium">{{ resep.metode_masak.nama }}</span>
+                        <span class="bg-[#62191c] text-white px-3 py-1 rounded-full text-xs font-bold tracking-wide shadow-md">
+                            {{ resep.kategori.nama }}
+                        </span>
+                        {% if resep.metode_masak %}
+                        <span class="bg-black/60 backdrop-blur-md text-amber-200 px-3 py-1 rounded-full text-xs font-semibold shadow-md">
+                            {{ resep.metode_masak.nama }}
+                        </span>
+                        {% endif %}
                     </div>
                 </div>
             </div>
-            <div class="md:w-3/5 p-6">
-                <h1 class="text-3xl font-bold mb-4 text-gray-800">{{ resep.judul }}</h1>
 
-                <div class="flex flex-wrap items-center gap-6 p-4 bg-gray-50 rounded-lg mb-4">
-                    <!-- Duration -->
-                    <div class="flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#62191c] mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <div>
-                            <p class="text-xs text-gray-500">Duration</p>
-                            <p class="font-semibold">{{ resep.durasi|default:"30 minutes" }}</p>
-                        </div>
-                    </div>
+            <!-- Right: Recipe Details & Metadata -->
+            <div class="md:w-7/12 p-6 md:p-8 flex flex-col justify-between">
+                <div>
+                    <!-- Headline Title -->
+                    <h1 class="font-heading text-2xl md:text-3xl font-extrabold mb-3 text-stone-900 tracking-tight leading-tight">
+                        {{ resep.judul }}
+                    </h1>
 
-                    <!-- Servings -->
-                    <div class="flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#62191c] mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                        <div>
-                            <p class="text-xs text-gray-500">Servings</p>
-                            <p class="font-semibold">{{ resep.porsi|default:"4 servings" }}</p>
-                        </div>
-                    </div>
-
-                    <!-- Main ingredient -->
-                    <div class="flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#62191c] mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.701 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18zm-3-9v-2a2 2 0 00-2-2H8a2 2 0 00-2 2v2h12z" />
-                        </svg>
-                        <div>
-                            <p class="text-xs text-gray-500">Main Ingredient</p>
-                            <p class="font-semibold">{{ resep.bahan_utama.nama }}</p>
-                        </div>
-                    </div>
-                </div>
-
-                <p class="text-gray-600 mb-6 leading-relaxed">{{ resep.deskripsi }}</p>
-
-                <!-- Rating section (include from rating app) -->
-                {% include 'rating/rating.html' with resep=resep average_rating=average_rating total_ratings=total_ratings %}
-
-                <div class="flex justify-between items-center mt-4 pt-3 border-t border-gray-200">
-                    <div class="flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 text-red-500" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
-                        </svg>
-                        <span class="text-lg font-semibold likes-count">
-                            {{ resep.likes_count|default:"0" }} Likes
-                        </span>
-                    </div>
-                </div>
-
-                {% if resep.user %}
-                <div class="flex items-center mt-4 border-t pt-4 border-gray-100">
-                    <div class="bg-[#62191c] rounded-full w-10 h-10 flex items-center justify-center text-white font-bold">
-                        {{ resep.user.user.username|first|upper }}
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm font-medium">{{ resep.user.user.username }}</p>
-                        <p class="text-xs text-gray-500">Recipe Creator</p>
-                    </div>
-                    {% if request.user.is_authenticated and resep.user.user == request.user %}
-                    <div class="ml-auto flex space-x-2">
-                        <a href="{% url 'resep:edit_resep' id=resep.id %}" class="inline-flex items-center px-4 py-2 bg-[#62191c] text-white rounded-lg hover:bg-[#4a1317] transition-colors duration-200">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    <!-- Clean Unified Metadata Bar (Alfredo Pasta Reference) -->
+                    <div class="flex items-center flex-wrap gap-2.5 sm:gap-3.5 py-2.5 px-4 bg-stone-50/90 rounded-2xl border border-stone-200/60 text-xs text-stone-700 mb-5">
+                        {% if resep.durasi %}
+                        <div class="flex items-center gap-1.5 font-medium">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-stone-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            Edit Recipe
-                        </a>
-                        <a href="{% url 'resep:delete_resep' id=resep.id %}" class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            <span>{{ resep.durasi }} mins</span>
+                        </div>
+                        <span class="w-1 h-1 rounded-full bg-stone-300"></span>
+                        {% endif %}
+
+                        {% if resep.porsi %}
+                        <div class="flex items-center gap-1.5 font-medium">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-stone-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                             </svg>
-                            Delete
-                        </a>
+                            <span>{{ resep.porsi }} porsi</span>
+                        </div>
+                        {% endif %}
+
+                        {% if resep.bahan_utama %}
+                        <span class="w-1 h-1 rounded-full bg-stone-300"></span>
+                        <div class="flex items-center gap-1.5 font-medium">
+                            <span class="text-stone-400">Bahan:</span>
+                            <span class="font-semibold text-stone-900">{{ resep.bahan_utama.nama }}</span>
+                        </div>
+                        {% endif %}
+
+                        {% if resep.metode_masak %}
+                        <span class="w-1 h-1 rounded-full bg-stone-300"></span>
+                        <div class="flex items-center gap-1.5 font-medium">
+                            <span class="text-stone-400">Metode:</span>
+                            <span class="font-semibold text-stone-900">{{ resep.metode_masak.nama }}</span>
+                        </div>
+                        {% endif %}
                     </div>
-                    {% elif user.is_authenticated and user != resep.user.user and not resep.user.user.is_staff and not resep.user.user.is_superuser %}
-                    <button class="inline-flex items-center px-3 py-1 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200 text-sm report-recipe-link" data-recipe-id="{{ resep.id }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
-                        </svg>
-                        Report
-                    </button>
-                    {% endif %}
-                    
-                    {% if user.is_staff or user.is_superuser %}
-                    <button class="inline-flex items-center px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors duration-200 text-sm admin-report-recipe-link" data-recipe-id="{{ resep.id }}" data-user-id="{{ resep.user.user.id }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                        Moderate
-                    </button>
+
+                    <!-- Description -->
+                    <p class="text-stone-600 mb-5 text-sm sm:text-[15px] leading-relaxed">
+                        {{ resep.deskripsi }}
+                    </p>
+                </div>
+
+                <!-- Rating & Likes Row -->
+                <div>
+                    <!-- Rating section (include from rating app) -->
+                    {% include 'rating/rating.html' with resep=resep average_rating=average_rating total_ratings=total_ratings %}
+
+                    <!-- Likes / Bookmark Status Row -->
+                    <div class="flex items-center justify-between mt-3 pt-3 border-t border-stone-100">
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200/80 text-[#62191c] text-xs font-bold">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="likes-count">{{ resep.likes_count|default:"0" }} Menyukai</span>
+                        </div>
+                    </div>
+
+                    <!-- Author & Recipe Actions -->
+                    {% if resep.user %}
+                    <div class="flex items-center mt-4 border-t pt-3.5 border-stone-100">
+                        <div class="bg-[#62191c] rounded-full w-9 h-9 flex items-center justify-center text-white font-bold text-xs shadow-sm">
+                            {{ resep.user.user.username|first|upper }}
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-xs font-bold text-stone-900">{{ resep.user.user.username }}</p>
+                            <p class="text-[11px] text-stone-400">Pembuat Resep</p>
+                        </div>
+
+                        {% if request.user.is_authenticated and resep.user.user == request.user %}
+                        <div class="ml-auto flex items-center gap-2">
+                            <a href="{% url 'resep:edit_resep' id=resep.id %}" 
+                               class="inline-flex items-center px-3.5 py-1.5 bg-[#62191c] text-white rounded-xl hover:bg-[#873632] transition-colors text-xs font-semibold shadow-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                                Edit
+                            </a>
+                            <a href="{% url 'resep:delete_resep' id=resep.id %}" 
+                               class="inline-flex items-center px-3.5 py-1.5 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors text-xs font-semibold shadow-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                                Delete
+                            </a>
+                        </div>
+                        {% elif user.is_authenticated and user != resep.user.user and not resep.user.user.is_staff and not resep.user.user.is_superuser %}
+                        <button class="ml-auto inline-flex items-center px-3.5 py-1.5 bg-stone-100 text-stone-600 rounded-xl hover:bg-stone-200 transition-colors text-xs font-semibold report-recipe-link" 
+                                data-recipe-id="{{ resep.id }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+                            </svg>
+                            Laporkan
+                        </button>
+                        {% endif %}
+                        
+                        {% if user.is_staff or user.is_superuser %}
+                        <button class="ml-auto inline-flex items-center px-3.5 py-1.5 bg-red-50 text-red-700 border border-red-200 rounded-xl hover:bg-red-100 transition-colors text-xs font-semibold admin-report-recipe-link" 
+                                data-recipe-id="{{ resep.id }}" 
+                                data-user-id="{{ resep.user.user.id }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                            Moderasi
+                        </button>
+                        {% endif %}
+                    </div>
                     {% endif %}
                 </div>
-                {% endif %}
             </div>
         </div>
     </div>
 
-    <!-- Recipe Details -->
-    <div class="grid md:grid-cols-2 gap-8 mb-8">
-        <!-- Left Column -->
-        <div class="space-y-8">
-            <!-- Ingredients -->
-            <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-                <div class="bg-[#62191c] text-white py-3 px-6 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                    </svg>
-                    <h3 class="text-xl font-bold">Ingredients</h3>
+    <!-- Culinary Details Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8 items-start">
+        
+        <!-- Left Sidebar: Ingredients & Tools (5 cols) -->
+        <div class="lg:col-span-5 space-y-6">
+            
+            <!-- Ingredients Card -->
+            <div class="bg-white rounded-3xl border border-stone-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] overflow-hidden">
+                <div class="px-6 py-4 border-b border-stone-100 bg-white">
+                    <h3 class="font-heading font-bold text-base md:text-lg text-stone-900 tracking-tight">Ingredients</h3>
                 </div>
-                <div class="p-6">
-                    <div class="text-gray-700 prose">
+                <div class="p-5 sm:p-6">
+                    {% if resep.get_bahan_list %}
+                    <ul class="space-y-2">
+                        {% for item in resep.get_bahan_list %}
+                        <li onclick="this.classList.toggle('bg-stone-50'); this.querySelector('.check-box').classList.toggle('bg-[#62191c]'); this.querySelector('.check-box').classList.toggle('border-[#62191c]'); this.querySelector('.check-icon').classList.toggle('hidden'); this.querySelector('.ingredient-text').classList.toggle('line-through'); this.querySelector('.ingredient-text').classList.toggle('text-stone-400');"
+                            class="flex items-center gap-3 p-3 rounded-2xl hover:bg-stone-50/70 border border-stone-200/60 cursor-pointer select-none transition-all group">
+                            <span class="check-box flex-shrink-0 w-4 h-4 rounded-full border border-stone-300 group-hover:border-[#62191c] flex items-center justify-center transition-colors bg-white">
+                                <svg class="check-icon h-2.5 w-2.5 text-white hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </span>
+                            <span class="ingredient-text text-stone-800 text-sm font-medium leading-snug transition-colors">
+                                {{ item }}
+                            </span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <div class="text-stone-700 text-sm leading-relaxed prose-sm max-w-none">
                         {{ resep.bahan|linebreaks }}
                     </div>
+                    {% endif %}
                 </div>
             </div>
 
-            <!-- Tools -->
-            <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-                <div class="bg-[#62191c] text-white py-3 px-6 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <h3 class="text-xl font-bold">Tools & Equipment</h3>
+            <!-- Tools & Equipment Card -->
+            <div class="bg-white rounded-3xl border border-stone-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] overflow-hidden">
+                <div class="px-6 py-4 border-b border-stone-100 bg-white">
+                    <h3 class="font-heading font-bold text-base md:text-lg text-stone-900 tracking-tight">Tools & Equipment</h3>
                 </div>
-                <div class="p-6">
-                    <div class="text-gray-700 prose">
+                <div class="p-5 sm:p-6">
+                    {% if resep.get_alat_list %}
+                    <div class="flex flex-wrap gap-2">
+                        {% for tool in resep.get_alat_list %}
+                        <span class="inline-flex items-center px-3.5 py-1.5 bg-stone-100/90 text-stone-700 rounded-full text-xs font-medium border border-stone-200/50">
+                            {{ tool }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-stone-700 text-sm leading-relaxed prose-sm max-w-none">
                         {{ resep.alat|linebreaks }}
                     </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
 
-        <!-- Right Column -->
-        <div>
-            <!-- Steps -->
-            <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-                <div class="bg-[#62191c] text-white py-3 px-6 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                    <h3 class="text-xl font-bold">Cooking Instructions</h3>
+        <!-- Right Main Column: Cooking Instructions (7 cols) -->
+        <div class="lg:col-span-7">
+            <div class="bg-white rounded-3xl border border-stone-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] overflow-hidden">
+                <div class="px-6 py-4 border-b border-stone-100 bg-white">
+                    <h3 class="font-heading font-bold text-base md:text-lg text-stone-900 tracking-tight">Cooking Instructions</h3>
                 </div>
-                <div class="p-6">
-                    <div class="text-gray-700 prose max-w-none">
+                <div class="p-5 sm:p-6 space-y-3">
+                    {% if resep.get_langkah_list %}
+                        {% for step in resep.get_langkah_list %}
+                        <div class="flex items-start gap-3.5 p-3.5 rounded-2xl bg-stone-50/60 border border-stone-100 transition-colors">
+                            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-[#62191c] text-white font-bold text-xs flex items-center justify-center mt-0.5 shadow-xs">
+                                {{ forloop.counter }}
+                            </span>
+                            <div class="flex-1">
+                                <p class="text-stone-800 text-sm sm:text-[15px] leading-relaxed">
+                                    {{ step }}
+                                </p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                    <div class="p-6 text-stone-800 text-sm md:text-base leading-relaxed prose max-w-none">
                         {{ resep.langkah|linebreaks }}
                     </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -224,47 +305,49 @@
 {% include 'komentar/komentar.html' with resep=resep %}
 
 <!-- User Report Recipe Dialog -->
-<div id="reportRecipeDialog" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 hidden z-50">
-    <div class="bg-white p-6 rounded-lg shadow-lg w-96 max-w-full">
+<div id="reportRecipeDialog" class="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden z-50 p-4">
+    <div class="bg-white p-6 rounded-3xl shadow-xl w-96 max-w-full border border-stone-100">
         <div class="text-center mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-[#62191c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
-            </svg>
+            <div class="w-12 h-12 rounded-2xl bg-red-50 text-[#62191c] flex items-center justify-center mx-auto mb-2 border border-red-100">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+                </svg>
+            </div>
+            <h3 class="text-lg font-bold text-stone-900">Laporkan Resep</h3>
+            <p class="text-stone-500 text-xs mt-1">Pilih alasan pelaporan resep ini:</p>
         </div>
-        <h3 class="text-lg font-semibold mb-2 text-center text-[#62191c]">Report Recipe</h3>
-        <p class="text-gray-600 mb-4 text-center">Please select a reason for reporting this recipe:</p>
         
         <form id="reportRecipeForm" method="post" action="">
             {% csrf_token %}
-            <div class="space-y-3 mb-6">
-                <div class="flex items-center">
-                    <input id="inappropriate" name="reason" type="radio" value="inappropriate" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-gray-300">
-                    <label for="inappropriate" class="ml-2 block text-sm text-gray-700">Inappropriate content</label>
-                </div>
-                <div class="flex items-center">
-                    <input id="copyright" name="reason" type="radio" value="copyright" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-gray-300">
-                    <label for="copyright" class="ml-2 block text-sm text-gray-700">Copyright violation</label>
-                </div>
-                <div class="flex items-center">
-                    <input id="offensive" name="reason" type="radio" value="offensive" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-gray-300">
-                    <label for="offensive" class="ml-2 block text-sm text-gray-700">Offensive content</label>
-                </div>
-                <div class="flex items-center">
-                    <input id="spam" name="reason" type="radio" value="spam" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-gray-300">
-                    <label for="spam" class="ml-2 block text-sm text-gray-700">Spam or advertisement</label>
-                </div>
-                <div class="flex items-center">
-                    <input id="harmful" name="reason" type="radio" value="harmful" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-gray-300">
-                    <label for="harmful" class="ml-2 block text-sm text-gray-700">Harmful or dangerous content</label>
-                </div>
+            <div class="space-y-2.5 mb-6 text-xs">
+                <label class="flex items-center p-2.5 rounded-xl border border-stone-200 hover:bg-stone-50 cursor-pointer">
+                    <input id="inappropriate" name="reason" type="radio" value="inappropriate" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-stone-300">
+                    <span class="ml-2.5 text-stone-700 font-medium">Konten tidak pantas</span>
+                </label>
+                <label class="flex items-center p-2.5 rounded-xl border border-stone-200 hover:bg-stone-50 cursor-pointer">
+                    <input id="copyright" name="reason" type="radio" value="copyright" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-stone-300">
+                    <span class="ml-2.5 text-stone-700 font-medium">Pelanggaran hak cipta</span>
+                </label>
+                <label class="flex items-center p-2.5 rounded-xl border border-stone-200 hover:bg-stone-50 cursor-pointer">
+                    <input id="offensive" name="reason" type="radio" value="offensive" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-stone-300">
+                    <span class="ml-2.5 text-stone-700 font-medium">Menyinggung atau menghina</span>
+                </label>
+                <label class="flex items-center p-2.5 rounded-xl border border-stone-200 hover:bg-stone-50 cursor-pointer">
+                    <input id="spam" name="reason" type="radio" value="spam" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-stone-300">
+                    <span class="ml-2.5 text-stone-700 font-medium">Spam atau promosi ilegal</span>
+                </label>
+                <label class="flex items-center p-2.5 rounded-xl border border-stone-200 hover:bg-stone-50 cursor-pointer">
+                    <input id="harmful" name="reason" type="radio" value="harmful" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-stone-300">
+                    <span class="ml-2.5 text-stone-700 font-medium">Konten berbahaya atau racun</span>
+                </label>
             </div>
             
-            <div class="flex justify-center space-x-3">
-                <button type="button" id="cancelReportRecipeBtn" class="px-4 py-2 border border-gray-300 rounded text-gray-600 hover:bg-gray-100">
-                    Cancel
+            <div class="flex justify-center space-x-2.5">
+                <button type="button" id="cancelReportRecipeBtn" class="px-4 py-2 border border-stone-200 rounded-xl text-stone-600 hover:bg-stone-50 text-xs font-semibold">
+                    Batal
                 </button>
-                <button type="submit" class="px-4 py-2 bg-[#62191c] text-white rounded hover:bg-[#62191c]/90">
-                    Submit Report
+                <button type="submit" class="px-5 py-2 bg-[#62191c] hover:bg-[#873632] text-white rounded-xl text-xs font-semibold shadow-sm transition-all">
+                    Kirim Laporan
                 </button>
             </div>
         </form>
@@ -272,61 +355,63 @@
 </div>
 
 <!-- Admin Moderation Recipe Dialog -->
-<div id="adminModerateRecipeDialog" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 hidden z-50">
-    <div class="bg-white p-6 rounded-lg shadow-lg w-96 max-w-full">
+<div id="adminModerateRecipeDialog" class="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden z-50 p-4">
+    <div class="bg-white p-6 rounded-3xl shadow-xl w-96 max-w-full border border-stone-100">
         <div class="text-center mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-[#62191c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
-            </svg>
+            <div class="w-12 h-12 rounded-2xl bg-[#62191c]/10 text-[#62191c] flex items-center justify-center mx-auto mb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+            </div>
+            <h3 class="text-lg font-bold text-stone-900">Moderasi Resep</h3>
+            <p class="text-stone-500 text-xs mt-1">Pilih alasan dan tindakan moderasi:</p>
         </div>
-        <h3 class="text-lg font-semibold mb-2 text-center text-[#62191c]">Moderate Recipe</h3>
-        <p class="text-gray-600 mb-4 text-center">Please select a reason and action:</p>
         
         <form id="adminModerateRecipeForm" method="post" action="">
             {% csrf_token %}
-            <div class="space-y-3 mb-6">
-                <div class="flex items-center">
-                    <input id="admin_inappropriate" name="reason" type="radio" value="inappropriate" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-gray-300">
-                    <label for="admin_inappropriate" class="ml-2 block text-sm text-gray-700">Inappropriate content</label>
-                </div>
-                <div class="flex items-center">
-                    <input id="admin_copyright" name="reason" type="radio" value="copyright" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-gray-300">
-                    <label for="admin_copyright" class="ml-2 block text-sm text-gray-700">Copyright violation</label>
-                </div>
-                <div class="flex items-center">
-                    <input id="admin_offensive" name="reason" type="radio" value="offensive" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-gray-300">
-                    <label for="admin_offensive" class="ml-2 block text-sm text-gray-700">Offensive content</label>
-                </div>
-                <div class="flex items-center">
-                    <input id="admin_spam" name="reason" type="radio" value="spam" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-gray-300">
-                    <label for="admin_spam" class="ml-2 block text-sm text-gray-700">Spam or advertisement</label>
-                </div>
-                <div class="flex items-center">
-                    <input id="admin_harmful" name="reason" type="radio" value="harmful" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-gray-300">
-                    <label for="admin_harmful" class="ml-2 block text-sm text-gray-700">Harmful or dangerous content</label>
-                </div>
+            <div class="space-y-2.5 mb-5 text-xs">
+                <label class="flex items-center p-2.5 rounded-xl border border-stone-200 hover:bg-stone-50 cursor-pointer">
+                    <input id="admin_inappropriate" name="reason" type="radio" value="inappropriate" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-stone-300">
+                    <span class="ml-2.5 text-stone-700 font-medium">Inappropriate content</span>
+                </label>
+                <label class="flex items-center p-2.5 rounded-xl border border-stone-200 hover:bg-stone-50 cursor-pointer">
+                    <input id="admin_copyright" name="reason" type="radio" value="copyright" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-stone-300">
+                    <span class="ml-2.5 text-stone-700 font-medium">Copyright violation</span>
+                </label>
+                <label class="flex items-center p-2.5 rounded-xl border border-stone-200 hover:bg-stone-50 cursor-pointer">
+                    <input id="admin_offensive" name="reason" type="radio" value="offensive" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-stone-300">
+                    <span class="ml-2.5 text-stone-700 font-medium">Offensive content</span>
+                </label>
+                <label class="flex items-center p-2.5 rounded-xl border border-stone-200 hover:bg-stone-50 cursor-pointer">
+                    <input id="admin_spam" name="reason" type="radio" value="spam" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-stone-300">
+                    <span class="ml-2.5 text-stone-700 font-medium">Spam or advertisement</span>
+                </label>
+                <label class="flex items-center p-2.5 rounded-xl border border-stone-200 hover:bg-stone-50 cursor-pointer">
+                    <input id="admin_harmful" name="reason" type="radio" value="harmful" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-stone-300">
+                    <span class="ml-2.5 text-stone-700 font-medium">Harmful or dangerous content</span>
+                </label>
                 
-                <div class="border-t border-gray-200 pt-4 mt-4">
-                    <p class="text-sm font-medium text-gray-700 mb-2">Select action to take:</p>
+                <div class="border-t border-stone-200 pt-3.5 mt-3">
+                    <p class="text-xs font-bold text-stone-800 mb-2">Tindakan:</p>
                     <div class="space-y-2">
-                        <div class="flex items-center">
-                            <input id="delete_recipe" name="action" type="radio" value="delete_recipe" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-gray-300" checked>
-                            <label for="delete_recipe" class="ml-2 block text-sm text-gray-700">Delete Recipe Only</label>
-                        </div>
-                        <div class="flex items-center">
-                            <input id="ban_user" name="action" type="radio" value="ban_user" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-gray-300">
-                            <label for="ban_user" class="ml-2 block text-sm text-gray-700">Ban User & Delete All Recipes</label>
-                        </div>
+                        <label class="flex items-center p-2 rounded-xl border border-stone-200 hover:bg-stone-50 cursor-pointer">
+                            <input id="delete_recipe" name="action" type="radio" value="delete_recipe" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-stone-300" checked>
+                            <span class="ml-2.5 text-stone-700 font-medium">Hapus Resep Saja</span>
+                        </label>
+                        <label class="flex items-center p-2 rounded-xl border border-stone-200 hover:bg-stone-50 cursor-pointer">
+                            <input id="ban_user" name="action" type="radio" value="ban_user" class="h-4 w-4 text-[#62191c] focus:ring-[#62191c] border-stone-300">
+                            <span class="ml-2.5 text-stone-700 font-medium">Ban Pengguna & Hapus Semua Resep</span>
+                        </label>
                     </div>
                 </div>
             </div>
             
-            <div class="flex justify-center space-x-3">
-                <button type="button" id="cancelAdminModerateRecipeBtn" class="px-4 py-2 border border-gray-300 rounded text-gray-600 hover:bg-gray-100">
-                    Cancel
+            <div class="flex justify-center space-x-2.5">
+                <button type="button" id="cancelAdminModerateRecipeBtn" class="px-4 py-2 border border-stone-200 rounded-xl text-stone-600 hover:bg-stone-50 text-xs font-semibold">
+                    Batal
                 </button>
-                <button type="submit" class="px-4 py-2 bg-[#62191c] text-white rounded hover:bg-[#62191c]/90">
-                    Submit
+                <button type="submit" class="px-5 py-2 bg-[#62191c] hover:bg-[#873632] text-white rounded-xl text-xs font-semibold shadow-sm transition-all">
+                    Eksekusi
                 </button>
             </div>
         </form>
@@ -395,6 +480,65 @@
             });
         }
     });
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function toggleBookmark(resepId, event) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+
+        if (document.body.dataset.userAuthenticated !== 'true') {
+            if (typeof openLoginModal === 'function') {
+                openLoginModal('bookmark');
+            } else {
+                window.location.href = '/auth/login/?next=' + encodeURIComponent(window.location.pathname);
+            }
+            return;
+        }
+
+        const bookmarkBtn = document.querySelector(`.bookmark-toggle-btn[data-resep-id="${resepId}"]`);
+        const bookmarkIcon = bookmarkBtn ? bookmarkBtn.querySelector('svg') : null;
+        const likesCountElem = document.querySelector('.likes-count');
+
+        fetch(`/bookmark/toggle/${resepId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken') || document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.is_bookmarked) {
+                if (bookmarkIcon) {
+                    bookmarkIcon.classList.add('text-red-500', 'fill-current');
+                }
+            } else {
+                if (bookmarkIcon) {
+                    bookmarkIcon.classList.remove('text-red-500', 'fill-current');
+                }
+            }
+            if (data.likes_count !== undefined && likesCountElem) {
+                likesCountElem.textContent = `${data.likes_count} Menyukai`;
+            }
+        })
+        .catch(err => console.error(err));
+    }
 </script>
 
 {% csrf_token %}

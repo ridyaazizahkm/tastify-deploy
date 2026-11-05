@@ -1,55 +1,90 @@
 {% if resep_items.has_other_pages %}
-<div class="mt-8 flex flex-col sm:flex-row justify-center items-center gap-4">
-    <div class="flex items-center">
-        <label for="items_per_page" class="text-sm font-medium text-gray-700 mr-2">Show:</label>
-        <select name="items_per_page" id="items_per_page" class="items-per-page-select px-3 py-2 border border-gray-300 rounded-lg focus:ring-[#62191c] focus:border-[#62191c]">
-            <option value="9" {% if items_per_page == 9 %}selected{% endif %}>9</option>
-            <option value="18" {% if items_per_page == 18 %}selected{% endif %}>18</option>
-            <option value="24" {% if items_per_page == 24 %}selected{% endif %}>24</option>
-            <option value="36" {% if items_per_page == 36 %}selected{% endif %}>36</option>
-        </select>
-        <span class="ml-2 text-sm text-gray-600">each page</span>
+<div class="mt-10 pt-6 border-t border-stone-200/70 flex flex-col sm:flex-row justify-between items-center gap-4">
+    <!-- Items per page -->
+    <div class="flex items-center gap-2 text-xs md:text-sm text-stone-600 font-medium">
+        <span>Show</span>
+        <div class="relative">
+            <select name="items_per_page" id="items_per_page"
+                class="items-per-page-select appearance-none pl-3.5 pr-8 py-1.5 bg-white border border-stone-200 rounded-xl text-xs md:text-sm font-semibold text-stone-800 shadow-2xs focus:outline-none focus:ring-2 focus:ring-[#62191c]/20 focus:border-[#62191c] cursor-pointer transition-all">
+                <option value="10" {% if items_per_page == 10 or items_per_page == 9 %}selected{% endif %}>10</option>
+                <option value="20" {% if items_per_page == 20 or items_per_page == 18 %}selected{% endif %}>20</option>
+                <option value="30" {% if items_per_page == 30 or items_per_page == 24 or items_per_page == 36 %}selected{% endif %}>30</option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-2.5 flex items-center text-stone-400">
+                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                </svg>
+            </div>
+        </div>
+        <span class="text-stone-400">per page</span>
     </div>
 
-    <nav class="relative z-0 inline-flex shadow-sm -space-x-px rounded-md" aria-label="Pagination">
+    <!-- Page buttons -->
+    <div class="inline-flex items-center gap-1.5">
+        <!-- Previous -->
         {% if resep_items.has_previous %}
-            <a href="#" data-page="{{ resep_items.previous_page_number }}" class="pagination-link relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                <span class="sr-only">Previous</span>
-                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+            <a href="#" data-page="{{ resep_items.previous_page_number }}"
+                class="pagination-link inline-flex items-center justify-center w-9 h-9 rounded-xl border border-stone-200 bg-white text-stone-600 hover:bg-stone-50 hover:text-[#62191c] hover:border-stone-300 shadow-2xs transition-all"
+                title="Previous Page">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
                 </svg>
             </a>
+        {% else %}
+            <span class="inline-flex items-center justify-center w-9 h-9 rounded-xl border border-stone-100 bg-stone-50 text-stone-300 cursor-not-allowed">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                </svg>
+            </span>
         {% endif %}
 
+        <!-- Page numbers -->
         {% for i in resep_items.paginator.page_range %}
             {% if resep_items.number == i %}
-                <span class="relative inline-flex items-center px-4 py-2 border border-[#62191c] bg-[#62191c] text-sm font-medium text-white">{{ i }}</span>
+                <span class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-[#62191c] text-white text-xs md:text-sm font-extrabold shadow-sm shadow-[#62191c]/30 ring-2 ring-[#62191c]/20">{{ i }}</span>
             {% elif i > resep_items.number|add:"-3" and i < resep_items.number|add:"3" %}
-                <a href="#" data-page="{{ i }}" class="pagination-link relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">{{ i }}</a>
+                <a href="#" data-page="{{ i }}"
+                    class="pagination-link inline-flex items-center justify-center w-9 h-9 rounded-xl border border-stone-200 bg-white text-stone-700 hover:bg-stone-50 hover:border-stone-300 hover:text-[#62191c] text-xs md:text-sm font-semibold shadow-2xs transition-all">{{ i }}</a>
             {% endif %}
         {% endfor %}
 
+        <!-- Next -->
         {% if resep_items.has_next %}
-            <a href="#" data-page="{{ resep_items.next_page_number }}" class="pagination-link relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                <span class="sr-only">Next</span>
-                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+            <a href="#" data-page="{{ resep_items.next_page_number }}"
+                class="pagination-link inline-flex items-center justify-center w-9 h-9 rounded-xl border border-stone-200 bg-white text-stone-600 hover:bg-stone-50 hover:text-[#62191c] hover:border-stone-300 shadow-2xs transition-all"
+                title="Next Page">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
                 </svg>
             </a>
+        {% else %}
+            <span class="inline-flex items-center justify-center w-9 h-9 rounded-xl border border-stone-100 bg-stone-50 text-stone-300 cursor-not-allowed">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                </svg>
+            </span>
         {% endif %}
-    </nav>
+    </div>
 </div>
+
 {% else %}
 <div class="mt-8 flex justify-center">
-    <div class="flex items-center">
-        <label for="items_per_page" class="text-sm font-medium text-gray-700 mr-2">Show:</label>
-        <select name="items_per_page" id="items_per_page" class="items-per-page-select px-3 py-2 border border-gray-300 rounded-lg focus:ring-[#62191c] focus:border-[#62191c]">
-            <option value="9" {% if items_per_page == 9 %}selected{% endif %}>9</option>
-            <option value="18" {% if items_per_page == 18 %}selected{% endif %}>18</option>
-            <option value="24" {% if items_per_page == 24 %}selected{% endif %}>24</option>
-            <option value="36" {% if items_per_page == 36 %}selected{% endif %}>36</option>
-        </select>
-        <span class="ml-2 text-sm text-gray-600">each page</span>
+    <div class="flex items-center gap-2 text-xs md:text-sm text-stone-600 font-medium">
+        <span>Show</span>
+        <div class="relative">
+            <select name="items_per_page" id="items_per_page"
+                class="items-per-page-select appearance-none pl-3.5 pr-8 py-1.5 bg-white border border-stone-200 rounded-xl text-xs md:text-sm font-semibold text-stone-800 shadow-2xs focus:outline-none focus:ring-2 focus:ring-[#62191c]/20 focus:border-[#62191c] cursor-pointer transition-all">
+                <option value="10" {% if items_per_page == 10 or items_per_page == 9 %}selected{% endif %}>10</option>
+                <option value="20" {% if items_per_page == 20 or items_per_page == 18 %}selected{% endif %}>20</option>
+                <option value="30" {% if items_per_page == 30 or items_per_page == 24 or items_per_page == 36 %}selected{% endif %}>30</option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-2.5 flex items-center text-stone-400">
+                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                </svg>
+            </div>
+        </div>
+        <span class="text-stone-400">per page</span>
     </div>
 </div>
 {% endif %}

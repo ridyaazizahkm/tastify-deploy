@@ -1,24 +1,29 @@
 <!-- Rating Section -->
-<div class="flex items-center mt-4 mb-4 border-t pt-4 border-gray-100">
-    <div class="flex items-center">
-        <span class="text-lg font-semibold">{{ average_rating }}</span>
-        <span class="text-yellow-500 mx-1">★</span>
-        <span class="text-sm text-gray-500 ml-1">({{ total_ratings }})</span>
+<div class="flex items-center flex-wrap gap-3 mt-4 mb-4 border-t pt-4 border-stone-100">
+    <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50/80 border border-amber-200/70 text-xs font-semibold">
+        <span class="text-amber-500 text-sm leading-none">★</span>
+        <span class="text-stone-900 font-bold leading-none">{{ average_rating }}</span>
+        <span class="text-stone-500 font-normal leading-none">({{ total_ratings }} ulasan)</span>
     </div>
-    {% if user.is_authenticated and not user.is_staff and not user.is_superuser %}
-    <button id="addRatingBtn" class="ml-4 bg-[#62191c] text-white px-4 py-2 rounded">Add Rating</button>
+    {% if not user.is_staff and not user.is_superuser %}
+    <button id="addRatingBtn" type="button" class="inline-flex items-center gap-1.5 bg-[#62191c] hover:bg-[#873632] text-white px-3.5 py-1.5 rounded-full text-xs font-semibold shadow-xs hover:shadow transition-all duration-200">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+        </svg>
+        <span>Beri Rating</span>
+    </button>
     {% endif %}
 </div>
 
 <!-- Rating Popup -->
-<div id="ratingPopup" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 hidden z-50">
-    <div class="bg-white p-6 rounded-lg shadow-lg w-80">
-        <h3 class="text-lg font-semibold mb-4">Rate this Recipe</h3>
-        <div id="starContainer" class="flex justify-center mb-6 space-x-2">
+<div id="ratingPopup" class="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden z-50 p-4">
+    <div class="bg-white p-6 rounded-2xl shadow-xl w-80 max-w-full border border-stone-100">
+        <h3 class="text-base font-bold text-stone-900 mb-4 text-center">Rate this Recipe</h3>
+        <div id="starContainer" class="flex justify-center mb-6 space-x-2 text-2xl">
         </div>
         <div class="flex justify-end space-x-2">
-            <button id="cancelRatingBtn" class="px-4 py-2 border border-gray-300 rounded text-gray-600 hover:bg-gray-100">Cancel</button>
-            <button id="submitRatingBtn" data-rating-url="{% url 'rating:add_rating' resep.id %}" class="px-4 py-2 bg-[#62191c] text-white rounded hover:bg-[#62191c]/90">Submit</button>
+            <button id="cancelRatingBtn" class="px-4 py-2 border border-stone-200 rounded-xl text-stone-600 hover:bg-stone-50 text-xs font-semibold transition-colors">Cancel</button>
+            <button id="submitRatingBtn" data-rating-url="{% url 'rating:add_rating' resep.id %}" class="px-4 py-2 bg-[#62191c] hover:bg-[#873632] text-white rounded-xl text-xs font-semibold shadow-sm transition-all">Submit</button>
         </div>
     </div>
 </div>
@@ -35,6 +40,12 @@
         
         if (addRatingBtn) {
             addRatingBtn.addEventListener('click', function() {
+                if (document.body.dataset.userAuthenticated !== 'true') {
+                    if (typeof openLoginModal === 'function') {
+                        openLoginModal('rating');
+                    }
+                    return;
+                }
                 ratingPopup.classList.remove('hidden');
                 generateStars();
             });
@@ -188,7 +199,7 @@
             for (let i = 1; i <= 5; i++) {
                 const star = document.createElement('span');
                 star.innerHTML = '★';
-                star.classList.add('text-4xl', 'cursor-pointer', 'text-gray-300');
+                star.classList.add('text-3xl', 'cursor-pointer', 'text-stone-300', 'hover:scale-110', 'transition-transform');
                 star.dataset.rating = i;
                 star.addEventListener('click', function() {
                     selectRating(i);
@@ -204,11 +215,11 @@
             stars.forEach(star => {
                 const starRating = parseInt(star.dataset.rating);
                 if (starRating <= rating) {
-                    star.classList.remove('text-gray-300');
-                    star.classList.add('text-yellow-500');
+                    star.classList.remove('text-stone-300');
+                    star.classList.add('text-amber-500');
                 } else {
-                    star.classList.remove('text-yellow-500');
-                    star.classList.add('text-gray-300');
+                    star.classList.remove('text-amber-500');
+                    star.classList.add('text-stone-300');
                 }
             });
         }
